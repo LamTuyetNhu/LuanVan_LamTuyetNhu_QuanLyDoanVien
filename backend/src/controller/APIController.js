@@ -1,5 +1,6 @@
 import pool from "../configs/connectDB";
 const XLSX = require("xlsx");
+const { parse, format } = require('date-fns');
 
 //Lấy danh sách chi đoàn
 let getAllChiDoan = async (req, res) => {
@@ -1229,9 +1230,6 @@ let layDSHoatDong = async (req, res) => {
       ]),
     ]);
 
-    // console.log(Math.ceil(result2[0].length / pageSize))
-    // console.log(Math.ceil(page))
-
     if (result2[0] && result2[0].length > 0) {
       return res.status(200).json({
         dataHD: result2[0],
@@ -1263,6 +1261,16 @@ let layMotHoatDong = async (req, res) => {
       [IDHoatDong]
     );
 
+    if (rows.length > 0) {
+      // Định dạng lại ngày trong rows[0].NgayHetHan
+      const formattedDate = format(new Date(rows[0].NgayBanHanh), 'dd/MM/yyyy');
+      const formattedDate1 = format(new Date(rows[0].NgayHetHan), 'dd/MM/yyyy');
+
+      // Gán lại giá trị đã định dạng vào rows[0].NgayHetHan
+      rows[0].NgayBanHanh = formattedDate;
+      rows[0].NgayHetHan = formattedDate1;
+    }
+
     console.log(rows);
 
     return res.status(200).json({
@@ -1278,35 +1286,31 @@ let layMotHoatDong = async (req, res) => {
 
 let capNhatHoatDong = async (req, res) => {
   try {
-    const { IDHoatDong, TenHoatDong, NgayBanHanh, NgayHetHan, ChiTietHoatDong } =
+    const { IDHoatDong, TenHoatDong, NgayBanHanh, NgayHetHan, ChiTietHD } =
       req.body;
 
-      console.log(IDHoatDong)
-      console.log(TenHoatDong)
-      console.log(NgayBanHanh)
-      console.log(NgayHetHan)
-      console.log(ChiTietHoatDong)
-
-    // Kiểm tra xem có thông tin cần thiết để cập nhật hay không
-    if (!TenHoatDong || !NgayBanHanh || !NgayHetHan || !ChiTietHoatDong) {
+    if (!TenHoatDong || !NgayBanHanh || !NgayHetHan || !ChiTietHD) {
       return res.status(400).json({
         error: "Vui lòng cung cấp đầy đủ thông tin để cập nhật hoạt động.",
       });
     }
+
+    const parsedNgayBatDau = format(parse(NgayBanHanh, 'dd/MM/yyyy', new Date()), 'yyyy/MM/dd');
+    const parsedNgayHetHan = format(parse(NgayHetHan, 'dd/MM/yyyy', new Date()), 'yyyy/MM/dd');
+
 
     // Thực hiện truy vấn cập nhật
     const updateQuery =
       "UPDATE hoatdong SET TenHoatDong=?, NgayBanHanh=?, NgayHetHan=?, ChiTietHD = ? WHERE IDHoatDong=?";
     const [result] = await pool.execute(updateQuery, [
       TenHoatDong,
-      NgayBanHanh,
-      NgayHetHan,
-      ChiTietHoatDong,
+      parsedNgayBatDau,
+      parsedNgayHetHan,
+      ChiTietHD,
       IDHoatDong,
     ]);
 
     console.log(result);
-    console.log("Cap nhap jdfdfjj");
 
     // Kiểm tra xem có bản ghi nào được cập nhật hay không
     if (result.affectedRows === 0) {

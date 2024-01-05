@@ -96,7 +96,7 @@ const DanhSachHoatDong = (props) => {
 
         if (res.status === 200) {
           // Tích hợp dữ liệu từ trang hiện tại vào mảng
-          allDataArray = [...allDataArray, ...res.data.dataCD];
+          allDataArray = [...allDataArray, ...res.data.dataHD];
         } else {
           // Xử lý trường hợp lỗi
           console.error("Lỗi khi gọi API:", res.statusText);

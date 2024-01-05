@@ -27,8 +27,7 @@ const ChiTietHoatDong = (props) => {
   const { IDHoatDong } = useParams();
   const [HoatDong, setHoatDong] = useState([]);
 
-  const [editedDoanPhi, seteditedDoanPhi] = useState({
-  });
+  const [editedDoanPhi, seteditedDoanPhi] = useState({});
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
@@ -55,7 +54,7 @@ const ChiTietHoatDong = (props) => {
     TenHoatDong: "",
     NgayBanHanh: "",
     NgayHetHan: "",
-    ChiTietHoatDong: "",
+    ChiTietHD: "",
   });
 
   const handleChange = (e) => {
@@ -84,19 +83,6 @@ const ChiTietHoatDong = (props) => {
     setShowModal1(true);
   };
 
-  const isValidDate = (dateString) => {
-    try {
-      const parsedDate = parseISO(dateString);
-      if (isNaN(parsedDate.getTime())) {
-        return false;
-      }
-      return true;
-    } catch (error) {
-      return false;
-    }
-  };
-
-
   const handleToggleEdit = () => {
     setIsEditing((prevIsEditing) => !prevIsEditing);
   };
@@ -108,10 +94,10 @@ const ChiTietHoatDong = (props) => {
       TenHoatDong: !editedDoanPhi.TenHoatDong
         ? "Vui lòng nhập tên hoạt động"
         : "",
-      NgayBanHanh: !isValidDate(editedDoanPhi.NgayBanHanh)
+      NgayBanHanh: !editedDoanPhi.NgayBanHanh
         ? "Ngày bắt đầu phải có định dạng là DD/MM/YYYY"
         : "",
-      NgayHetHan: !isValidDate(editedDoanPhi.NgayHetHan)
+      NgayHetHan: !editedDoanPhi.NgayHetHan
         ? "Ngày kết thúc có định dạng là DD/MM/YYYY"
         : "",
       ChiTietHoatDong: !editedDoanPhi.ChiTietHD
@@ -196,30 +182,27 @@ const ChiTietHoatDong = (props) => {
             <div className="error-message">{errors.TenHoatDong}</div>
           </div>
           <div className="row flex">
-          <div className="col formadd">
+            <div className="col formadd">
               <Form.Label htmlFor="NgayBanHanh" className="formadd-label">
                 Ngày bắt đầu
               </Form.Label>
 
               {isEditing ? (
-                <Form.Control
-                  className="form-control"
-                  type="text"
-                  id="NgayBanHanh"
-                  aria-describedby="NgayBanHanh"
-                  value={editedDoanPhi.NgayBanHanh}
-                  onChange={handleChange}
-                />
+                    <Form.Control
+                      className="form-control"
+                      type="text"
+                      id="NgayBanHanh"
+                      aria-describedby="NgayBanHanh"
+                      value={editedDoanPhi.NgayBanHanh}
+                      onChange={handleChange}
+                      placeholder="Ngày bắt đầu phải có định dạng là DD/MM/YYYY"
+                    />
               ) : (
                 <Form.Control
                   type="text"
                   id="NgayBanHanh"
                   aria-describedby="NgayBanHanh"
-                  value={
-                    HoatDong && HoatDong.NgayBanHanh
-                      ? format(new Date(HoatDong.NgayBanHanh), "dd/MM/yyyy")
-                      : ""
-                  }
+                  value={HoatDong.NgayBanHanh}
                   onChange={handleChange}
                   disabled
                 />
@@ -239,17 +222,15 @@ const ChiTietHoatDong = (props) => {
                   aria-describedby="NgayHetHan"
                   value={editedDoanPhi.NgayHetHan}
                   onChange={handleChange}
+                  
+                  placeholder="Ngày hết hạn phải có định dạng là DD/MM/YYYY"
                 />
               ) : (
                 <Form.Control
                   type="text"
                   id="NgayHetHan"
                   aria-describedby="NgayHetHan"
-                  value={
-                    HoatDong && HoatDong.NgayHetHan
-                      ? format(new Date(HoatDong.NgayHetHan), "dd/MM/yyyy")
-                      : ""
-                  }
+                  value={HoatDong.NgayHetHan}
                   onChange={handleChange}
                   disabled
                 />
@@ -258,7 +239,7 @@ const ChiTietHoatDong = (props) => {
             </div>
           </div>
           <div className="formadd">
-            <Form.Label htmlFor="ChiTietHoatDong" className="formadd-label">
+            <Form.Label htmlFor="ChiTietHD" className="formadd-label">
               Chi tiết
             </Form.Label>
 
@@ -266,7 +247,7 @@ const ChiTietHoatDong = (props) => {
               <Form.Control
                 className="form-control"
                 type="text"
-                id="ChiTietHoatDong"
+                id="ChiTietHD"
                 aria-describedby="ChiTietHD"
                 as="textarea"
                 rows={5}
@@ -276,7 +257,7 @@ const ChiTietHoatDong = (props) => {
             ) : (
               <Form.Control
                 type="text"
-                id="ChiTietHoatDong"
+                id="ChiTietHD"
                 as="textarea"
                 rows={5}
                 aria-describedby="ChiTietHD"
@@ -285,7 +266,7 @@ const ChiTietHoatDong = (props) => {
                 disabled
               />
             )}
-            <div className="error-message">{errors.ChiTietHoatDong}</div>
+            <div className="error-message">{errors.ChiTietHD}</div>
           </div>{" "}
           <br />
           <div className="btns">

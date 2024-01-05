@@ -673,7 +673,8 @@ header {
 #NgayBatDau,
 #NgayHetHan,
 #NgayBanHanh,
-#ChiTietHoatDong {
+#ChiTietHoatDong,
+#ChiTietHD {
   font-size: 1em;
   padding: 6px;
 }
@@ -875,4 +876,9 @@ header {
 }
 .gv-body {
   padding: 15px 0;
+}
+
+.date-input {
+  appearance: none !important;
+  padding-right: 30px; /* Cho không gian cho icon */
 }
