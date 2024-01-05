@@ -255,6 +255,9 @@ header {
 }
 
 /* Search */
+.margin-top {
+  margin-top: 16px;
+}
 .searchDV {
   display: flex;
   font-size: 1.2em;
@@ -401,6 +404,16 @@ header {
 
 .chuaTotNghiep {
   color: green !important;
+}
+
+.hoanthanh {
+  color: var(--color) !important;
+
+}
+
+.col-center {
+  text-align: center !important;
+
 }
 
 .col-right {
@@ -650,6 +663,12 @@ header {
   color: var(--color);
 }
 
+#ttLop,
+#TenDoanPhi,
+#SoTien,
+#TenNamHoc,
+#IDNamHoc,
+#TenNamHoc1,
 #TenHoatDong,
 #NgayBatDau,
 #NgayHetHan,
@@ -658,6 +677,14 @@ header {
   font-size: 1em;
   padding: 6px;
 }
+
+#TenNamHoc {
+  margin-top: 10px;
+}
+
+// #TenNamHoc1 {
+//   margin-top: 0px !important;
+// }
 
 .btns {
   display: flex;
@@ -692,6 +719,11 @@ header {
   text-decoration: none;
 }
 
+.NavLink-item {
+  color: var(--black);
+  text-decoration: none;
+}
+
 .navlink:hover {
   color: var(--white);
 }
@@ -719,8 +751,8 @@ header {
 
 .pagination {
   width: 100%;
-  // position: fixed;
-  // bottom: 0;
+  position: fixed;
+  bottom: 0;
   padding: 12px;
   justify-content: center;
 }

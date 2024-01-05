@@ -7,10 +7,13 @@ import { NavLink } from "react-router-dom";
 
 import {
   faPlus,
-  faPenNib,
+  faEye,
+  faPenToSquare,
   faCloudArrowDown,
   faDownload,
   faMagnifyingGlass,
+  faChevronRight,
+  faChevronLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { laydshoatdong, searchHoatDong } from "../../../services/apiService";
 
@@ -21,6 +24,7 @@ const DanhSachHoatDong = (props) => {
 
   useEffect(() => {
     fetchDSHoatDong();
+    fetchAllData();
   }, [currentPage]);
 
   const fetchDSHoatDong = async () => {
@@ -65,9 +69,50 @@ const DanhSachHoatDong = (props) => {
     }
   };
 
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      // Chỉ tăng currentPage nếu không phải là trang cuối cùng
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  // Hàm xử lý khi nhấn nút sang trái
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      // Chỉ giảm currentPage nếu không phải là trang đầu tiên
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const [allData, setAllData] = useState([]);
+
+  const fetchAllData = async () => {
+    try {
+      let allDataArray = [];
+
+      // Lặp qua tất cả các trang
+      for (let page = 1; page <= totalPages; page++) {
+        let res = await laydshoatdong(page);
+
+        if (res.status === 200) {
+          // Tích hợp dữ liệu từ trang hiện tại vào mảng
+          allDataArray = [...allDataArray, ...res.data.dataCD];
+        } else {
+          // Xử lý trường hợp lỗi
+          console.error("Lỗi khi gọi API:", res.statusText);
+        }
+      }
+
+      // Cập nhật mảng dữ liệu chung
+      setAllData(allDataArray);
+    } catch (error) {
+      console.error("Lỗi khi gọi API:", error.message);
+    }
+  };
+
   const exportToExcel = () => {
     // Tạo một mảng chứa dữ liệu bạn muốn xuất
-    const dataToExport = DSHoatDong.map((item) => {
+    const dataToExport = allData.map((item) => {
       return {
         TenHoatDong: item.TenHoatDong,
         NgayBanHanh: format(new Date(item.NgayTao), "dd/MM/yyyy"),
@@ -160,7 +205,6 @@ const DanhSachHoatDong = (props) => {
                   <option value="0">Chưa ban hành</option>
                   <option value="1">Đã ban hành</option>
                   <option value="2">Hoàn thành</option>
-                  <option value="3">Đã xóa</option>
                 </select>
               </div>
               <button className="formatButton" onClick={handleSearch}>
@@ -196,7 +240,9 @@ const DanhSachHoatDong = (props) => {
 
                   <th>Ngày hết hạn</th>
                   <th>Trạng thái</th>
-                  <th>Xem chi tiết</th>
+                  <th className="table-item2">Điểm danh</th>
+                  <th className="table-item2">Cập nhật</th>
+
                 </tr>
               </thead>
               <tbody id="myTable">
@@ -205,34 +251,53 @@ const DanhSachHoatDong = (props) => {
                   DSHoatDong.map((item, index) => {
                     return (
                       <tr key={`table-hoatdong-${index}`} className="tableRow">
-                        <td className="table-item">{index + 1}</td>
-                        <td className="table-item">{item.TenHoatDong}</td>
-                        <td className="table-item">
+                        <td className="col-center">{index + 1}</td>
+                        <td className="">{item.TenHoatDong}</td>
+                        <td className="col-center">
                           {format(new Date(item.NgayTao), "dd/MM/yyyy")}
                         </td>
-                        <td className="table-item">
+                        <td className="col-center">
                           {format(new Date(item.NgayBanHanh), "dd/MM/yyyy")}
                         </td>
-                        <td className="table-item">
+                        <td className="col-center">
                           {format(new Date(item.NgayHetHan), "dd/MM/yyyy")}
                         </td>
 
-                        <td className="table-item">
+                        <td className={` ${
+                          item.ttHD === 0
+                          ? ""
+                          : item.ttHD === 1
+                          ? "daTotNghiep"
+                          : item.ttHD === 2
+                          ? "chuaTotNghiep"
+                          : "hoanthanh"
+                        }`}>
                           {item.ttHD === 0
                             ? "Chưa ban hành"
                             : item.ttHD === 1
-                            ? "Đã ban hành"
+                            ? "Đang diễn ra"
                             : item.ttHD === 2
                             ? "Hoàn thành"
                             : "Đã xóa"}
                         </td>
 
-                        <td className="thButton">
+                        <td className="btnOnTable1">
+                        <NavLink
+                          to={`/BCH-DoanTruong/ChiTietChiDoan`}
+                        >
+                          <button className="btnOnTable ">
+                            <FontAwesomeIcon icon={faEye} />
+                          </button>
+                        </NavLink>
+                      </td>
+
+                        <td className="btnOnTable1 thButton">
                           <NavLink
                             to={`/BCH-DoanTruong/ChiTietHoatDong/${item.IDHoatDong}`}
                           >
                             <button className="btnOnTable">
-                              <FontAwesomeIcon icon={faPenNib} /> Chi tiết
+                            <FontAwesomeIcon icon={faPenToSquare} />
+
                             </button>
                           </NavLink>
                         </td>
@@ -250,10 +315,13 @@ const DanhSachHoatDong = (props) => {
         </div>
 
         <div className="pagination">
+          <button className="btn-footer" onClick={handlePrevPage}>
+            <FontAwesomeIcon icon={faChevronLeft} />
+          </button>
+
           {Array.from({ length: totalPages }, (_, index) => (
-            <div className="footer">
+            <div className="footer" key={index}>
               <button
-                key={index}
                 className={`btn-footer ${
                   currentPage === index + 1 ? "active" : ""
                 }`}
@@ -263,6 +331,10 @@ const DanhSachHoatDong = (props) => {
               </button>
             </div>
           ))}
+
+          <button className="btn-footer" onClick={handleNextPage}>
+            <FontAwesomeIcon icon={faChevronRight} />
+          </button>
         </div>
       </div>
     </>

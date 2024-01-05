@@ -1,7 +1,9 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
+import Modal from "react-bootstrap/Modal";
+
 import {
   faEye,
   faCloudArrowDown,
@@ -16,14 +18,14 @@ import {
   getAllChiDoan,
   searchChiDoan,
   getKhoa,
+  XoaChiDoan
 } from "../../../services/apiService";
-import { all } from "axios";
 
 const DanhSachChiDoan = (props) => {
   const [DSChiDoan, setListChiDoan] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-
+  const [selectedIDLop, setSelectedIDLop] = useState(null);
   const [DSKhoa, setListKhoa] = useState([]);
 
   const [searchData, setSearchData] = useState({
@@ -163,6 +165,21 @@ const DanhSachChiDoan = (props) => {
     XLSX.writeFile(wb, "DanhSachChiDoan.xlsx");
   };
 
+  const [showModal, setShowModal] = useState(false);
+  const [showModal1, setShowModal1] = useState(false);
+
+  const handleDelete = async () => {
+    try {
+      await XoaChiDoan(selectedIDLop);
+      setShowModal(false);
+      setShowModal1(true);
+      fetchDSChiDoan();
+      console.log("Chi đoàn đã được xóa thành công!");
+    } catch (error) {
+      console.error("Lỗi khi xóa hoạt động:", error);
+    }
+  };
+
   return (
     <>
       <div className="container-fluid app__content">
@@ -223,7 +240,7 @@ const DanhSachChiDoan = (props) => {
                   Trạng thái lớp
                 </option>
                 <option value="1">Chưa tốt nghiệp</option>
-                <option value="0">Đã tốt nghiệp</option>
+                <option value="0">Ngừng hoạt động</option>
               </select>
             </div>
             <button className="formatButton" onClick={handleSearch}>
@@ -264,18 +281,18 @@ const DanhSachChiDoan = (props) => {
                 DSChiDoan.map((item, index) => {
                   return (
                     <tr key={`table-chidoan-${index}`} className="tableRow">
-                      <td className="table-item col-right">{index + 1}</td>
-                      <td className="table-item">{item.MaLop}</td>
-                      <td className="table-item">{item.TenLop}</td>
-                      <td className="table-item">{item.Email}</td>
+                      <td className=" col-center">{index + 1}</td>
+                      <td className="">{item.MaLop}</td>
+                      <td className="">{item.TenLop}</td>
+                      <td className="">{item.Email}</td>
 
-                      <td className="table-item col-right">{item.Khoa}</td>
+                      <td className=" col-right">{item.Khoa}</td>
                       <td
-                        className={`table-item ${
+                        className={` ${
                           item.ttLop === 0 ? "daTotNghiep" : "chuaTotNghiep"
                         }`}
                       >
-                        {item.ttLop === 1 ? "Đang hoạt động" : "Đã tốt nghiệp"}
+                        {item.ttLop === 1 ? "Đang hoạt động" : "Ngừng hoạt động"}
                       </td>
                       <td className="btnOnTable1">
                         <NavLink
@@ -287,13 +304,17 @@ const DanhSachChiDoan = (props) => {
                         </NavLink>
                       </td>
                       <td className="btnOnTable1">
+                      <NavLink
+                          to={`/BCH-DoanTruong/ChiTiet/${item.IDLop}`}
+                        >
 
                       <button className="btnOnTable ">
                         <FontAwesomeIcon icon={faPenToSquare} />
                           </button>
+                        </NavLink>
                       </td>
                       <td className="btnOnTable1">
-                      <button className="btnOnTable ">
+                      <button className="btnOnTable" onClick={() => { setSelectedIDLop(item.IDLop);setShowModal(true)}}>
                         <FontAwesomeIcon icon={faTrash} />
                           </button>
                       </td>
@@ -332,6 +353,56 @@ const DanhSachChiDoan = (props) => {
           <FontAwesomeIcon icon={faChevronRight} />
         </button>
       </div>
+
+      <Modal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        className="custom-modal"
+      >
+        <Modal.Header closeButton className="border-none">
+          <Modal.Title className="custom-modal-title">Thông báo!</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="custom-modal-body" bsPrefix="custom-modal-body">
+          Bạn chắc chắn xóa?
+        </Modal.Body>
+        <Modal.Footer className="border-none">
+          <button
+            className="allcus-button button-error"
+            onClick={() => handleDelete()}
+          >
+            Xóa
+          </button>
+          <button className="allcus-button" onClick={() => setShowModal(false)}>
+            Đóng
+          </button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal
+        show={showModal1}
+        onHide={() => setShowModal1(false)}
+        className="custom-modal"
+      >
+        <Modal.Header closeButton className="border-none">
+          <Modal.Title className="custom-modal-title">Thông báo!</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="custom-modal-body" bsPrefix="custom-modal-body">
+          Xóa thành công!
+        </Modal.Body>
+        <Modal.Footer className="border-none">
+          <NavLink
+            to={`/BCH-DoanTruong`}
+            className="navlink"
+          >
+            <button
+              className="allcus-button"
+              onClick={() => setShowModal1(false)}
+            >
+              Đóng
+            </button>
+          </NavLink>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 };

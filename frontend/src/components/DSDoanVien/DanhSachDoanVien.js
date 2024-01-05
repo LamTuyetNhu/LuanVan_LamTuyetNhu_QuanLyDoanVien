@@ -5,19 +5,17 @@ import * as XLSX from "xlsx";
 import { format } from "date-fns";
 import { NavLink } from "react-router-dom";
 
-
 import {
   faPenNib,
   faFilter,
   faCloudArrowUp,
   faCloudArrowDown,
   faMagnifyingGlass,
+  
+  faChevronRight,
+  faChevronLeft,
 } from "@fortawesome/free-solid-svg-icons";
-import {
-  searchDoanVien,
-  laymotlop,
-  chucvu,
-} from "../../services/apiService";
+import { searchDoanVien, laymotlop, chucvu } from "../../services/apiService";
 
 const DanhSachDoanVien = (props) => {
   const { IDLop } = useParams();
@@ -40,7 +38,7 @@ const DanhSachDoanVien = (props) => {
     fetchDSDoanVien();
     fetchDSChucVu();
     // handleSearch();
-  },  [currentPage]);
+  }, [currentPage]);
 
   const fetchDSDoanVien = async () => {
     try {
@@ -49,7 +47,7 @@ const DanhSachDoanVien = (props) => {
 
       if (res.status === 200) {
         setListDoanVien(res.data.dataCD);
-        
+
         setTotalPages(res.data.totalPages);
       } else {
         // Xử lý trường hợp lỗi
@@ -91,7 +89,7 @@ const DanhSachDoanVien = (props) => {
         MSSV: trimmedMSSV,
         HoTen: trimmedHoTen,
       }); // Assuming you have implemented the search API
-      
+
       console.log(res);
       if (res.status === 200) {
         setListDoanVien(res.data.dataCD);
@@ -107,9 +105,50 @@ const DanhSachDoanVien = (props) => {
     setCurrentPage(newPage);
   };
 
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      // Chỉ tăng currentPage nếu không phải là trang cuối cùng
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  // Hàm xử lý khi nhấn nút sang trái
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      // Chỉ giảm currentPage nếu không phải là trang đầu tiên
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const [allData, setAllData] = useState([]);
+
+  const fetchAllData = async () => {
+    try {
+      let allDataArray = [];
+
+      // Lặp qua tất cả các trang
+      for (let page = 1; page <= totalPages; page++) {
+        let res = await laymotlop(page);
+
+        if (res.status === 200) {
+          // Tích hợp dữ liệu từ trang hiện tại vào mảng
+          allDataArray = [...allDataArray, ...res.data.dataCD];
+        } else {
+          // Xử lý trường hợp lỗi
+          console.error("Lỗi khi gọi API:", res.statusText);
+        }
+      }
+
+      // Cập nhật mảng dữ liệu chung
+      setAllData(allDataArray);
+    } catch (error) {
+      console.error("Lỗi khi gọi API:", error.message);
+    }
+  };
+
   const exportToExcel = () => {
     // Tạo một mảng chứa dữ liệu bạn muốn xuất
-    const dataToExport = DSDoanVien.map((item) => {
+    const dataToExport = allData.map((item) => {
       return {
         "Mã Chi Đoàn": item.MaLop,
         "Tên Chi Đoàn": item.TenLop,
@@ -176,9 +215,7 @@ const DanhSachDoanVien = (props) => {
                     setSearchData({ ...searchData, IDChucVu: e.target.value });
                   }}
                 >
-                  <option value="Chức vụ">
-                    Chọn chức vụ
-                  </option>
+                  <option value="Chức vụ">Chọn chức vụ</option>
                   {DSChucVu.map((item, index) => {
                     return (
                       <option key={index} value={item.IDChucVu}>
@@ -197,9 +234,7 @@ const DanhSachDoanVien = (props) => {
                     setSearchData({ ...searchData, GioiTinh: e.target.value });
                   }}
                 >
-                  <option value="Giới tính">
-                    Chọn giới tính
-                  </option>
+                  <option value="Giới tính">Chọn giới tính</option>
                   <option value="1">Nam</option>
                   <option value="0">Nữ</option>
                   <option value="2">Khác</option>
@@ -211,7 +246,7 @@ const DanhSachDoanVien = (props) => {
               {/* <FontAwesomeIcon icon={faFilter} /> */}
             </div>
             <div className="buttonSearch">
-            <button className="formatButton">
+              <button className="formatButton">
                 <FontAwesomeIcon icon={faCloudArrowUp} /> Tải lên
               </button>
               <button className="formatButton" onClick={exportToExcel}>
@@ -243,10 +278,10 @@ const DanhSachDoanVien = (props) => {
                   DSDoanVien.map((item, index) => {
                     return (
                       <tr key={`table-doanvien-${index}`} className="tableRow">
-                        <td className="table-item col-right">{index + 1}</td>
-                        <td className="table-item">{item.MSSV}</td>
-                        <td className="table-item">{item.HoTen}</td>
-                        <td className="table-item">
+                        <td className=" col-center">{index + 1}</td>
+                        <td className="">{item.MSSV}</td>
+                        <td className="">{item.HoTen}</td>
+                        <td className="col-center">
                           {format(new Date(item.NgaySinh), "dd/MM/yyyy")}
                         </td>
                         <td className="table-item">
@@ -256,18 +291,18 @@ const DanhSachDoanVien = (props) => {
                             ? "Nam"
                             : "Khác"}
                         </td>
-                        <td className="table-item">{item.TenCV}</td>
-                        <td className="table-item">{item.Email}</td>
-                        <td className="table-item">{item.SoDT}</td>
+                        <td className="">{item.TenCV}</td>
+                        <td className="">{item.Email}</td>
+                        <td className="">{item.SoDT}</td>
 
                         <td>
-                        <NavLink
-                          to={`/BCH-DoanTruong/ChiTietChiDoan/${item.MaLop}/${item.MSSV}`}
-                        >
-                          <button className="btnOnTable">
-                            <FontAwesomeIcon icon={faPenNib} /> Chi tiết
-                          </button>
-                        </NavLink>
+                          <NavLink
+                            to={`/BCH-DoanTruong/ChiTietChiDoan/${item.MaLop}/${item.MSSV}`}
+                          >
+                            <button className="btnOnTable">
+                              <FontAwesomeIcon icon={faPenNib} /> Chi tiết
+                            </button>
+                          </NavLink>
                         </td>
                       </tr>
                     );
@@ -281,17 +316,26 @@ const DanhSachDoanVien = (props) => {
             </table>
 
             <div className="pagination">
+              <button className="btn-footer" onClick={handlePrevPage}>
+                <FontAwesomeIcon icon={faChevronLeft} />
+              </button>
+
               {Array.from({ length: totalPages }, (_, index) => (
-                <div className="footer">
+                <div className="footer" key={index}>
                   <button
-                    key={index}
-                    className={`btn-footer ${currentPage === index + 1 ? "active" : ""}`}
+                    className={`btn-footer ${
+                      currentPage === index + 1 ? "active" : ""
+                    }`}
                     onClick={() => changePage(index + 1)}
                   >
                     {index + 1}
                   </button>
                 </div>
               ))}
+
+              <button className="btn-footer" onClick={handleNextPage}>
+                <FontAwesomeIcon icon={faChevronRight} />
+              </button>
             </div>
           </div>
         </div>

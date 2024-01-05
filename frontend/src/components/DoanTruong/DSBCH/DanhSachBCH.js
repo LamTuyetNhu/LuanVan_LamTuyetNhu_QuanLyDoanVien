@@ -257,7 +257,11 @@ const DanhSachBCH = (props) => {
                     DoanVien.length > 0 &&
                     DoanVien.map((item, index) => {
                       return (
+                        
                         <div className="col-lg-3 col-md-6 col-sm-6 giang-vien-col lazy">
+                          <NavLink
+                            to={`/BCH-DoanTruong/DanhSachBCH/${item.MaLop}/${item.MSSV}` } className="NavLink-item"
+                          >
                           <div className="giang-vien-item">
                             <div className="gv-image img-hover-zoom gv1">
                               <a>
@@ -274,7 +278,9 @@ const DanhSachBCH = (props) => {
                               <p>{item.TenCV}</p>
                             </div>
                           </div>
+                        </NavLink>
                         </div>
+
                       );
                     })}
 
