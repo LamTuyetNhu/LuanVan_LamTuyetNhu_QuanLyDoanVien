@@ -6,12 +6,11 @@ import { format } from "date-fns";
 import { NavLink } from "react-router-dom";
 
 import {
-  faPenNib,
-  faFilter,
+  faEye,
+  faPlus,
   faCloudArrowUp,
   faCloudArrowDown,
   faMagnifyingGlass,
-  
   faChevronRight,
   faChevronLeft,
 } from "@fortawesome/free-solid-svg-icons";
@@ -37,7 +36,6 @@ const DanhSachDoanVien = (props) => {
   useEffect(() => {
     fetchDSDoanVien();
     fetchDSChucVu();
-    // handleSearch();
   }, [currentPage]);
 
   const fetchDSDoanVien = async () => {
@@ -240,17 +238,23 @@ const DanhSachDoanVien = (props) => {
                   <option value="2">Khác</option>
                 </select>
               </div>
+
               <button className="formatButton" onClick={handleSearch}>
-                <FontAwesomeIcon icon={faMagnifyingGlass} /> Tìm
+                <FontAwesomeIcon icon={faMagnifyingGlass} />
               </button>
-              {/* <FontAwesomeIcon icon={faFilter} /> */}
             </div>
             <div className="buttonSearch">
+              <NavLink to={`/BCH-DoanTruong/ThemMoi-DoanVien/${IDLop}`}>
+                <button className="formatButton">
+                  <FontAwesomeIcon icon={faPlus} />
+                </button>
+              </NavLink>
               <button className="formatButton">
                 <FontAwesomeIcon icon={faCloudArrowUp} /> Tải lên
               </button>
+
               <button className="formatButton" onClick={exportToExcel}>
-                <FontAwesomeIcon icon={faCloudArrowDown} /> Tải xuống
+                <FontAwesomeIcon icon={faCloudArrowDown} /> Tải về
               </button>
             </div>
           </div>
@@ -267,6 +271,8 @@ const DanhSachDoanVien = (props) => {
                   <th>Ngày sinh</th>
                   <th>Giới tính</th>
                   <th>Chức vụ</th>
+                  <th>Năm học</th>
+
                   <th>Email</th>
                   <th>Số điện thoại</th>
                   <th>Chi tiết</th>
@@ -292,15 +298,17 @@ const DanhSachDoanVien = (props) => {
                             : "Khác"}
                         </td>
                         <td className="">{item.TenCV}</td>
+                        <td className="col-center">{item.TenNamHoc}</td>
+
                         <td className="">{item.Email}</td>
                         <td className="">{item.SoDT}</td>
 
-                        <td>
+                        <td className="btnOnTable1">
                           <NavLink
-                            to={`/BCH-DoanTruong/ChiTietChiDoan/${item.MaLop}/${item.MSSV}`}
+                            to={`/BCH-DoanTruong/ChiTietChiDoan/${item.IDLop}/${item.IDDoanVien}/${item.IDChiTietNamHoc}`}
                           >
                             <button className="btnOnTable">
-                              <FontAwesomeIcon icon={faPenNib} /> Chi tiết
+                              <FontAwesomeIcon icon={faEye} />
                             </button>
                           </NavLink>
                         </td>

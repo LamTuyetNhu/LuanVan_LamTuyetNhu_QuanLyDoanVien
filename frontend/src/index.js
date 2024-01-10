@@ -21,6 +21,7 @@ import DangNhap from "./components/DangNhap/DangNhap";
 
 import DanhSachDoanVien from "./components/DSDoanVien/DanhSachDoanVien";
 import DoanVien from "./components/DSDoanVien/DoanVien";
+import ThemMoiDoanVien from "./components/DSDoanVien/ThemMoiDoanVien";
 
 import DanhSachHoatDong from "./components/DoanTruong/HoatDong/DanhSachHD";
 import ThemMoiHoatDong from "./components/DoanTruong/HoatDong/ThemMoiHD";
@@ -40,11 +41,12 @@ root.render(
 
           <Route path="ChiTiet/:IDLop" element={<CapNhatChiDoan />} />
           <Route path="ChiTietChiDoan/:IDLop" element={<DanhSachDoanVien />} />
+          <Route path="ThemMoi-DoanVien/:IDLop" element={<ThemMoiDoanVien />} />
 
-          <Route path="ChiTietChiDoan/:IDLop/:IDDoanVien" element={<DoanVien />} />
+          <Route path="ChiTietChiDoan/:IDLop/:IDDoanVien/:IDChiTietNamHoc" element={<DoanVien />} />
 
           <Route path="DanhSachBCH" element={<DanhSachBCH />} />
-          <Route path="DanhSachBCH/:MaLop/:MSSV" element={<BanChapHanh />} />
+          <Route path="DanhSachBCH/:MaLop/:MSSV/:IDChiTietNamHoc" element={<BanChapHanh />} />
 
           <Route path="DoanPhi" element={<DoanPhi />} />
           <Route path="ThemMoi-DoanPhi" element={<ThemMoiDoanPhi />} />
@@ -52,7 +54,6 @@ root.render(
 
           <Route path="HoatDong" element={<DanhSachHoatDong />} />
           <Route path="ChiTietHoatDong/:IDHoatDong" element={<ChiTietHoatDong />} />
-          
           <Route path="ThemMoi" element={<ThemMoiHoatDong />} />
         </Route>
       </Routes>

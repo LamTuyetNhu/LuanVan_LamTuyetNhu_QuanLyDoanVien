@@ -25,7 +25,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-
+app.use(express.static("./src/public"));
 // Hỗ trợ lấy data từ client về server
 app.use(express.urlencoded({ extended: true })); // MiddleWare
 app.use(express.json()); // MiddleWare

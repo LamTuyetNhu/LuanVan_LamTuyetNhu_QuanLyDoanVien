@@ -6,6 +6,8 @@ import { useParams } from "react-router-dom";
 import { format } from "date-fns";
 import { NavLink } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
+import ModalAddSuccess from "../../Modal/ModalAddSuccess";
+
 
 import { faPlus, faBackward, faTrash } from "@fortawesome/free-solid-svg-icons";
 import {
@@ -148,7 +150,13 @@ const DoanVien = (props) => {
           </div>
         </form>
       </div>
+      <NavLink to={`/BCH-DoanTruong`} className="navlink">
+            
+      <ModalAddSuccess show={showModal} onHide={() => setShowModal(false)} />
+          </NavLink>
 
+
+{/* 
       <Modal
         show={showModal}
         onHide={() => setShowModal(false)}
@@ -170,7 +178,7 @@ const DoanVien = (props) => {
             </button>
           </NavLink>
         </Modal.Footer>
-      </Modal>
+      </Modal> */}
     </>
   );
 };

@@ -260,12 +260,12 @@ const DanhSachBCH = (props) => {
                         
                         <div className="col-lg-3 col-md-6 col-sm-6 giang-vien-col lazy">
                           <NavLink
-                            to={`/BCH-DoanTruong/DanhSachBCH/${item.MaLop}/${item.MSSV}` } className="NavLink-item"
+                            to={`/BCH-DoanTruong/DanhSachBCH/${item.MaLop}/${item.MSSV}/${item.IDChiTietNamHoc}` } className="NavLink-item"
                           >
                           <div className="giang-vien-item">
                             <div className="gv-image img-hover-zoom gv1">
                               <a>
-                                <img src={logo} />
+                                <img src={`http://localhost:8080/images/${item.TenAnh}`} />
                               </a>
                             </div>
                             <div className="gv-body">

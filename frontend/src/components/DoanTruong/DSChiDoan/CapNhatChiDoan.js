@@ -6,6 +6,7 @@ import { useParams } from "react-router-dom";
 import { format } from "date-fns";
 import { NavLink } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
+import ModalSuccess from "../../Modal/ModalSuccess";
 
 import {
   faPlus,
@@ -49,7 +50,7 @@ const ChiTietChiDoan = (props) => {
     MaLop: "",
     TenLop: "",
     Khoa: "",
-    Email: "",
+    EmailLop: "",
     ttLop: "",
   });
 
@@ -75,8 +76,8 @@ const ChiTietChiDoan = (props) => {
 
       TenLop: !editedChiDoan.TenLop.trim() ? "Vui lòng nhập tên lớp" : "",
       Khoa: !editedChiDoan.Khoa.trim() ? "Vui lòng nhập khóa" : "",
-      Email: !editedChiDoan.Email.trim() ? "Vui lòng nhập Email" : "",
-      Email: !editedChiDoan.ttLop ? "Vui lòng chọn trạng thái" : "",
+      EmailLop: !editedChiDoan.EmailLop.trim() ? "Vui lòng nhập Email" : "",
+      ttLop: !editedChiDoan.ttLop ? "Vui lòng chọn trạng thái" : "",
     };
 
     setErrors(newErrors);
@@ -160,27 +161,27 @@ const ChiTietChiDoan = (props) => {
                   <div className="error-message">{errors.TenLop}</div>
                 </div>
                 <div className="form-group col col-6">
-                  <Form.Label htmlFor="Email">Email</Form.Label>
+                  <Form.Label htmlFor="EmailLop">Email</Form.Label>
                   {isEditing ? (
                     <Form.Control
                       className="form-control"
                       type="text"
-                      id="Email"
-                      aria-describedby="Email"
-                      value={editedChiDoan.Email}
+                      id="EmailLop"
+                      aria-describedby="EmailLop"
+                      value={editedChiDoan.EmailLop}
                       onChange={handleChange}
                     />
                   ) : (
                     <Form.Control
                       className="form-control"
                       type="text"
-                      id="Email"
-                      aria-describedby="Email"
-                      value={ChiDoan.Email}
+                      id="EmailLop"
+                      aria-describedby="EmailLop"
+                      value={ChiDoan.EmailLop}
                       disabled
                     />
                   )}
-                  <div className="error-message">{errors.Email}</div>
+                  <div className="error-message">{errors.EmailLop}</div>
                 </div>
                 <div className="form-group col col-6">
                   <div className="flex row">
@@ -267,25 +268,8 @@ const ChiTietChiDoan = (props) => {
         </form>
       </div>
 
-      <Modal
-        show={showModal}
-        onHide={() => setShowModal(false)}
-        className="custom-modal"
-      >
-        <Modal.Header closeButton className="border-none">
-          <Modal.Title className="custom-modal-title">Thông báo!</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="custom-modal-body" bsPrefix="custom-modal-body">
-          Cập nhật thành công!
-        </Modal.Body>
-        <Modal.Footer className="border-none">
-          {/* <NavLink to={`/BCH-DoanTruong`} className="navlink"> */}
-          <button className="allcus-button" onClick={() => setShowModal(false)}>
-            Đóng
-          </button>
-          {/* </NavLink> */}
-        </Modal.Footer>
-      </Modal>
+      <ModalSuccess show={showModal} onHide={() => setShowModal(false)} />
+ 
     </>
   );
 };

@@ -3,7 +3,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import Modal from "react-bootstrap/Modal";
-
+import DeleteSuccess from "../../Modal/DeleteSuccess";
+import DeleteConfirmationModal from "../../Modal/DeleteConfirmationModal";
 import {
   faEye,
   faCloudArrowDown,
@@ -18,7 +19,7 @@ import {
   getAllChiDoan,
   searchChiDoan,
   getKhoa,
-  XoaChiDoan
+  XoaChiDoan,
 } from "../../../services/apiService";
 
 const DanhSachChiDoan = (props) => {
@@ -248,12 +249,12 @@ const DanhSachChiDoan = (props) => {
             </button>
           </div>
           <div className="buttonSearch">
-          <NavLink to="/BCH-DoanTruong/ThemMoi-ChiDoan">
-                <button className="formatButton">
-                  {" "}
-                  <FontAwesomeIcon icon={faPlus} /> Thêm
-                </button>
-              </NavLink>
+            <NavLink to="/BCH-DoanTruong/ThemMoi-ChiDoan">
+              <button className="formatButton">
+                {" "}
+                <FontAwesomeIcon icon={faPlus} /> Thêm
+              </button>
+            </NavLink>
             <button className="formatButton" onClick={exportToExcel}>
               <FontAwesomeIcon icon={faCloudArrowDown} /> Tải
             </button>
@@ -284,7 +285,7 @@ const DanhSachChiDoan = (props) => {
                       <td className=" col-center">{index + 1}</td>
                       <td className="">{item.MaLop}</td>
                       <td className="">{item.TenLop}</td>
-                      <td className="">{item.Email}</td>
+                      <td className="">{item.EmailLop}</td>
 
                       <td className=" col-right">{item.Khoa}</td>
                       <td
@@ -292,7 +293,9 @@ const DanhSachChiDoan = (props) => {
                           item.ttLop === 0 ? "daTotNghiep" : "chuaTotNghiep"
                         }`}
                       >
-                        {item.ttLop === 1 ? "Đang hoạt động" : "Ngừng hoạt động"}
+                        {item.ttLop === 1
+                          ? "Đang hoạt động"
+                          : "Ngừng hoạt động"}
                       </td>
                       <td className="btnOnTable1">
                         <NavLink
@@ -304,19 +307,22 @@ const DanhSachChiDoan = (props) => {
                         </NavLink>
                       </td>
                       <td className="btnOnTable1">
-                      <NavLink
-                          to={`/BCH-DoanTruong/ChiTiet/${item.IDLop}`}
-                        >
-
-                      <button className="btnOnTable ">
-                        <FontAwesomeIcon icon={faPenToSquare} />
+                        <NavLink to={`/BCH-DoanTruong/ChiTiet/${item.IDLop}`}>
+                          <button className="btnOnTable ">
+                            <FontAwesomeIcon icon={faPenToSquare} />
                           </button>
                         </NavLink>
                       </td>
                       <td className="btnOnTable1">
-                      <button className="btnOnTable" onClick={() => { setSelectedIDLop(item.IDLop);setShowModal(true)}}>
-                        <FontAwesomeIcon icon={faTrash} />
-                          </button>
+                        <button
+                          className="btnOnTable"
+                          onClick={() => {
+                            setSelectedIDLop(item.IDLop);
+                            setShowModal(true);
+                          }}
+                        >
+                          <FontAwesomeIcon icon={faTrash} />
+                        </button>
                       </td>
                     </tr>
                   );
@@ -354,55 +360,13 @@ const DanhSachChiDoan = (props) => {
         </button>
       </div>
 
-      <Modal
+      <DeleteConfirmationModal
         show={showModal}
         onHide={() => setShowModal(false)}
-        className="custom-modal"
-      >
-        <Modal.Header closeButton className="border-none">
-          <Modal.Title className="custom-modal-title">Thông báo!</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="custom-modal-body" bsPrefix="custom-modal-body">
-          Bạn chắc chắn xóa?
-        </Modal.Body>
-        <Modal.Footer className="border-none">
-          <button
-            className="allcus-button button-error"
-            onClick={() => handleDelete()}
-          >
-            Xóa
-          </button>
-          <button className="allcus-button" onClick={() => setShowModal(false)}>
-            Đóng
-          </button>
-        </Modal.Footer>
-      </Modal>
+        handleDelete={handleDelete}
+      />
 
-      <Modal
-        show={showModal1}
-        onHide={() => setShowModal1(false)}
-        className="custom-modal"
-      >
-        <Modal.Header closeButton className="border-none">
-          <Modal.Title className="custom-modal-title">Thông báo!</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="custom-modal-body" bsPrefix="custom-modal-body">
-          Xóa thành công!
-        </Modal.Body>
-        <Modal.Footer className="border-none">
-          <NavLink
-            to={`/BCH-DoanTruong`}
-            className="navlink"
-          >
-            <button
-              className="allcus-button"
-              onClick={() => setShowModal1(false)}
-            >
-              Đóng
-            </button>
-          </NavLink>
-        </Modal.Footer>
-      </Modal>
+      <DeleteSuccess show={showModal1} onHide={() => setShowModal1(false)} />
     </>
   );
 };

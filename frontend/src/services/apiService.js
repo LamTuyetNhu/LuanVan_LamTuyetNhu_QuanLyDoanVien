@@ -13,7 +13,6 @@ const laymotchidoan = (IDLop) => {
 };
 
 const CapNhatChiDoan = (formData) => {
-  console.log(formData)
   return axios.post("api/CapNhatChiDoan", formData);
 };
 
@@ -41,6 +40,29 @@ const CapNhatDoanVien = (formData) => {
   return axios.post("api/CapNhatDoanVien", formData);
 };
 
+// const ThemMoiDoanVien = (formData) => {
+//   console.log(formData)
+//   return axios.post("api/ThemMoiDoanVien", formData);
+// };
+
+const ThemMoiDoanVien = async (formData) => {
+  try {
+    console.log("HIHIHI")
+    console.log(formData)
+    const response = await axios.post("api/ThemMoiDoanVien", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data", // Ensure correct content type for file uploads
+      },
+    });
+    console.log("HUHUHUHU")
+    console.log(response.data); // Log the response data for debugging
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw error; // Rethrow the error to handle it in your application
+  }
+};
+
 const laydshoatdong = (page) => {
   return axios.get(`api/layDSHoatDong/${page}`);
 };
@@ -58,7 +80,6 @@ const LayMotHoatDong = (IDHoatDong) => {
 };
 
 const CapNhatHoatDong = (formData) => {
-  console.log(formData)
   return axios.post("api/CapNhatHoatDong", formData);
 };
 
@@ -66,12 +87,12 @@ const XoaHoatDong = (IDHoatDong) => {
   return axios.post(`api/XoaHoatDong/${IDHoatDong}`);
 };
 
-const LayMotDoanVien = (IDLop, IDDoanVien) => {
-  return axios.get(`api/laymotdoanvien/${IDLop}/${IDDoanVien}`);
+const LayMotDoanVien = (IDLop, IDDoanVien, IDChiTietNamHoc) => {
+  return axios.get(`api/laymotdoanvien/${IDLop}/${IDDoanVien}/${IDChiTietNamHoc}`);
 };
 
-const XoaDoanVien = (IDDoanVien) => {
-  return axios.post(`api/XoaDoanVien/${IDDoanVien}`);
+const XoaDoanVien = (IDChiTietNamHoc) => {
+  return axios.post(`api/XoaDoanVien/${IDChiTietNamHoc}`);
 };
 
 const laydsBCH = (page) => {
@@ -80,6 +101,10 @@ const laydsBCH = (page) => {
 
 const searchBCH = (formData) => {
   return axios.post(`api/searchBCH`, formData);
+};
+
+const XoaBanChapHanh = (select) => {
+  return axios.post(`api/XoaBanChapHanh/${select}`);
 };
 
 const themChiDoan = (formData) => {
@@ -114,6 +139,13 @@ const CapNhatDoanPhi = (formData) => {
   return axios.post("api/CapNhatDoanPhi", formData);
 };
 
+const LayDanToc = () => {
+  return axios.get(`api/LayDanToc`);
+};
+
+const LayTonGiao = () => {
+  return axios.get(`api/LayTonGiao`);
+};
 
 export {
   getAllChiDoan,
@@ -133,8 +165,10 @@ export {
   LayMotDoanVien,
   XoaDoanVien,
   CapNhatDoanVien,
+  ThemMoiDoanVien,
   laydsBCH,
   searchBCH,
+  XoaBanChapHanh,
   themChiDoan,
   XoaChiDoan,
   namhoc,
@@ -143,7 +177,9 @@ export {
   xoaMotDoanPhi,
   themDoanPhi,
   LayMotDoanPhi,
-  CapNhatDoanPhi
+  CapNhatDoanPhi,
+  LayTonGiao,
+  LayDanToc
 };
 
 
