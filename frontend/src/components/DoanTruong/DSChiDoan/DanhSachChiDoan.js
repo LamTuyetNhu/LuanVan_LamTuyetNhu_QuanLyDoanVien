@@ -245,7 +245,7 @@ const DanhSachChiDoan = (props) => {
               </select>
             </div>
             <button className="formatButton" onClick={handleSearch}>
-              <FontAwesomeIcon icon={faMagnifyingGlass} /> Tìm
+              <FontAwesomeIcon icon={faMagnifyingGlass} />
             </button>
           </div>
           <div className="buttonSearch">
@@ -255,9 +255,12 @@ const DanhSachChiDoan = (props) => {
                 <FontAwesomeIcon icon={faPlus} /> Thêm
               </button>
             </NavLink>
+            <div>
+
             <button className="formatButton" onClick={exportToExcel}>
               <FontAwesomeIcon icon={faCloudArrowDown} /> Tải
             </button>
+            </div>
           </div>
         </div>
 
@@ -337,29 +340,67 @@ const DanhSachChiDoan = (props) => {
         </div>
       </div>
 
-      <div className="pagination">
-        <button className="btn-footer" onClick={handlePrevPage}>
-          <FontAwesomeIcon icon={faChevronLeft} />
-        </button>
+      {/* <div className="pagination-container"> */}
+      <div className="pagination pagination1">
+              <button
+                className="btn-footer"
+                onClick={handlePrevPage}
+                disabled={currentPage <= 1}
+              >
+                <FontAwesomeIcon icon={faChevronLeft} />
+              </button>
 
-        {Array.from({ length: totalPages }, (_, index) => (
-          <div className="footer" key={index}>
-            <button
-              className={`btn-footer ${
-                currentPage === index + 1 ? "active" : ""
-              }`}
-              onClick={() => changePage(index + 1)}
-            >
-              {index + 1}
-            </button>
-          </div>
-        ))}
+              {totalPages > 4 && currentPage > 3 && (
+                <div className="footer">
+                  <span className="ellipsis"></span>
+                </div>
+              )}
 
-        <button className="btn-footer" onClick={handleNextPage}>
-          <FontAwesomeIcon icon={faChevronRight} />
-        </button>
-      </div>
+              {Array.from(
+                { length: totalPages > 4 ? 3 : totalPages },
+                (_, index) => {
+                  let pageToShow;
+                  if (totalPages <= 4) {
+                    pageToShow = index + 1;
+                  } else if (currentPage <= 3) {
+                    pageToShow = index + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageToShow = totalPages - 2 + index;
+                  } else {
+                    pageToShow = currentPage - 1 + index;
+                  }
 
+                  return (
+                    <div className="footer" key={index}>
+                      <button
+                        className={`btn-footer ${
+                          currentPage === pageToShow ? "active" : ""
+                        }`}
+                        onClick={() => changePage(pageToShow)}
+                        disabled={currentPage === pageToShow}
+                      >
+                        {pageToShow}
+                      </button>
+                    </div>
+                  );
+                }
+              )}
+
+              {totalPages > 4 && currentPage < totalPages - 2 && (
+                <div className="footer">
+                  <span className="ellipsis"></span>
+                </div>
+              )}
+
+              <button
+                className="btn-footer"
+                onClick={handleNextPage}
+                disabled={currentPage >= totalPages}
+              >
+                <FontAwesomeIcon icon={faChevronRight} />
+              </button>
+            </div>
+            {/* </div> */}
       <DeleteConfirmationModal
         show={showModal}
         onHide={() => setShowModal(false)}

@@ -2,15 +2,11 @@ import React, { useState, useEffect } from "react";
 import Form from "react-bootstrap/Form";
 import { NavLink } from "react-router-dom";
 import { themDoanPhi } from "../../../services/apiService";
-import { format, parseISO } from "date-fns";
-import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Modal from "react-bootstrap/Modal";
-import Button from "react-bootstrap/Button";
-
+import ModalAddSuccess from "../../Modal/ModalAddSuccess";
 import { namhoc } from "../../../services/apiService";
 const ThemDoanPhi = (props) => {
-  // const history = useHistory();
+
   const [NamHoc, setNamHoc] = useState([]);
 
   useEffect(() => {
@@ -21,10 +17,8 @@ const ThemDoanPhi = (props) => {
     try {
       let res = await namhoc();
       if (res.status === 200) {
-        // setListKhoa(res.data.dataNH); // Cập nhật state với danh sách khóa học
         const NamHocdata = res.data.dataNH;
 
-        // Kiểm tra nếu khoaData là mảng trước khi cập nhật state
         if (Array.isArray(NamHocdata)) {
           setNamHoc(NamHocdata);
         } else {
@@ -191,28 +185,10 @@ const ThemDoanPhi = (props) => {
         </form>
       </div>
 
-      <Modal
-        show={showModal}
-        onHide={() => setShowModal(false)}
-        className="custom-modal"
-      >
-        <Modal.Header closeButton className="border-none">
-          <Modal.Title className="custom-modal-title">Thành công</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="custom-modal-body" bsPrefix="custom-modal-body">
-          Đoàn phí đã được thêm mới!
-        </Modal.Body>
-        <Modal.Footer className="border-none">
-          {/* <Button variant="primary" onClick={() => setShowModal(false)}>
-            Đóng
-          </Button> */}
-          <button className="allcus-button button-error" type="submit">
-            <NavLink to="/BCH-DoanTruong/DoanPhi" className="navlink">
-              Đóng
-            </NavLink>
-          </button>
-        </Modal.Footer>
-      </Modal>
+      <NavLink to={`/BCH-DoanTruong/DoanPhi`} className="navlink">
+        <ModalAddSuccess show={showModal} onHide={() => setShowModal(false)} />
+      </NavLink>
+
     </>
   );
 };

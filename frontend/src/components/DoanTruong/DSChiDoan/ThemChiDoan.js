@@ -1,20 +1,10 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useState } from "react";
-
+import { useState } from "react";
 import Form from "react-bootstrap/Form";
-import { useParams } from "react-router-dom";
-import { format } from "date-fns";
 import { NavLink } from "react-router-dom";
-import Modal from "react-bootstrap/Modal";
+import Modal from "../../Modal/Modal";
 import ModalAddSuccess from "../../Modal/ModalAddSuccess";
 
-
-import { faPlus, faBackward, faTrash } from "@fortawesome/free-solid-svg-icons";
-import {
-  themChiDoan,
-  LayMotDoanVien,
-  XoaDoanVien,
-} from "../../../services/apiService";
+import { themChiDoan } from "../../../services/apiService";
 import logo from "../../../assets/logo.jpg";
 
 const DoanVien = (props) => {
@@ -41,6 +31,8 @@ const DoanVien = (props) => {
   };
 
   const [showModal, setShowModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -63,12 +55,18 @@ const DoanVien = (props) => {
     }
 
     try {
-      await themChiDoan(themchidoan);
+      let res = await themChiDoan(themchidoan);
       // Xử lý sau khi thêm thành công (chuyển hướng hoặc hiển thị thông báo)
-      setShowModal(true);
-      console.log("Chi đoàn đã được thêm mới thành công!");
+      if (res.status === 200) {
+        setSuccessMessage("Thêm thành công!");
+        setShowModal(true);
+      } else {
+        setErrorMessage("Thêm không thành công!");
+        setShowModal(true);
+      }
     } catch (error) {
-      console.error("Lỗi khi thêm mới hoạt động:", error);
+      setErrorMessage("Lỗi khi thêm mới!");
+      setShowModal(true);
     }
   };
 
@@ -151,34 +149,34 @@ const DoanVien = (props) => {
         </form>
       </div>
       <NavLink to={`/BCH-DoanTruong`} className="navlink">
-            
-      <ModalAddSuccess show={showModal} onHide={() => setShowModal(false)} />
-          </NavLink>
+        <div>
+          {/* Display success message */}
+          {successMessage && (
+            <Modal
+              show={showModal}
+              onHide={() => {
+                setShowModal(false);
+                setSuccessMessage("");
+              }}
+              message={successMessage}
+            />
+          )}
 
-
-{/* 
-      <Modal
-        show={showModal}
-        onHide={() => setShowModal(false)}
-        className="custom-modal"
-      >
-        <Modal.Header closeButton className="border-none">
-          <Modal.Title className="custom-modal-title">Thông báo!</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="custom-modal-body" bsPrefix="custom-modal-body">
-          Thêm thành công!
-        </Modal.Body>
-        <Modal.Footer className="border-none">
-          <NavLink to={`/BCH-DoanTruong`} className="navlink">
-            <button
-              className="allcus-button"
-              onClick={() => setShowModal(false)}
-            >
-              Đóng
-            </button>
-          </NavLink>
-        </Modal.Footer>
-      </Modal> */}
+          {/* Display error message */}
+          {errorMessage && (
+            <Modal
+              show={showModal}
+              onHide={() => {
+                setShowModal(false);
+                setErrorMessage("");
+              }}
+              message={errorMessage}
+              isError={true}
+            />
+          )}
+        </div>
+        {/* <ModalAddSuccess show={showModal} onHide={() => setShowModal(false)} /> */}
+      </NavLink>
     </>
   );
 };

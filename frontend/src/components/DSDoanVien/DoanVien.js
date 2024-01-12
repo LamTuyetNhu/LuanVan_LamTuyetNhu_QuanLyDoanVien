@@ -7,6 +7,7 @@ import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
 import DeleteSuccess from "../Modal/DeleteSuccess";
 import DeleteConfirmationModal from "../Modal/DeleteConfirmationModal";
+import ModalSuccess from "../Modal/ModalSuccess";
 
 import {
   faBackward,
@@ -713,7 +714,10 @@ const DoanVien = (props) => {
                   </button>
                 </>
               ) : (
-                <button className="allcus-button" onClick={handleToggleEdit}>
+                <button
+                  className="allcus-button bgcapnhat"
+                  onClick={handleToggleEdit}
+                >
                   <FontAwesomeIcon icon={faEdit} /> Cập nhật
                 </button>
               )}
@@ -742,26 +746,15 @@ const DoanVien = (props) => {
         <DeleteSuccess show={showModal1} onHide={() => setShowModal1(false)} />
       </NavLink>
 
-      <Modal
-        show={showModalUpdate}
-        onHide={() => setShowModalUpdate(false)}
-        className="custom-modal"
+      <NavLink
+        to={`/BCH-DoanTruong/ChiTietChiDoan/${DoanVien.IDLop}`}
+        className="navlink"
       >
-        <Modal.Header closeButton className="border-none">
-          <Modal.Title className="custom-modal-title">Thông báo!</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="custom-modal-body" bsPrefix="custom-modal-body">
-          Cập nhật thành công!
-        </Modal.Body>
-        <Modal.Footer className="border-none">
-          <button
-            className="allcus-button"
-            onClick={() => setShowModalUpdate(false)}
-          >
-            Đóng
-          </button>
-        </Modal.Footer>
-      </Modal>
+        <ModalSuccess
+          show={showModalUpdate}
+          onHide={() => setShowModalUpdate(false)}
+        />
+      </NavLink>
     </>
   );
 };

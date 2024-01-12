@@ -2,7 +2,8 @@ import { NavLink } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import Modal from "react-bootstrap/Modal";
-
+import DeleteConfirmationModal from "../../Modal/DeleteConfirmationModal";
+import DeleteSuccess from "../../Modal/DeleteSuccess";
 import {
   faEye,
   faMagnifyingGlass,
@@ -28,7 +29,7 @@ const DanhSachDoanPhi = (props) => {
   const [NamHoc, setNamHoc] = useState([]);
 
   const [searchData, setSearchData] = useState({
-    TenNamHoc: ""
+    TenNamHoc: "",
   });
 
   const changePage = (newPage) => {
@@ -136,7 +137,7 @@ const DanhSachDoanPhi = (props) => {
       <div className="container-fluid app__content">
         <h5 className="text-center">Danh Sách Đoàn Phí</h5>
         <div className="searchDV">
-          <div className="">       
+          <div className="">
             <div className="searchDV-input">
               <select
                 className="search_name"
@@ -165,12 +166,12 @@ const DanhSachDoanPhi = (props) => {
             </button>
           </div>
           <div className="buttonSearch">
-          <NavLink to="/BCH-DoanTruong/ThemMoi-DoanPhi">
-                <button className="formatButton">
-                  {" "}
-                  <FontAwesomeIcon icon={faPlus} /> Thêm
-                </button>
-              </NavLink>
+            <NavLink to="/BCH-DoanTruong/ThemMoi-DoanPhi">
+              <button className="formatButton">
+                {" "}
+                <FontAwesomeIcon icon={faPlus} /> Thêm
+              </button>
+            </NavLink>
           </div>
         </div>
 
@@ -196,31 +197,36 @@ const DanhSachDoanPhi = (props) => {
                       <td className="col-center">{index + 1}</td>
                       <td className="">{item.TenDoanPhi}</td>
                       <td className="col-center">{item.TenNamHoc}</td>
-                      <td className="col-right">{formatCurrency(item.SoTien)}</td>
+                      <td className="col-right">
+                        {formatCurrency(item.SoTien)}
+                      </td>
 
                       <td className="btnOnTable1">
-                        <NavLink
-                          to={`/BCH-DoanTruong/ChiTietChiDoan`}
-                        >
+                        <NavLink to={`/BCH-DoanTruong/DoanPhi/ChiTietDoanPhi/${item.IDDoanPhi}`}>
                           <button className="btnOnTable ">
                             <FontAwesomeIcon icon={faEye} />
                           </button>
                         </NavLink>
                       </td>
                       <td className="btnOnTable1">
-                      <NavLink
+                        <NavLink
                           to={`/BCH-DoanTruong/DoanPhi/ChiTiet/${item.IDDoanPhi}`}
                         >
-
-                      <button className="btnOnTable ">
-                        <FontAwesomeIcon icon={faPenToSquare} />
+                          <button className="btnOnTable ">
+                            <FontAwesomeIcon icon={faPenToSquare} />
                           </button>
                         </NavLink>
                       </td>
                       <td className="btnOnTable1">
-                      <button className="btnOnTable" onClick={() => { setSelectedIDDoanPhi(item.IDDoanPhi); setShowModal(true)}}>
-                        <FontAwesomeIcon icon={faTrash} />
-                          </button>
+                        <button
+                          className="btnOnTable"
+                          onClick={() => {
+                            setSelectedIDDoanPhi(item.IDDoanPhi);
+                            setShowModal(true);
+                          }}
+                        >
+                          <FontAwesomeIcon icon={faTrash} />
+                        </button>
                       </td>
                     </tr>
                   );
@@ -235,78 +241,70 @@ const DanhSachDoanPhi = (props) => {
         </div>
       </div>
 
-      <div className="pagination">
-        <button className="btn-footer" onClick={handlePrevPage}>
+      <div className="pagination pagination1">
+        <button
+          className="btn-footer"
+          onClick={handlePrevPage}
+          disabled={currentPage <= 1}
+        >
           <FontAwesomeIcon icon={faChevronLeft} />
         </button>
 
-        {Array.from({ length: totalPages }, (_, index) => (
-          <div className="footer" key={index}>
-            <button
-              className={`btn-footer ${
-                currentPage === index + 1 ? "active" : ""
-              }`}
-              onClick={() => changePage(index + 1)}
-            >
-              {index + 1}
-            </button>
+        {totalPages > 4 && currentPage > 3 && (
+          <div className="footer">
+            <span className="ellipsis"></span>
           </div>
-        ))}
+        )}
 
-        <button className="btn-footer" onClick={handleNextPage}>
+        {Array.from({ length: totalPages > 4 ? 3 : totalPages }, (_, index) => {
+          let pageToShow;
+          if (totalPages <= 4) {
+            pageToShow = index + 1;
+          } else if (currentPage <= 3) {
+            pageToShow = index + 1;
+          } else if (currentPage >= totalPages - 2) {
+            pageToShow = totalPages - 2 + index;
+          } else {
+            pageToShow = currentPage - 1 + index;
+          }
+
+          return (
+            <div className="footer" key={index}>
+              <button
+                className={`btn-footer ${
+                  currentPage === pageToShow ? "active" : ""
+                }`}
+                onClick={() => changePage(pageToShow)}
+                disabled={currentPage === pageToShow}
+              >
+                {pageToShow}
+              </button>
+            </div>
+          );
+        })}
+
+        {totalPages > 4 && currentPage < totalPages - 2 && (
+          <div className="footer">
+            <span className="ellipsis"></span>
+          </div>
+        )}
+
+        <button
+          className="btn-footer"
+          onClick={handleNextPage}
+          disabled={currentPage >= totalPages}
+        >
           <FontAwesomeIcon icon={faChevronRight} />
         </button>
       </div>
 
-      <Modal
+      <DeleteConfirmationModal
         show={showModal}
         onHide={() => setShowModal(false)}
-        className="custom-modal"
-      >
-        <Modal.Header closeButton className="border-none">
-          <Modal.Title className="custom-modal-title">Thông báo!</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="custom-modal-body" bsPrefix="custom-modal-body">
-          Bạn chắc chắn xóa?
-        </Modal.Body>
-        <Modal.Footer className="border-none">
-          <button
-            className="allcus-button button-error"
-            onClick={() => handleDelete()}
-          >
-            Xóa
-          </button>
-          <button className="allcus-button" onClick={() => setShowModal(false)}>
-            Đóng
-          </button>
-        </Modal.Footer>
-      </Modal>
+        handleDelete={handleDelete}
+      />
 
-      <Modal
-        show={showModal1}
-        onHide={() => setShowModal1(false)}
-        className="custom-modal"
-      >
-        <Modal.Header closeButton className="border-none">
-          <Modal.Title className="custom-modal-title">Thông báo!</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="custom-modal-body" bsPrefix="custom-modal-body">
-          Xóa thành công!
-        </Modal.Body>
-        <Modal.Footer className="border-none">
-          <NavLink
-            to={`/BCH-DoanTruong/DoanPhi`}
-            className="navlink"
-          >
-            <button
-              className="allcus-button"
-              onClick={() => setShowModal1(false)}
-            >
-              Đóng
-            </button>
-          </NavLink>
-        </Modal.Footer>
-      </Modal>
+      <DeleteSuccess show={showModal1} onHide={() => setShowModal1(false)} />
     </>
   );
 };

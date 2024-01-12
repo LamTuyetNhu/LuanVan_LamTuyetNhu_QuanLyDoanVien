@@ -290,7 +290,6 @@ const DoanVien = (props) => {
       Province: !Province ? "Vui lòng chọn tỉnh thành" : "",
       District: !District ? "Vui lòng chọn quận huyện" : "",
       Ward: !Ward ? "Vui lòng chọn phường xã" : "",
-      image: !image ? "Chọn ảnh" : "",
     };
 
     setErrors(newErrors);
@@ -318,8 +317,13 @@ const DoanVien = (props) => {
       formData.append("Province", Province);
       formData.append("IDLop", IDLop);
 
-      formData.append("file", image, image.name);
+      // formData.append("file", image, image.name);
 
+      if (image instanceof Blob) {
+        formData.append("file", image, image.name);
+      }
+
+      console.log(formData)
       let res = await axios.post(
         "http://localhost:8080/api/ThemMoiDoanVien",
         formData
@@ -340,7 +344,6 @@ const DoanVien = (props) => {
           <div className="row formAdd">
             <div className="col col-2">
               <div className="avatar">
-        
                 <img className="avatar_img" src={previewImage || logo} alt="" />
                 <label htmlFor="fileInput" className="camera-icon">
                   <FontAwesomeIcon icon={faCamera} />
@@ -350,10 +353,8 @@ const DoanVien = (props) => {
                     id="fileInput"
                     style={{ display: "none" }}
                     onChange={(e) => handleUpLoadImage(e)}
-                    value={image}
                   />
                 </label>
-                <div className="error-message">{errors.image}</div>
               </div>
             </div>
             <div className="col col-10">
@@ -690,24 +691,6 @@ const DoanVien = (props) => {
       </div>
 
       <ModalAddSuccess show={showModal} onHide={() => setShowModal(false)} />
-
-      {/* <Modal
-        show={showModal}
-        onHide={() => setShowModal(false)}
-        className="custom-modal"
-      >
-        <Modal.Header closeButton className="border-none">
-          <Modal.Title className="custom-modal-title">Thông báo!</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="custom-modal-body" bsPrefix="custom-modal-body">
-          Thêm mới thành công!
-        </Modal.Body>
-        <Modal.Footer className="border-none">
-          <button className="allcus-button" onClick={() => setShowModal(false)}>
-            Đóng
-          </button>
-        </Modal.Footer>
-      </Modal> */}
     </>
   );
 };

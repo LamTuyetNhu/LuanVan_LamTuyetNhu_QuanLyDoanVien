@@ -1,11 +1,12 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { format } from "date-fns";
 import { NavLink } from "react-router-dom";
-import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
-
+import ModalSuccess from "../../Modal/ModalSuccess";
+import DeleteSuccess from "../../Modal/DeleteSuccess";
+import DeleteConfirmationModal from "../../Modal/DeleteConfirmationModal";
+import logo from "../../../assets/logo.jpg"
 import {
   faBackward,
   faTrash,
@@ -23,7 +24,7 @@ import {
 } from "../../../services/apiService";
 
 const BanChapHanh = (props) => {
-  const { MaLop, MSSV, IDChiTietNamHoc } = useParams();
+  const { IDLop, IDDoanVien, IDChiTietNamHoc } = useParams();
   const [DoanVien, setDoanVien] = useState([]);
 
   const [select, setSelect] = useState([]);
@@ -57,17 +58,16 @@ const BanChapHanh = (props) => {
     fetchChucVu();
     fetchTonGiao();
     fetchDanToc();
-  }, [MaLop, MSSV]);
+  }, [IDLop, IDDoanVien, IDChiTietNamHoc]);
 
   const layMotDoanVien = async () => {
     try {
-      let res = await LayMotDoanVien(MaLop, MSSV, IDChiTietNamHoc);
+      let res = await LayMotDoanVien(IDLop, IDDoanVien, IDChiTietNamHoc);
 
       if (res.status === 200) {
         setDoanVien(res.data.dataDV);
         console.log(res.data.dataDV);
         seteditedDoanVien(res.data.dataDV);
-
       } else {
         // Xử lý trường hợp lỗi
         console.error("Lỗi khi gọi API:", res.statusText);
@@ -194,8 +194,7 @@ const BanChapHanh = (props) => {
   };
 
   const handleSaveChanges = async (e) => {
-    e.preventDefault() 
-      
+    e.preventDefault();
 
     const newErrors = {
       // MaLop: !editedDoanVien.MaLop.trim() ? "Vui lòng nhập mã lớp" : "",
@@ -229,8 +228,6 @@ const BanChapHanh = (props) => {
       return;
     }
 
-
-
     try {
       // Gọi API hoặc hàm cập nhật dữ liệu ở đây
       await CapNhatDoanVien(editedDoanVien);
@@ -263,18 +260,9 @@ const BanChapHanh = (props) => {
             </div>
             <div className="col col-10">
               <div className="row">
-              <div className="form-group col col-4">
+                <div className="form-group col col-4">
                   <Form.Label htmlFor="MaLop">Mã chi đoàn</Form.Label>
-                  {/* {isEditing ? (
-                    <Form.Control
-                      className="form-control"
-                      type="text"
-                      id="MaLop"
-                      aria-describedby="MaLop"
-                      value={editedDoanVien.MaLop}
-                      onChange={handleChange}
-                    />
-                  ) : ( */}
+              
                   <Form.Control
                     className="form-control"
                     type="text"
@@ -283,21 +271,11 @@ const BanChapHanh = (props) => {
                     value={DoanVien.MaLop}
                     disabled
                   />
-                  {/* )} */}
-                  {/* <div className="error-message">{errors.MaLop}</div> */}
+                 
                 </div>
                 <div className="form-group col col-4">
                   <Form.Label htmlFor="TenLop">Tên chi đoàn</Form.Label>
-                  {/* {isEditing ? (
-                    <Form.Control
-                      className="form-control"
-                      type="text"
-                      id="TenLop"
-                      aria-describedby="TenLop"
-                      value={editedDoanVien.TenLop}
-                      onChange={handleChange}
-                    />
-                  ) : ( */}
+            
                   <Form.Control
                     className="form-control"
                     type="text"
@@ -306,21 +284,11 @@ const BanChapHanh = (props) => {
                     value={DoanVien.TenLop}
                     disabled
                   />
-                  {/* )} */}
-                  {/* <div className="error-message">{errors.TenLop}</div> */}
+               
                 </div>
                 <div className="form-group col col-4">
                   <Form.Label htmlFor="Khoa">Khóa</Form.Label>
-                  {/* {isEditing ? (
-                    <Form.Control
-                      className="form-control"
-                      type="text"
-                      id="Khoa"
-                      aria-describedby="Khoa"
-                      value={editedDoanVien.Khoa}
-                      onChange={handleChange}
-                    />
-                  ) : ( */}
+            
                   <Form.Control
                     className="form-control"
                     type="text"
@@ -329,8 +297,7 @@ const BanChapHanh = (props) => {
                     value={DoanVien.Khoa}
                     disabled
                   />
-                  {/* )} */}
-                  {/* <div className="error-message">{errors.Khoa}</div> */}
+                 
                 </div>
                 <div className="form-group col col-4">
                   <Form.Label htmlFor="MSSV">Mã số sinh viên</Form.Label>
@@ -483,7 +450,9 @@ const BanChapHanh = (props) => {
                   <div className="error-message">{errors.GioiTinh}</div>
                 </div>
                 <div className="form-group col col-4">
-                  <Form.Label htmlFor="NgaySinh">Ngày sinh (dd/mm/yyyy)</Form.Label>
+                  <Form.Label htmlFor="NgaySinh">
+                    Ngày sinh (dd/mm/yyyy)
+                  </Form.Label>
                   {isEditing ? (
                     <Form.Control
                       className="form-control"
@@ -506,7 +475,9 @@ const BanChapHanh = (props) => {
                   <div className="error-message">{errors.NgaySinh}</div>
                 </div>
                 <div className="form-group col col-4">
-                  <Form.Label htmlFor="NgayVaoDoan">Ngày vào đoàn (dd/mm/yyyy)</Form.Label>
+                  <Form.Label htmlFor="NgayVaoDoan">
+                    Ngày vào đoàn (dd/mm/yyyy)
+                  </Form.Label>
                   {isEditing ? (
                     <Form.Control
                       className="form-control"
@@ -702,73 +673,20 @@ const BanChapHanh = (props) => {
         </div>
       </div>
 
-      <Modal
+      <DeleteConfirmationModal
         show={showModal}
         onHide={() => setShowModal(false)}
-        className="custom-modal"
-      >
-        <Modal.Header closeButton className="border-none">
-          <Modal.Title className="custom-modal-title">Thông báo!</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="custom-modal-body" bsPrefix="custom-modal-body">
-          Bạn chắc chắn xóa?
-        </Modal.Body>
-        <Modal.Footer className="border-none">
-          <button
-            className="allcus-button button-error"
-            onClick={() => handleDelete()}
-          >
-            Xóa
-          </button>
-          <button className="allcus-button" onClick={() => setShowModal(false)}>
-            Đóng
-          </button>
-        </Modal.Footer>
-      </Modal>
+        handleDelete={handleDelete}
+      />
 
-      <Modal
-        show={showModal1}
-        onHide={() => setShowModal1(false)}
-        className="custom-modal"
-      >
-        <Modal.Header closeButton className="border-none">
-          <Modal.Title className="custom-modal-title">Thông báo!</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="custom-modal-body" bsPrefix="custom-modal-body">
-          Xóa thành công!
-        </Modal.Body>
-        <Modal.Footer className="border-none">
-          <NavLink to={`/BCH-DoanTruong/DanhSachBCH`} className="navlink">
-            <button
-              className="allcus-button"
-              onClick={() => setShowModal1(false)}
-            >
-              Đóng
-            </button>
-          </NavLink>
-        </Modal.Footer>
-      </Modal>
+      <NavLink to={`/BCH-DoanTruong/DanhSachBCH`} className="navlink">
+      <DeleteSuccess show={showModal1} onHide={() => setShowModal1(false)} />
+      </NavLink>
 
-      <Modal
-        show={showModalUpdate}
-        onHide={() => setShowModalUpdate(false)}
-        className="custom-modal"
-      >
-        <Modal.Header closeButton className="border-none">
-          <Modal.Title className="custom-modal-title">Thông báo!</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="custom-modal-body" bsPrefix="custom-modal-body">
-          Cập nhật thành công!
-        </Modal.Body>
-        <Modal.Footer className="border-none">
-          <button
-            className="allcus-button"
-            onClick={() => setShowModalUpdate(false)}
-          >
-            Đóng
-          </button>
-        </Modal.Footer>
-      </Modal>
+        <ModalSuccess
+          show={showModalUpdate}
+          onHide={() => setShowModalUpdate(false)}
+        />
     </>
   );
 };

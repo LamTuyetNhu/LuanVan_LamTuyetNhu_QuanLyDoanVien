@@ -6,13 +6,12 @@ import {
   CapNhatHoatDong,
   XoaHoatDong,
 } from "../../../services/apiService";
-import { format, parseISO, parse, isValid } from "date-fns";
 import "react-toastify/dist/ReactToastify.css";
 import Modal from "react-bootstrap/Modal";
-import Button from "react-bootstrap/Button";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-
+import ModalSuccess from "../../Modal/ModalSuccess";
+import DeleteSuccess from "../../Modal/DeleteSuccess";
+import DeleteConfirmationModal from "../../Modal/DeleteConfirmationModal";
 import { useParams } from "react-router-dom";
 
 import {
@@ -188,15 +187,15 @@ const ChiTietHoatDong = (props) => {
               </Form.Label>
 
               {isEditing ? (
-                    <Form.Control
-                      className="form-control"
-                      type="text"
-                      id="NgayBanHanh"
-                      aria-describedby="NgayBanHanh"
-                      value={editedDoanPhi.NgayBanHanh}
-                      onChange={handleChange}
-                      placeholder="Ngày bắt đầu phải có định dạng là DD/MM/YYYY"
-                    />
+                <Form.Control
+                  className="form-control"
+                  type="text"
+                  id="NgayBanHanh"
+                  aria-describedby="NgayBanHanh"
+                  value={editedDoanPhi.NgayBanHanh}
+                  onChange={handleChange}
+                  placeholder="Ngày bắt đầu phải có định dạng là DD/MM/YYYY"
+                />
               ) : (
                 <Form.Control
                   type="text"
@@ -222,7 +221,6 @@ const ChiTietHoatDong = (props) => {
                   aria-describedby="NgayHetHan"
                   value={editedDoanPhi.NgayHetHan}
                   onChange={handleChange}
-                  
                   placeholder="Ngày hết hạn phải có định dạng là DD/MM/YYYY"
                 />
               ) : (
@@ -299,75 +297,20 @@ const ChiTietHoatDong = (props) => {
         </form>
       </div>
 
-      <Modal
+      <DeleteConfirmationModal
         show={showModal}
         onHide={() => setShowModal(false)}
-        className="custom-modal"
-      >
-        <Modal.Header closeButton className="border-none">
-          <Modal.Title className="custom-modal-title">Thông báo!</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="custom-modal-body" bsPrefix="custom-modal-body">
-          Bạn chắc chắn xóa?
-        </Modal.Body>
-        <Modal.Footer className="border-none">
-          <button
-            className="allcus-button button-error"
-            onClick={() => handleDelete()}
-          >
-            Xóa
-          </button>
-          <button className="allcus-button" onClick={() => setShowModal(false)}>
-            {/* <NavLink to="/BCH-DoanTruong/HoatDong" className="navlink"> */}
-            Đóng
-            {/* </NavLink> */}
-          </button>
-        </Modal.Footer>
-      </Modal>
+        handleDelete={handleDelete}
+      />
 
-      <Modal
-        show={showModal1}
-        onHide={() => setShowModal1(false)}
-        className="custom-modal"
-      >
-        <Modal.Header closeButton className="border-none">
-          <Modal.Title className="custom-modal-title">Thông báo!</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="custom-modal-body" bsPrefix="custom-modal-body">
-          Xóa thành công!
-        </Modal.Body>
-        <Modal.Footer className="border-none">
-          <button
-            className="allcus-button"
-            onClick={() => setShowModal1(false)}
-          >
-            <NavLink to="/BCH-DoanTruong/HoatDong" className="navlink">
-              Đóng
-            </NavLink>
-          </button>
-        </Modal.Footer>
-      </Modal>
+<NavLink to={`/BCH-DoanTruong/HoatDong`} className="navlink">
+      <DeleteSuccess show={showModal1} onHide={() => setShowModal1(false)} />
+</NavLink>
 
-      <Modal
+      <ModalSuccess
         show={showModalUpdate}
         onHide={() => setShowModalUpdate(false)}
-        className="custom-modal"
-      >
-        <Modal.Header closeButton className="border-none">
-          <Modal.Title className="custom-modal-title">Thông báo!</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="custom-modal-body" bsPrefix="custom-modal-body">
-          Cập nhật thành công!
-        </Modal.Body>
-        <Modal.Footer className="border-none">
-          <button
-            className="allcus-button"
-            onClick={() => setShowModalUpdate(false)}
-          >
-            Đóng
-          </button>
-        </Modal.Footer>
-      </Modal>
+      />
     </>
   );
 };

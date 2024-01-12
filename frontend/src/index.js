@@ -16,6 +16,7 @@ import BanChapHanh from "./components/DoanTruong/DSBCH/BCH";
 import DoanPhi from "./components/DoanTruong/DoanPhi/DoanPhi";
 import ThemMoiDoanPhi from "./components/DoanTruong/DoanPhi/ThemDoanPhi";
 import CapNhatDoanPhi from "./components/DoanTruong/DoanPhi/CapNhapDoanPhi";
+import DSNopDoanPhi from "./components/DoanTruong/DoanPhi/DSNopDoanPhi"
 
 import DangNhap from "./components/DangNhap/DangNhap";
 
@@ -46,11 +47,12 @@ root.render(
           <Route path="ChiTietChiDoan/:IDLop/:IDDoanVien/:IDChiTietNamHoc" element={<DoanVien />} />
 
           <Route path="DanhSachBCH" element={<DanhSachBCH />} />
-          <Route path="DanhSachBCH/:MaLop/:MSSV/:IDChiTietNamHoc" element={<BanChapHanh />} />
+          <Route path="DanhSachBCH/:IDLop/:IDDoanVien/:IDChiTietNamHoc" element={<BanChapHanh />} />
 
           <Route path="DoanPhi" element={<DoanPhi />} />
           <Route path="ThemMoi-DoanPhi" element={<ThemMoiDoanPhi />} />
           <Route path="DoanPhi/ChiTiet/:IDDoanPhi" element={<CapNhatDoanPhi />} />
+          <Route path="DoanPhi/ChiTietDoanPhi/:IDDoanPhi" element={<DSNopDoanPhi />} />
 
           <Route path="HoatDong" element={<DanhSachHoatDong />} />
           <Route path="ChiTietHoatDong/:IDHoatDong" element={<ChiTietHoatDong />} />

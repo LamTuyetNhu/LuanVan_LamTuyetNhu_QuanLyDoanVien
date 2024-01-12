@@ -318,6 +318,10 @@ header {
   
 }
 
+.buttonSearch {
+  display: flex;
+}
+
 .ButtonCenter {
   display: flex;
   justify-content: center;
@@ -340,6 +344,18 @@ header {
 .button-right {
   position: absolute;
   right: 0;
+}
+
+.bgcapnhat {
+  background-color: #bba075 !important;
+}
+
+.clcapnhat {
+color: yellowgreen !important;
+}
+
+.mauxoa {
+  color: var(--red);
 }
 /* Table */
 .table-container {
@@ -700,6 +716,11 @@ header {
   color: var(--color);
 }
 
+.btnRight {
+  position: absolute;
+  right: 5px;
+}
+
 #ttLop,
 #TenDoanPhi,
 #SoTien,
@@ -780,19 +801,29 @@ header {
 .custom-modal-body {
   text-align: center;
   font-size: 1.6em;
-  padding: 32px 16px;
+  padding: 16px;
 }
 
 .border-none {
   border: none;
 }
 
+// .pagination-container {
+//   position: sticky;
+//   top: 0; /* Chọn giá trị cụ thể cho vị trí top, có thể là số px hoặc % */
+//   background-color: white; /* Đặt màu nền của thanh chuyển trang nếu cần */
+//   z-index: 2; /* Đảm bảo thanh chuyển trang hiển thị trên cùng */
+// }
+
 .pagination {
   width: 100%;
-  position: fixed;
-  bottom: 0;
   padding: 12px;
   justify-content: center;
+}
+
+.pagination1 {
+  position: fixed;
+  bottom: 0;
 }
 
 .btn-footer {
@@ -823,7 +854,7 @@ header {
   // background-image: url("/template/frontend/images/giang-vien-bg.png");
   width: 100%;
   // padding-top: 40px;
-  padding-bottom: 60px;
+  // padding-bottom: 60px;
 }
 
 .giang-vien-items {

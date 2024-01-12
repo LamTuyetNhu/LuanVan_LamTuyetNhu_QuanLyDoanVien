@@ -260,7 +260,7 @@ const DanhSachBCH = (props) => {
                         
                         <div className="col-lg-3 col-md-6 col-sm-6 giang-vien-col lazy">
                           <NavLink
-                            to={`/BCH-DoanTruong/DanhSachBCH/${item.MaLop}/${item.MSSV}/${item.IDChiTietNamHoc}` } className="NavLink-item"
+                            to={`/BCH-DoanTruong/DanhSachBCH/${item.IDLop}/${item.IDDoanVien}/${item.IDChiTietNamHoc}` } className="NavLink-item"
                           >
                           <div className="giang-vien-item">
                             <div className="gv-image img-hover-zoom gv1">
@@ -269,6 +269,9 @@ const DanhSachBCH = (props) => {
                               </a>
                             </div>
                             <div className="gv-body">
+                            <div className="giang-vien-subtitle">
+                                {item.MSSV}
+                              </div>
                               <div className="giang-vien-title">
                                 <a>{item.HoTen}</a>
                               </div>
@@ -297,27 +300,64 @@ const DanhSachBCH = (props) => {
       </div>
 
       <div className="pagination">
-        <button className="btn-footer" onClick={handlePrevPage}>
-          <FontAwesomeIcon icon={faChevronLeft} />
-        </button>
+              <button
+                className="btn-footer"
+                onClick={handlePrevPage}
+                disabled={currentPage <= 1}
+              >
+                <FontAwesomeIcon icon={faChevronLeft} />
+              </button>
 
-        {Array.from({ length: totalPages }, (_, index) => (
-          <div className="footer" key={index}>
-            <button
-              className={`btn-footer ${
-                currentPage === index + 1 ? "active" : ""
-              }`}
-              onClick={() => changePage(index + 1)}
-            >
-              {index + 1}
-            </button>
-          </div>
-        ))}
+              {totalPages > 4 && currentPage > 3 && (
+                <div className="footer">
+                  <span className="ellipsis"></span>
+                </div>
+              )}
 
-        <button className="btn-footer" onClick={handleNextPage}>
-          <FontAwesomeIcon icon={faChevronRight} />
-        </button>
-      </div>
+              {Array.from(
+                { length: totalPages > 4 ? 3 : totalPages },
+                (_, index) => {
+                  let pageToShow;
+                  if (totalPages <= 4) {
+                    pageToShow = index + 1;
+                  } else if (currentPage <= 3) {
+                    pageToShow = index + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageToShow = totalPages - 2 + index;
+                  } else {
+                    pageToShow = currentPage - 1 + index;
+                  }
+
+                  return (
+                    <div className="footer" key={index}>
+                      <button
+                        className={`btn-footer ${
+                          currentPage === pageToShow ? "active" : ""
+                        }`}
+                        onClick={() => changePage(pageToShow)}
+                        disabled={currentPage === pageToShow}
+                      >
+                        {pageToShow}
+                      </button>
+                    </div>
+                  );
+                }
+              )}
+
+              {totalPages > 4 && currentPage < totalPages - 2 && (
+                <div className="footer">
+                  <span className="ellipsis"></span>
+                </div>
+              )}
+
+              <button
+                className="btn-footer"
+                onClick={handleNextPage}
+                disabled={currentPage >= totalPages}
+              >
+                <FontAwesomeIcon icon={faChevronRight} />
+              </button>
+            </div>
     </>
   );
 };

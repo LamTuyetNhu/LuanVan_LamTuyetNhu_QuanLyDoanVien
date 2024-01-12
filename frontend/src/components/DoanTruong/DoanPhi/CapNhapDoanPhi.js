@@ -8,6 +8,7 @@ import {
 } from "../../../services/apiService";
 import "react-toastify/dist/ReactToastify.css";
 import Modal from "react-bootstrap/Modal";
+import ModalSuccess from "../../Modal/ModalSuccess";
 
 import { useParams } from "react-router-dom";
 
@@ -273,23 +274,7 @@ const ChiTietDoanPhi = (props) => {
         </form>
       </div>
 
-      <Modal
-        show={showModal}
-        onHide={() => setShowModal(false)}
-        className="custom-modal"
-      >
-        <Modal.Header closeButton className="border-none">
-          <Modal.Title className="custom-modal-title">Thông báo!</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="custom-modal-body" bsPrefix="custom-modal-body">
-          Cập nhật thành công!
-        </Modal.Body>
-        <Modal.Footer className="border-none">
-          <button className="allcus-button" onClick={() => setShowModal(false)}>
-            Đóng
-          </button>
-        </Modal.Footer>
-      </Modal>
+      <ModalSuccess show={showModal} onHide={() => setShowModal(false)} />
     </>
   );
 };

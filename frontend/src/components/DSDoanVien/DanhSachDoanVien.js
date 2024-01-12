@@ -1,10 +1,11 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import * as XLSX from "xlsx";
 import { format } from "date-fns";
 import { NavLink } from "react-router-dom";
-
+import Modal from "../Modal/Modal";
+import axios from "axios";
 import {
   faEye,
   faPlus,
@@ -14,7 +15,12 @@ import {
   faChevronRight,
   faChevronLeft,
 } from "@fortawesome/free-solid-svg-icons";
-import { searchDoanVien, laymotlop, chucvu } from "../../services/apiService";
+import {
+  searchDoanVien,
+  laymotlop,
+  chucvu,
+  ThemDanhSachDoanVien,
+} from "../../services/apiService";
 
 const DanhSachDoanVien = (props) => {
   const { IDLop } = useParams();
@@ -24,6 +30,9 @@ const DanhSachDoanVien = (props) => {
   const [totalPages, setTotalPages] = useState(1);
 
   const [DSChucVu, setListChucVu] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const [searchData, setSearchData] = useState({
     IDLop: IDLop,
@@ -36,7 +45,8 @@ const DanhSachDoanVien = (props) => {
   useEffect(() => {
     fetchDSDoanVien();
     fetchDSChucVu();
-  }, [currentPage]);
+    fetchAllData()
+  }, [IDLop, currentPage, totalPages]);
 
   const fetchDSDoanVien = async () => {
     try {
@@ -126,7 +136,7 @@ const DanhSachDoanVien = (props) => {
 
       // Lặp qua tất cả các trang
       for (let page = 1; page <= totalPages; page++) {
-        let res = await laymotlop(page);
+        let res = await laymotlop(IDLop, page);
 
         if (res.status === 200) {
           // Tích hợp dữ liệu từ trang hiện tại vào mảng
@@ -144,35 +154,86 @@ const DanhSachDoanVien = (props) => {
     }
   };
 
-  const exportToExcel = () => {
+  const exportToExcel = async () => {
     // Tạo một mảng chứa dữ liệu bạn muốn xuất
-    const dataToExport = allData.map((item) => {
-      return {
-        "Mã Chi Đoàn": item.MaLop,
-        "Tên Chi Đoàn": item.TenLop,
-        Khóa: item.Khoa,
-        MSSV: item.MSSV,
-        HoTen: item.HoTen,
-        Email: item.Email,
-        SoDT: item.SoDT,
-        GioiTinh:
-          item.GioiTinh === 0 ? "Nữ" : item.GioiTinh === 1 ? "Nam" : "Khác",
-        QueQuan: item.QueQuan,
-        DanToc: item.TenDanToc,
-        TonGiao: item.TenTonGiao,
-        NgaySinh: format(new Date(item.NgaySinh), "dd/MM/yyyy"),
-        NgayVaoDoan: format(new Date(item.NgayVaoDoan), "dd/MM/yyyy"),
-        "Trạng thái": item.ttLop === 1 ? "Đang hoạt động" : "Đã tốt nghiệp",
-      };
-    });
+    try {
+      await fetchAllData();
 
-    // Tạo một đối tượng Workbook từ mảng dữ liệu
-    const ws = XLSX.utils.json_to_sheet(dataToExport);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "DanhSachDoanVien");
+      const dataToExport = allData.map((item) => {
+        return {
+          "Mã Chi Đoàn": item.MaLop,
+          "Tên Chi Đoàn": item.TenLop,
+          "Khóa": item.Khoa,
+          "MSSV": item.MSSV,
+          "Họ tên": item.HoTen,
+          "Email": item.Email,
+          "Số điện thoại": item.SoDT,
+          "Giới tính":
+            item.GioiTinh === 0 ? "Nữ" : item.GioiTinh === 1 ? "Nam" : "Khác",
+          "Quê quán": item.QueQuan,
+          "Dân tộc": item.TenDanToc,
+          "Tôn giáo": item.TenTonGiao,
+          "Ngày sinh": format(new Date(item.NgaySinh), "dd/MM/yyyy"),
+          "Ngày vào đoàn": format(new Date(item.NgayVaoDoan), "dd/MM/yyyy"),
+          "Chức vụ": item.TenCV
+        };
+      });
+  
+      // Tạo một đối tượng Workbook từ mảng dữ liệu
+      const ws = XLSX.utils.json_to_sheet(dataToExport);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "DanhSachDoanVien");
+  
+      // Xuất file Excel
+      XLSX.writeFile(wb, `${allData[0].MaLop}.xlsx`);
+    } catch (error) {
+      console.error("Lỗi khi tải dữ liệu:", error.message);
+      // Xử lý lỗi nếu có
+    }
+  };
 
-    // Xuất file Excel
-    XLSX.writeFile(wb, "DanhSachDoanVien.xlsx");
+  /* Tải file */
+  const fileInputRef = useRef(null);
+
+  const handleButtonClick = () => {
+    // Kích hoạt sự kiện click của thẻ input để mở hộp thoại chọn file
+    fileInputRef.current.click();
+  };
+
+  const handleFileChange = async (event) => {
+
+    try {
+      const selectedFile = event.target.files[0];
+      console.log("Selected File:", selectedFile);
+
+      const formData = new FormData();
+      formData.append("IDLop", IDLop)
+      formData.append("file", selectedFile);
+
+      // let res = await ThemDanhSachDoanVien(formData);
+      console.log(formData)
+      let res = await axios.post(
+        "http://localhost:8080/api/ThemDoanVienExcel",
+        formData
+      );
+
+      if (res.status === 200) {
+        // Thêm thành công
+        setSuccessMessage("Thêm thành công!");
+        setShowModal(true);
+        // Fetch updated data after successful addition
+        fetchDSDoanVien();
+      } else {
+        // Xử lý trường hợp lỗi
+        setErrorMessage("Thêm không thành công!");
+        setShowModal(true);
+      }
+    } catch (error) {
+      // Xử lý lỗi nếu có
+      console.error("Lỗi khi tải file:", error.message);
+      setErrorMessage("Lỗi khi tải file!");
+      setShowModal(true);
+    }
   };
 
   return (
@@ -249,13 +310,23 @@ const DanhSachDoanVien = (props) => {
                   <FontAwesomeIcon icon={faPlus} />
                 </button>
               </NavLink>
-              <button className="formatButton">
-                <FontAwesomeIcon icon={faCloudArrowUp} /> Tải lên
-              </button>
+              <div>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  style={{ display: "none" }}
+                  onChange={handleFileChange}
+                />
+                <button className="formatButton" onClick={handleButtonClick}>
+                  <FontAwesomeIcon icon={faCloudArrowUp} />
+                </button>
+              </div>
 
-              <button className="formatButton" onClick={exportToExcel}>
-                <FontAwesomeIcon icon={faCloudArrowDown} /> Tải về
-              </button>
+              <div>
+                <button className="formatButton" onClick={exportToExcel}>
+                  <FontAwesomeIcon icon={faCloudArrowDown} />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -323,31 +394,97 @@ const DanhSachDoanVien = (props) => {
               </tbody>
             </table>
 
-            <div className="pagination">
-              <button className="btn-footer" onClick={handlePrevPage}>
+            <div className="pagination pagination1">
+              <button
+                className="btn-footer"
+                onClick={handlePrevPage}
+                disabled={currentPage <= 1}
+              >
                 <FontAwesomeIcon icon={faChevronLeft} />
               </button>
 
-              {Array.from({ length: totalPages }, (_, index) => (
-                <div className="footer" key={index}>
-                  <button
-                    className={`btn-footer ${
-                      currentPage === index + 1 ? "active" : ""
-                    }`}
-                    onClick={() => changePage(index + 1)}
-                  >
-                    {index + 1}
-                  </button>
+              {totalPages > 4 && currentPage > 3 && (
+                <div className="footer">
+                  <span className="ellipsis"></span>
                 </div>
-              ))}
+              )}
 
-              <button className="btn-footer" onClick={handleNextPage}>
+              {Array.from(
+                { length: totalPages > 4 ? 3 : totalPages },
+                (_, index) => {
+                  let pageToShow;
+                  if (totalPages <= 4) {
+                    pageToShow = index + 1;
+                  } else if (currentPage <= 3) {
+                    pageToShow = index + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageToShow = totalPages - 2 + index;
+                  } else {
+                    pageToShow = currentPage - 1 + index;
+                  }
+
+                  return (
+                    <div className="footer" key={index}>
+                      <button
+                        className={`btn-footer ${
+                          currentPage === pageToShow ? "active" : ""
+                        }`}
+                        onClick={() => changePage(pageToShow)}
+                        disabled={currentPage === pageToShow}
+                      >
+                        {pageToShow}
+                      </button>
+                    </div>
+                  );
+                }
+              )}
+
+              {totalPages > 4 && currentPage < totalPages - 2 && (
+                <div className="footer">
+                  <span className="ellipsis"></span>
+                </div>
+              )}
+
+              <button
+                className="btn-footer"
+                onClick={handleNextPage}
+                disabled={currentPage >= totalPages}
+              >
                 <FontAwesomeIcon icon={faChevronRight} />
               </button>
             </div>
           </div>
         </div>
       </div>
+
+      <div>
+        {/* Display success message */}
+        {successMessage && (
+          <Modal
+            show={showModal}
+            onHide={() => {
+              setShowModal(false);
+              setSuccessMessage("");
+            }}
+            message={successMessage}
+          />
+        )}
+
+        {/* Display error message */}
+        {errorMessage && (
+          <Modal
+            show={showModal}
+            onHide={() => {
+              setShowModal(false);
+              setErrorMessage("");
+            }}
+            message={errorMessage}
+            isError={true}
+          />
+        )}
+      </div>
+
+      {/* <ModalAddSuccess show={showModal} onHide={() => setShowModal(false)} /> */}
     </>
   );
 };
