@@ -86,6 +86,12 @@ const ChiTietHoatDong = (props) => {
     setIsEditing((prevIsEditing) => !prevIsEditing);
   };
 
+  const validateNgay = (Ngay) => {
+    return String(Ngay).match(
+      /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/
+    );
+  };
+
   const handleSaveChanges = async (e) => {
     e.preventDefault();
 
@@ -93,12 +99,19 @@ const ChiTietHoatDong = (props) => {
       TenHoatDong: !editedDoanPhi.TenHoatDong
         ? "Vui lòng nhập tên hoạt động"
         : "",
-      NgayBanHanh: !editedDoanPhi.NgayBanHanh
-        ? "Ngày bắt đầu phải có định dạng là DD/MM/YYYY"
-        : "",
-      NgayHetHan: !editedDoanPhi.NgayHetHan
-        ? "Ngày kết thúc có định dạng là DD/MM/YYYY"
-        : "",
+        NgayBanHanh:
+        !editedDoanPhi.NgayBanHanh.trim() === ""
+          ? "Vui lòng nhập ngày bắt đầu"
+          : !validateNgay(editedDoanPhi.NgayBanHanh)
+          ? "Ngày định dạng là dd/mm/yyyy"
+          : "",
+
+          NgayHetHan:
+        !editedDoanPhi.NgayHetHan.trim() === ""
+          ? "Vui lòng nhập ngày hết hạn"
+          : !validateNgay(editedDoanPhi.NgayHetHan)
+          ? "Ngày định dạng là dd/mm/yyyy"
+          : "",
       ChiTietHoatDong: !editedDoanPhi.ChiTietHD
         ? "Vui lòng nhập chi tiết hoạt động"
         : "",
@@ -303,9 +316,9 @@ const ChiTietHoatDong = (props) => {
         handleDelete={handleDelete}
       />
 
-<NavLink to={`/BCH-DoanTruong/HoatDong`} className="navlink">
-      <DeleteSuccess show={showModal1} onHide={() => setShowModal1(false)} />
-</NavLink>
+      <NavLink to={`/BCH-DoanTruong/HoatDong`} className="navlink">
+        <DeleteSuccess show={showModal1} onHide={() => setShowModal1(false)} />
+      </NavLink>
 
       <ModalSuccess
         show={showModalUpdate}

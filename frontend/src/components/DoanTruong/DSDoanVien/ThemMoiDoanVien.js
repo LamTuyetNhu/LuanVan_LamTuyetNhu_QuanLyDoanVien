@@ -6,7 +6,9 @@ import { NavLink } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
 import loadVietnamBoundary from "./DiaGioiVN";
-import ModalAddSuccess from "../Modal/ModalAddSuccess";
+
+import Modal1 from "../../Modal/Modal";
+import ModalAddSuccess from "../../Modal/ModalAddSuccess";
 import axios from "axios";
 import {
   faBackward,
@@ -20,8 +22,8 @@ import {
   namhoc,
   laymotchidoan,
   ThemMoiDoanVien,
-} from "../../services/apiService";
-import logo from "../../assets/logo.jpg";
+} from "../../../services/apiService";
+import logo from "../../../assets/logo.jpg";
 
 const DoanVien = (props) => {
   const { IDLop } = useParams();
@@ -30,6 +32,10 @@ const DoanVien = (props) => {
   const [DanToc, setDanToc] = useState([]);
   const [TonGiao, setTonGiao] = useState([]);
   const [ChucVu, setChucVu] = useState([]);
+
+  const [apiMessage, setApiMessage] = useState("");
+const [apiError, setApiError] = useState(false);
+
   const [vietnamBoundaryData, setVietnamBoundaryData] = useState(null);
 
   const [selectedProvince, setSelectedProvince] = useState("");
@@ -250,9 +256,17 @@ const DoanVien = (props) => {
   const validateEmail = (Email) => {
     return String(Email)
       .toLowerCase()
-      .match(
-        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-      );
+      .match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/);
+  };
+
+  const validatePhoneNumber = (sdt) => {
+    return String(sdt).match(/^0[2-9][0-9]{8}$/);
+  };
+
+  const validateNgay = (Ngay) => {
+    return String(Ngay).match(
+      /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/
+    );
   };
 
   const handleUpLoadImage = (event) => {
@@ -267,20 +281,30 @@ const DoanVien = (props) => {
 
     const newErrors = {
       Email:
-        !Email || Email.trim() === "" || !validateEmail(Email)
+        !Email.trim() === ""
+          ? "Vui lòng nhập Email"
+          : !validateEmail(Email)
           ? "Email không hợp lệ!"
           : "",
       HoTen: !HoTen || HoTen.trim() === "" ? "Vui lòng nhập họ tên" : "",
       MSSV: !MSSV || MSSV.trim() === "" ? "Vui lòng nhập MSSV" : "",
-      SoDT: !SoDT || SoDT.trim() === "" ? "Vui lòng nhập số điện thoại" : "",
+      SoDT:
+        !SoDT.trim() === ""
+          ? "Vui lòng nhập số điện thoại"
+          : !validatePhoneNumber(SoDT)
+          ? "Số điện thoại không hợp lệ!"
+          : "",
       GioiTinh:
         GioiTinh === undefined || GioiTinh === ""
           ? "Vui lòng nhập giới tính"
           : "",
       NgaySinh:
-        !NgaySinh || NgaySinh.trim() === "" ? "Vui lòng nhập ngày sinh" : "",
+        !NgaySinh.trim() === ""
+          ? "Vui lòng nhập ngày sinh"
+          : "",
+
       NgayVaoDoan:
-        !NgayVaoDoan || NgayVaoDoan.trim() === ""
+        !NgayVaoDoan.trim() === ""
           ? "Vui lòng nhập ngày vào đoàn"
           : "",
       IDDanToc: !IDDanToc ? "Vui lòng nhập tên dân tộc" : "",
@@ -323,15 +347,16 @@ const DoanVien = (props) => {
         formData.append("file", image, image.name);
       }
 
-      console.log(formData)
+      console.log(formData);
       let res = await axios.post(
         "http://localhost:8080/api/ThemMoiDoanVien",
         formData
       );
-
+      // setApiMessage(res.data.message);
       setShowModal(true);
       // setIsEditing(false);
     } catch (error) {
+      // setApiMessage(res.data.message);
       console.error("Lỗi khi cập nhật dữ liệu:", error);
     }
   };
@@ -573,7 +598,7 @@ const DoanVien = (props) => {
                   <div className="error-message">{errors.NgayVaoDoan}</div>
                 </div>
                 <div className="form-group col col-4">
-                  <Form.Label htmlFor="IDDanToc">Dân Tộc</Form.Label>
+                  <Form.Label htmlFor="IDDanToc">Dân tộc</Form.Label>
                   <Form.Select
                     className="form-control"
                     type="text"

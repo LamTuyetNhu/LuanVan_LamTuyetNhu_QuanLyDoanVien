@@ -2,7 +2,6 @@ import { NavLink, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
-import Modal from "react-bootstrap/Modal";
 import DeleteSuccess from "../../Modal/DeleteSuccess";
 import DeleteConfirmationModal from "../../Modal/DeleteConfirmationModal";
 import {
@@ -29,6 +28,8 @@ const DanhSachChiDoan = (props) => {
   const [selectedIDLop, setSelectedIDLop] = useState(null);
   const [DSKhoa, setListKhoa] = useState([]);
 
+  const token = localStorage.getItem("token");
+
   const [searchData, setSearchData] = useState({
     MaLop: "",
     TenLop: "",
@@ -44,7 +45,6 @@ const DanhSachChiDoan = (props) => {
     fetchDSChiDoan();
     fetchDSKhoa();
     fetchAllData();
-    // handleSearch();
   }, [currentPage, totalPages]);
 
   const fetchDSChiDoan = async () => {
@@ -240,7 +240,7 @@ const DanhSachChiDoan = (props) => {
                 <option value="" disabled selected>
                   Trạng thái lớp
                 </option>
-                <option value="1">Chưa tốt nghiệp</option>
+                <option value="1">Đang hoạt động</option>
                 <option value="0">Ngừng hoạt động</option>
               </select>
             </div>
@@ -252,14 +252,15 @@ const DanhSachChiDoan = (props) => {
             <NavLink to="/BCH-DoanTruong/ThemMoi-ChiDoan">
               <button className="formatButton">
                 {" "}
-                <FontAwesomeIcon icon={faPlus} /> Thêm
+                <FontAwesomeIcon icon={faPlus} />
               </button>
             </NavLink>
             <div>
 
             <button className="formatButton" onClick={exportToExcel}>
-              <FontAwesomeIcon icon={faCloudArrowDown} /> Tải
+              <FontAwesomeIcon icon={faCloudArrowDown} />
             </button>
+
             </div>
           </div>
         </div>
@@ -290,7 +291,7 @@ const DanhSachChiDoan = (props) => {
                       <td className="">{item.TenLop}</td>
                       <td className="">{item.EmailLop}</td>
 
-                      <td className=" col-right">{item.Khoa}</td>
+                      <td className="col-center">{item.Khoa}</td>
                       <td
                         className={` ${
                           item.ttLop === 0 ? "daTotNghiep" : "chuaTotNghiep"

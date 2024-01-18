@@ -1,7 +1,32 @@
 import axios from "../utils/axiosUser";
+// import axios from "axios"
+
+// const token = localStorage.getItem("token");
+
+// const instance = axios.create({
+//   baseURL: 'http://localhost:8080/',
+//   headers: {
+//     'Content-Type': 'application/json',
+//     'Authorization': `Bearer ${token}`
+//   }
+// })
+
+// instance.interceptors.response.use(
+//   (response) => response,
+//   (error) => {
+//     if (error.response.status === 401) {
+//       window.location.href = "/";
+//     }
+//     return Promise.reject(error);
+//   }
+// );
 
 const getAllChiDoan = (page) => {
-  return axios.get(`api/dschidoan/${page}`);
+  return axios.get(`api/dschidoan/${page}`, {
+    // headers: {
+    //   'Authorization': `Bearer ${token}`
+    // }
+  });
 };
 
 const XoaChiDoan = (selectedIDLop) => {
@@ -24,8 +49,8 @@ const searchChiDoan = (formData) => {
   return axios.post("api/searchChiDoan", formData);
 };
 
-const laymotlop = (IDLop, page) => {
-  return axios.get(`api/detailChiDoan/${IDLop}/${page}`);
+const laymotlop = (IDLop, page, idnamhoc) => {
+  return axios.get(`api/detailChiDoan/${IDLop}/${page}/${idnamhoc}`);
 };
 
 const chucvu = () => {
@@ -40,36 +65,8 @@ const CapNhatDoanVien = (formData) => {
   return axios.post("api/CapNhatDoanVien", formData);
 };
 
-const ThemMoiDoanVien = async (formData) => {
-  try {
-    const response = await axios.post("api/ThemMoiDoanVien", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data", // Ensure correct content type for file uploads
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error(error);
-    throw error; // Rethrow the error to handle it in your application
-  }
-};
-
-const ThemDanhSachDoanVien = async (formData) => {
-  try {
-    const response = await axios.post(`api/ThemDoanVienExcel`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data", // Ensure correct content type for file uploads
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error(error);
-    throw error; // Rethrow the error to handle it in your application
-  }
-};
-
-const laydshoatdong = (page) => {
-  return axios.get(`api/layDSHoatDong/${page}`);
+const laydshoatdong = (page, idnamhoc) => {
+  return axios.get(`api/layDSHoatDong/${page}/${idnamhoc}`);
 };
 
 const searchHoatDong = (formData) => {
@@ -92,6 +89,17 @@ const XoaHoatDong = (IDHoatDong) => {
   return axios.post(`api/XoaHoatDong/${IDHoatDong}`);
 };
 
+const LayDSDiemDanh = (IDHoatDong) => {
+  return axios.get(`api/LayDSDiemDanh/${IDHoatDong}`);
+};
+
+const SaveCheckboxStatesDiemDanh = (IDHoatDong, checkboxStates) => {
+  return axios.post("api/saveCheckboxStatesDiemDanh", {
+    IDHoatDong,
+    checkboxStates,
+  });
+};
+
 const LayMotDoanVien = (IDLop, IDDoanVien, IDChiTietNamHoc) => {
   return axios.get(
     `api/laymotdoanvien/${IDLop}/${IDDoanVien}/${IDChiTietNamHoc}`
@@ -102,8 +110,8 @@ const XoaDoanVien = (IDChiTietNamHoc) => {
   return axios.post(`api/XoaDoanVien/${IDChiTietNamHoc}`);
 };
 
-const laydsBCH = (page) => {
-  return axios.get(`api/dsBCH/${page}`);
+const laydsBCH = (page, idnamhoc) => {
+  return axios.get(`api/dsBCH/${page}/${idnamhoc}`);
 };
 
 const searchBCH = (formData) => {
@@ -122,8 +130,8 @@ const namhoc = () => {
   return axios.get(`api/namhoc`);
 };
 
-const layTatCaDSDoanPhi = (page) => {
-  return axios.get(`api/dsdoanphi/${page}`);
+const layTatCaDSDoanPhi = (page, idnamhoc) => {
+  return axios.get(`api/dsdoanphi/${page}/${idnamhoc}`);
 };
 
 const searchNamHoc = (formData) => {
@@ -146,8 +154,8 @@ const CapNhatDoanPhi = (formData) => {
   return axios.post("api/CapNhatDoanPhi", formData);
 };
 
-const LayDSNopDoanPhi = (IDDoanPhi) => {
-  return axios.get(`api/LayDSNopDoanPhi/${IDDoanPhi}`);
+const LayDSNopDoanPhi = (IDDoanPhi, IDNamHoc) => {
+  return axios.get(`api/LayDSNopDoanPhi/${IDDoanPhi}/${IDNamHoc}`);
 };
 
 const SaveCheckboxStates = (IDDoanPhi, checkboxStates) => {
@@ -180,11 +188,13 @@ export {
   LayMotHoatDong,
   CapNhatHoatDong,
   XoaHoatDong,
+  LayDSDiemDanh,
+  SaveCheckboxStatesDiemDanh,
   LayMotDoanVien,
   XoaDoanVien,
   CapNhatDoanVien,
-  ThemMoiDoanVien,
-  ThemDanhSachDoanVien,
+  // ThemMoiDoanVien,
+  // ThemDanhSachDoanVien,
   laydsBCH,
   searchBCH,
   XoaBanChapHanh,

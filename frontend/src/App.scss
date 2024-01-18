@@ -265,6 +265,11 @@ header {
   margin-bottom: 12px;
 }
 
+.namhoc-center {
+  text-align: center;
+  margin: 0;
+}
+
 /* Search */
 .margin-top {
   margin-top: 16px;
@@ -274,6 +279,13 @@ header {
   font-size: 1.2em;
   position: relative;
   justify-content: space-between;
+}
+
+.searchDV-Right {
+  display: flex;
+  font-size: 1.2em;
+  position: relative;
+  justify-content: end;
 }
 
 .searchDV-input {
@@ -363,7 +375,7 @@ color: yellowgreen !important;
   // overflow-x: auto;
   color: var(--black);
   font-size: 1.2em;
-  margin-top: 32px;
+  margin: 32px 0;
 }
 
 .table {
@@ -605,6 +617,10 @@ color: yellowgreen !important;
   border-bottom: 2px solid var(--black);
 }
 
+.input-boxPW {
+  margin-top: 46px !important;
+}
+
 .input-box label {
   position: absolute;
   top: 50%;
@@ -615,6 +631,7 @@ color: yellowgreen !important;
   font-weight: 600;
   pointer-events: none;
   transform: 0.5s;
+  // margin-top: 18px
 }
 
 .input-box input:focus ~ label,
@@ -792,6 +809,9 @@ color: yellowgreen !important;
   color: var(--red);
 }
 
+.error-message1 {
+ text-align: left;
+}
 .custom-modal-title {
   // margin-left: 35%;
   font-size: 1.6em;
@@ -821,10 +841,10 @@ color: yellowgreen !important;
   justify-content: center;
 }
 
-.pagination1 {
-  position: fixed;
-  bottom: 0;
-}
+// .pagination1 {
+//   position: fixed;
+//   bottom: 0;
+// }
 
 .btn-footer {
   padding: 12px 18px;

@@ -1,7 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
-import Modal from "react-bootstrap/Modal";
 import DeleteConfirmationModal from "../../Modal/DeleteConfirmationModal";
 import DeleteSuccess from "../../Modal/DeleteSuccess";
 import {
@@ -15,7 +14,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import {
   namhoc,
-  searchNamHoc,
   layTatCaDSDoanPhi,
   xoaMotDoanPhi,
 } from "../../../services/apiService";
@@ -26,11 +24,9 @@ const DanhSachDoanPhi = (props) => {
   const [totalPages, setTotalPages] = useState(1);
 
   const [selectedIDDoanPhi, setSelectedIDDoanPhi] = useState(null);
-  const [NamHoc, setNamHoc] = useState([]);
 
-  const [searchData, setSearchData] = useState({
-    TenNamHoc: "",
-  });
+  const [idnamhoc, setIDNamHoc] = useState(1);
+  const [NamHoc, setNamHoc] = useState([]);
 
   const changePage = (newPage) => {
     setCurrentPage(newPage);
@@ -39,11 +35,11 @@ const DanhSachDoanPhi = (props) => {
   useEffect(() => {
     fetchDSDoanPhi();
     fetchDSNamHoc();
-  }, [currentPage, totalPages]);
+  }, [currentPage, totalPages, idnamhoc]);
 
   const fetchDSDoanPhi = async () => {
     try {
-      let res = await layTatCaDSDoanPhi(currentPage);
+      let res = await layTatCaDSDoanPhi(currentPage, idnamhoc);
       console.log(res);
 
       if (res.status === 200) {
@@ -88,22 +84,6 @@ const DanhSachDoanPhi = (props) => {
     return formatter.format(amount);
   };
 
-  const handleSearch = async () => {
-    try {
-      let res = await searchNamHoc({
-        ...searchData,
-      });
-      console.log(res);
-      if (res.status === 200) {
-        setDSDoanPhi(res.data.dataDP);
-      } else {
-        console.error("Lỗi khi tìm kiếm:", res.statusText);
-      }
-    } catch (error) {
-      console.error("Lỗi khi tìm kiếm:", error.message);
-    }
-  };
-
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
@@ -132,44 +112,39 @@ const DanhSachDoanPhi = (props) => {
     }
   };
 
+  const handleNamHocChange = (e) => {
+    const selectedIDNamHoc = e.target.value;
+    setIDNamHoc(selectedIDNamHoc);
+  };
+
   return (
     <>
       <div className="container-fluid app__content">
-        <h5 className="text-center">Danh Sách Đoàn Phí</h5>
-        <div className="searchDV">
-          <div className="">
-            <div className="searchDV-input">
-              <select
-                className="search_name"
-                value={searchData.TenNamHoc}
-                onChange={(e) => {
-                  setSearchData({
-                    ...searchData,
-                    TenNamHoc: e.target.value,
-                  });
-                }}
-              >
-                <option value="" disabled>
-                  Chọn năm học
-                </option>
-                {NamHoc.map((namhoc, index) => {
-                  return (
-                    <option key={index} value={namhoc.TenNamHoc}>
-                      {namhoc.TenNamHoc}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
-            <button className="formatButton" onClick={handleSearch}>
-              <FontAwesomeIcon icon={faMagnifyingGlass} /> Tìm
-            </button>
+        <div className="namhoc-center">
+          <h5 className="text-center">Danh Sách Đoàn Phí</h5>
+          <div className="searchDV-input">
+            <select
+              type="text"
+              className="search_name"
+              value={idnamhoc}
+              onChange={handleNamHocChange}
+            >
+              {NamHoc.map((item, index) => {
+                return (
+                  <option key={index} value={item.IDNamHoc}>
+                    {item.TenNamHoc}
+                  </option>
+                );
+              })}
+            </select>
           </div>
+        </div>
+        <div className="searchDV-Right">
           <div className="buttonSearch">
             <NavLink to="/BCH-DoanTruong/ThemMoi-DoanPhi">
               <button className="formatButton">
                 {" "}
-                <FontAwesomeIcon icon={faPlus} /> Thêm
+                <FontAwesomeIcon icon={faPlus} /> 
               </button>
             </NavLink>
           </div>
@@ -202,7 +177,9 @@ const DanhSachDoanPhi = (props) => {
                       </td>
 
                       <td className="btnOnTable1">
-                        <NavLink to={`/BCH-DoanTruong/DoanPhi/ChiTietDoanPhi/${item.IDDoanPhi}`}>
+                        <NavLink
+                          to={`/BCH-DoanTruong/DoanPhi/ChiTietDoanPhi/${item.IDDoanPhi}/${item.IDNamHoc}`}
+                        >
                           <button className="btnOnTable ">
                             <FontAwesomeIcon icon={faEye} />
                           </button>
@@ -241,62 +218,73 @@ const DanhSachDoanPhi = (props) => {
         </div>
       </div>
 
-      <div className="pagination pagination1">
-        <button
-          className="btn-footer"
-          onClick={handlePrevPage}
-          disabled={currentPage <= 1}
-        >
-          <FontAwesomeIcon icon={faChevronLeft} />
-        </button>
+      {DSDoanPhi && DSDoanPhi.length > 0 && (
+        <div className="pagination pagination1">
+          <button
+            className="btn-footer"
+            onClick={handlePrevPage}
+            disabled={currentPage <= 1}
+          >
+            <FontAwesomeIcon icon={faChevronLeft} />
+          </button>
 
-        {totalPages > 4 && currentPage > 3 && (
-          <div className="footer">
-            <span className="ellipsis"></span>
-          </div>
-        )}
-
-        {Array.from({ length: totalPages > 4 ? 3 : totalPages }, (_, index) => {
-          let pageToShow;
-          if (totalPages <= 4) {
-            pageToShow = index + 1;
-          } else if (currentPage <= 3) {
-            pageToShow = index + 1;
-          } else if (currentPage >= totalPages - 2) {
-            pageToShow = totalPages - 2 + index;
-          } else {
-            pageToShow = currentPage - 1 + index;
-          }
-
-          return (
-            <div className="footer" key={index}>
-              <button
-                className={`btn-footer ${
-                  currentPage === pageToShow ? "active" : ""
-                }`}
-                onClick={() => changePage(pageToShow)}
-                disabled={currentPage === pageToShow}
-              >
-                {pageToShow}
-              </button>
+          {totalPages > 4 && currentPage > 3 && (
+            <div className="footer">
+              <span className="ellipsis"></span>
             </div>
-          );
-        })}
+          )}
 
-        {totalPages > 4 && currentPage < totalPages - 2 && (
-          <div className="footer">
-            <span className="ellipsis"></span>
-          </div>
-        )}
+          {Array.from(
+            { length: totalPages > 4 ? 3 : totalPages },
+            (_, index) => {
+              let pageToShow;
+              if (totalPages <= 4) {
+                pageToShow = index + 1;
+              } else if (currentPage <= 3) {
+                pageToShow = index + 1;
+              } else if (currentPage >= totalPages - 2) {
+                pageToShow = totalPages - 2 + index;
+              } else {
+                pageToShow = currentPage - 1 + index;
+              }
 
-        <button
-          className="btn-footer"
-          onClick={handleNextPage}
-          disabled={currentPage >= totalPages}
-        >
-          <FontAwesomeIcon icon={faChevronRight} />
-        </button>
-      </div>
+              return (
+                <div className="footer" key={index}>
+                  <button
+                    className={`btn-footer ${
+                      currentPage === pageToShow ? "active" : ""
+                    }`}
+                    onClick={() => changePage(pageToShow)}
+                    disabled={currentPage === pageToShow}
+                  >
+                    {pageToShow}
+                  </button>
+                </div>
+              );
+            }
+          )}
+
+          {totalPages > 4 && currentPage < totalPages - 2 && (
+            <div className="footer">
+              <span className="ellipsis"></span>
+            </div>
+          )}
+
+          <button
+            className="btn-footer"
+            onClick={handleNextPage}
+            disabled={currentPage >= totalPages}
+          >
+            <FontAwesomeIcon icon={faChevronRight} />
+          </button>
+        </div>
+      )}
+
+      {DSDoanPhi && DSDoanPhi.length <= 5 && (
+        <div className="pagination pagination1">
+          {/* You can add some message or content indicating that pagination is not shown */}
+        </div>
+      )}
 
       <DeleteConfirmationModal
         show={showModal}

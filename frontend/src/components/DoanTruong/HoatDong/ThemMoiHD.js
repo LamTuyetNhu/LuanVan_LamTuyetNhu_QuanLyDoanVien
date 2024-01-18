@@ -1,18 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Form from "react-bootstrap/Form";
 import { NavLink } from "react-router-dom";
 import { themHoatDong } from "../../../services/apiService";
 import { format, parseISO } from "date-fns";
 import "react-toastify/dist/ReactToastify.css";
 import Modal from "react-bootstrap/Modal";
+import ModalAddSuccess from "../../Modal/ModalAddSuccess";
+
+import {
+  namhoc,
+} from "../../../services/apiService";
 
 const ThemMoiHoatDong = (props) => {
+  const [NamHoc, setNamHoc] = useState([]);
+  const [IDNamHoc, setIDNamHoc] = useState("");
+
+  useEffect(() => {
+    fetchDSNamHoc();
+  }, []);
 
   const [themhoatdong, setThemhoatdong] = useState({
     TenHoatDong: "",
     NgayBatDau: "",
     NgayHetHan: "",
     ChiTietHoatDong: "",
+    IDNamHoc: ""
   });
 
   const [errors, setErrors] = useState({
@@ -20,12 +32,14 @@ const ThemMoiHoatDong = (props) => {
     NgayBatDau: "",
     NgayHetHan: "",
     ChiTietHoatDong: "",
+    IDNamHoc: ""
   });
 
   const handleChange = (e) => {
     const { id, value } = e.target;
     setThemhoatdong((prevData) => ({
       ...prevData,
+    IDNamHoc: IDNamHoc,
       [id]: value,
     }));
   };
@@ -42,6 +56,28 @@ const ThemMoiHoatDong = (props) => {
     }
   };
 
+  
+  const fetchDSNamHoc = async () => {
+    try {
+      let res = await namhoc();
+      if (res.status === 200) {
+        // setListKhoa(res.data.dataNH); // Cập nhật state với danh sách khóa học
+        const NamHocdata = res.data.dataNH;
+
+        // Kiểm tra nếu khoaData là mảng trước khi cập nhật state
+        if (Array.isArray(NamHocdata)) {
+          setNamHoc(NamHocdata);
+        } else {
+          console.error("Dữ liệu khóa không hợp lệ:", NamHocdata);
+        }
+      } else {
+        console.error("Lỗi khi gọi API:", res.statusText);
+      }
+    } catch (error) {
+      console.error("Lỗi khi gọi API:", error.message);
+    }
+  };
+
   // Hàm định dạng ngày thành "DD/MM/YYYY"
   const formatDate = (dateString) => {
     try {
@@ -53,6 +89,12 @@ const ThemMoiHoatDong = (props) => {
     } catch (error) {
       return "";
     }
+  };
+
+  const validateNgay = (Ngay) => {
+    return String(Ngay).match(
+      /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/
+    );
   };
 
   const [showModal, setShowModal] = useState(false);
@@ -72,6 +114,9 @@ const ThemMoiHoatDong = (props) => {
         : "",
       ChiTietHoatDong: !themhoatdong.ChiTietHoatDong
         ? "Vui lòng nhập chi tiết hoạt động"
+        : "",
+        IDNamHoc: !themhoatdong.IDNamHoc
+        ? "Vui lòng chọn năm học"
         : "",
     };
 
@@ -106,7 +151,9 @@ const ThemMoiHoatDong = (props) => {
         <h2 className="text-center">Thêm Hoạt Động</h2>
 
         <form id="customerForm" className="update" onSubmit={handleSubmit}>
-          <div className="formadd">
+       
+        <div className="row flex">
+            <div className="col formadd">
             <Form.Label htmlFor="TenHoatDong" className="formadd-label">
               Tên hoạt động
             </Form.Label>
@@ -118,7 +165,32 @@ const ThemMoiHoatDong = (props) => {
               onChange={handleChange}
             />
             <div className="error-message">{errors.TenHoatDong}</div>
+            </div>
+            <div className="col formadd">
+            <Form.Label htmlFor="TenNamHoc">Năm học</Form.Label>
+                  <Form.Select
+                    className="form-control"
+                    type="text"
+                    id="IDNamHoc"
+                    aria-describedby="IDNamHoc"
+                    value={IDNamHoc}
+                    onChange={(e) => setIDNamHoc(e.target.value)}
+                  >
+                    <option value="" disabled selected>
+                      Chọn năm học
+                    </option>
+                    {NamHoc.map((namhoc, index) => {
+                      return (
+                        <option key={index} value={namhoc.IDNamHoc}>
+                          {namhoc.TenNamHoc}
+                        </option>
+                      );
+                    })}
+                  </Form.Select>
+                  <div className="error-message">{errors.IDNamHoc}</div>
+            </div>
           </div>
+
           <div className="row flex">
             <div className="col formadd">
               <Form.Label htmlFor="NgayBatDau" className="formadd-label">
@@ -177,28 +249,11 @@ const ThemMoiHoatDong = (props) => {
         </form>
       </div>
 
-      <Modal
-        show={showModal}
-        onHide={() => setShowModal(false)}
-        className="custom-modal"
-      >
-        <Modal.Header closeButton className="border-none">
-          <Modal.Title className="custom-modal-title">Thành công</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="custom-modal-body" bsPrefix="custom-modal-body">
-          Hoạt động đã được thêm mới!
-        </Modal.Body>
-        <Modal.Footer className="border-none">
-          {/* <Button variant="primary" onClick={() => setShowModal(false)}>
-            Đóng
-          </Button> */}
-          <button className="allcus-button button-error" type="submit">
-            <NavLink to="/BCH-DoanTruong/HoatDong" className="navlink">
-              Đóng
+      <NavLink to="/BCH-DoanTruong/HoatDong" className="navlink">
+              
+      <ModalAddSuccess show={showModal} onHide={() => setShowModal(false)} />
             </NavLink>
-          </button>
-        </Modal.Footer>
-      </Modal>
+
     </>
   );
 };

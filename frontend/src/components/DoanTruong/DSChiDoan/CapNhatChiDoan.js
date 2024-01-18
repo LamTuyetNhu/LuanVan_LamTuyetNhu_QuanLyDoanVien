@@ -68,6 +68,14 @@ const ChiTietChiDoan = (props) => {
     setIsEditing((prevIsEditing) => !prevIsEditing);
   };
 
+  const validateEmail = (Email) => {
+    return String(Email)
+      .toLowerCase()
+      .match(
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+      );
+  };
+
   const handleSaveChanges = async (e) => {
     e.preventDefault();
 
@@ -76,7 +84,7 @@ const ChiTietChiDoan = (props) => {
 
       TenLop: !editedChiDoan.TenLop.trim() ? "Vui lòng nhập tên lớp" : "",
       Khoa: !editedChiDoan.Khoa.trim() ? "Vui lòng nhập khóa" : "",
-      EmailLop: !editedChiDoan.EmailLop.trim() ? "Vui lòng nhập Email" : "",
+      EmailLop: !editedChiDoan.EmailLop.trim() ? "Vui lòng nhập Email" : !validateEmail(editedChiDoan.EmailLop) ? "Email không hợp lệ" : "",
       ttLop: !editedChiDoan.ttLop ? "Vui lòng chọn trạng thái" : "",
     };
 
@@ -254,12 +262,12 @@ const ChiTietChiDoan = (props) => {
             </button>
             {isEditing ? (
               <>
-                <button className="allcus-button" onClick={handleSaveChanges}>
+                <button className="allcus-button bgcapnhat" onClick={handleSaveChanges}>
                   <FontAwesomeIcon icon={faSave} /> Lưu
                 </button>
               </>
             ) : (
-              <button className="allcus-button" onClick={handleToggleEdit}>
+              <button className="allcus-button bgcapnhat" onClick={handleToggleEdit}>
                 <FontAwesomeIcon icon={faEdit} /> Cập nhật
               </button>
             )}

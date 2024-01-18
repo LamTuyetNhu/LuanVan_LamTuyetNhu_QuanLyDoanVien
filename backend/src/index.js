@@ -22,7 +22,7 @@ const corsOptions = {
   optionsSuccessStatus: 204,
 };
 
-const secretKey = "doantruong";
+// const secretKey = "doantruong";
 
 app.use(cors(corsOptions));
 app.use(express.static("./src/public"));

@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
+import BCH from "./BCH"
 import reportWebVitals from "./reportWebVitals";
 import { Provider } from "react-redux";
 import store from "./redux/store";
@@ -20,13 +21,14 @@ import DSNopDoanPhi from "./components/DoanTruong/DoanPhi/DSNopDoanPhi"
 
 import DangNhap from "./components/DangNhap/DangNhap";
 
-import DanhSachDoanVien from "./components/DSDoanVien/DanhSachDoanVien";
-import DoanVien from "./components/DSDoanVien/DoanVien";
-import ThemMoiDoanVien from "./components/DSDoanVien/ThemMoiDoanVien";
+import DanhSachDoanVien from "./components/DoanTruong/DSDoanVien/DanhSachDoanVien";
+import DoanVien from "./components/DoanTruong/DSDoanVien/DoanVien";
+import ThemMoiDoanVien from "./components/DoanTruong/DSDoanVien/ThemMoiDoanVien";
 
 import DanhSachHoatDong from "./components/DoanTruong/HoatDong/DanhSachHD";
 import ThemMoiHoatDong from "./components/DoanTruong/HoatDong/ThemMoiHD";
 import ChiTietHoatDong from "./components/DoanTruong/HoatDong/ChiTietHoatDong";
+import DiemDanhChiDoan from "./components/DoanTruong/HoatDong/DSDiemDanh"
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -52,11 +54,21 @@ root.render(
           <Route path="DoanPhi" element={<DoanPhi />} />
           <Route path="ThemMoi-DoanPhi" element={<ThemMoiDoanPhi />} />
           <Route path="DoanPhi/ChiTiet/:IDDoanPhi" element={<CapNhatDoanPhi />} />
-          <Route path="DoanPhi/ChiTietDoanPhi/:IDDoanPhi" element={<DSNopDoanPhi />} />
+          <Route path="DoanPhi/ChiTietDoanPhi/:IDDoanPhi/:IDNamHoc" element={<DSNopDoanPhi />} />
 
           <Route path="HoatDong" element={<DanhSachHoatDong />} />
-          <Route path="ChiTietHoatDong/:IDHoatDong" element={<ChiTietHoatDong />} />
           <Route path="ThemMoi" element={<ThemMoiHoatDong />} />
+          <Route path="ChiTietHoatDong/:IDHoatDong" element={<ChiTietHoatDong />} />
+          <Route path="ChiTietHoatDong/DiemDanhChiDoan/:IDHoatDong" element={<DiemDanhChiDoan />} />
+
+        </Route>
+
+        <Route path="/DanhSachDoanVien" element={<BCH />}>
+          <Route index element={<DanhSachDoanVien />} />
+        </Route>
+
+        <Route path="/DoanVien" element={<App />}>
+          <Route index element={<DoanVien />} />
         </Route>
       </Routes>
     </BrowserRouter>

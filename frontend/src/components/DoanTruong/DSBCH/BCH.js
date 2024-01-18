@@ -7,11 +7,14 @@ import ModalSuccess from "../../Modal/ModalSuccess";
 import DeleteSuccess from "../../Modal/DeleteSuccess";
 import DeleteConfirmationModal from "../../Modal/DeleteConfirmationModal";
 import logo from "../../../assets/logo.jpg"
+import axios from "axios";
+
 import {
   faBackward,
   faTrash,
   faSave,
   faEdit,
+  faCamera
 } from "@fortawesome/free-solid-svg-icons";
 import {
   LayMotDoanVien,
@@ -39,6 +42,23 @@ const BanChapHanh = (props) => {
 
   const [editedDoanVien, seteditedDoanVien] = useState({});
   const [isEditing, setIsEditing] = useState(false);
+
+  const [image, setImage] = useState("");
+  const [previewImage, setPreviewImage] = useState("");
+  const [selectedImage, setSelectedImage] = useState("");
+
+  const [MSSV, setMSSV] = useState("");
+  const [HoTen, setHoTen] = useState("");
+  const [Email, setEmail] = useState("");
+  const [SoDT, setSoDT] = useState("");
+  const [GioiTinh, setGioiTinh] = useState("");
+  const [NgaySinh, setNgaySinh] = useState("");
+  const [QueQuan, setQueQuan] = useState("");
+  const [NgayVaoDoan, setNgayVaoDoan] = useState("");
+  const [IDDanToc, setIDDanToc] = useState("");
+  const [IDTonGiao, setIDTonGiao] = useState("");
+  const [IDChucVu, setIDChucVu] = useState("");
+  const [IDNamHoc, setIDNamHoc] = useState("");
 
   const handleDelete = async () => {
     try {
@@ -193,28 +213,66 @@ const BanChapHanh = (props) => {
     setIsEditing((prevIsEditing) => !prevIsEditing);
   };
 
+  const handleUpLoadImage = (event) => {
+    if (event.target && event.target.files && event.target.files[0]) {
+      setPreviewImage(URL.createObjectURL(event.target.files[0]));
+      setImage(event.target.files[0]);
+    }
+  };
+
+  const validateEmail = (Email) => {
+    return String(Email)
+      .toLowerCase()
+      .match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/);
+  };
+
+  const validatePhoneNumber = (sdt) => {
+    return String(sdt).match(/^0[2-9][0-9]{8}$/);
+};
+
+  const validateNgay = (Ngay) => {
+    return String(Ngay).match(
+      /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/
+    );
+  };
+
   const handleSaveChanges = async (e) => {
     e.preventDefault();
 
     const newErrors = {
-      // MaLop: !editedDoanVien.MaLop.trim() ? "Vui lòng nhập mã lớp" : "",
-      // TenLop: !editedDoanVien.TenLop.trim() ? "Vui lòng nhập tên lớp" : "",
-      // Khoa: !editedDoanVien.Khoa.trim() ? "Vui lòng nhập khóa" : "",
-      Email: !editedDoanVien.Email.trim() ? "Vui lòng nhập Email" : "",
-      HoTen: !editedDoanVien.HoTen.trim() ? "Vui lòng nhập họ tên" : "",
-      MSSV: !editedDoanVien.MSSV.trim() ? "Vui lòng nhập MSSV" : "",
-      SoDT: !editedDoanVien.SoDT.trim() ? "Vui lòng nhập số điện thoại" : "",
-      QueQuan: !editedDoanVien.QueQuan.trim() ? "Vui lòng nhập quê quán" : "",
+      Email:
+        !editedDoanVien.Email.trim() === ""
+          ? "Vui lòng nhập Email"
+          : !validateEmail(editedDoanVien.Email)
+          ? "Email không hợp lệ!"
+          : "",
+      HoTen: !editedDoanVien.HoTen.trim() === "" ? "Vui lòng nhập họ tên" : "",
+      MSSV: !editedDoanVien.MSSV.trim() === "" ? "Vui lòng nhập MSSV" : "",
+      SoDT: !editedDoanVien.SoDT.trim() === ""
+        ? "Vui lòng nhập số điện thoại"
+        : !validatePhoneNumber(editedDoanVien.SoDT)
+        ? "Số điện thoại không hợp lệ!"
+        : "",
+      QueQuan:
+        !editedDoanVien.QueQuan.trim() === "" ? "Vui lòng nhập quê quán" : "",
       GioiTinh:
         editedDoanVien.GioiTinh === undefined || editedDoanVien.GioiTinh === ""
           ? "Vui lòng nhập giới tính"
           : "",
-      NgaySinh: !editedDoanVien.NgaySinh.trim()
-        ? "Vui lòng nhập ngày sinh"
-        : "",
-      NgayVaoDoan: !editedDoanVien.NgayVaoDoan.trim()
-        ? "Vui lòng nhập ngày vào đoàn"
-        : "",
+      NgaySinh:
+        !editedDoanVien.NgaySinh.trim() === ""
+          ? "Vui lòng nhập ngày sinh"
+          : !validateNgay(editedDoanVien.NgaySinh)
+          ? "Ngày định dạng là dd/MM/yyyy"
+          : "",
+
+      NgayVaoDoan:
+        !editedDoanVien.NgayVaoDoan.trim() === ""
+          ? "Vui lòng nhập ngày vào đoàn"
+          : !validateNgay(editedDoanVien.NgayVaoDoan)
+          ? "Ngày định dạng là dd/MM/yyyy"
+          : "",
+
       IDDanToc: !editedDoanVien.IDDanToc ? "Vui lòng nhập tên dân tộc" : "",
       IDTonGiao: !editedDoanVien.IDTonGiao ? "Vui lòng nhập tên tôn giáo" : "",
       IDChucVu: !editedDoanVien.IDChucVu ? "Vui lòng chọn tên chức vụ" : "",
@@ -229,14 +287,39 @@ const BanChapHanh = (props) => {
     }
 
     try {
-      // Gọi API hoặc hàm cập nhật dữ liệu ở đây
-      await CapNhatDoanVien(editedDoanVien);
+      const formData = new FormData();
+      formData.append("MSSV", editedDoanVien.MSSV);
+      formData.append("HoTen", editedDoanVien.HoTen);
+      formData.append("Email", editedDoanVien.Email);
+      formData.append("SoDT", editedDoanVien.SoDT);
+      formData.append("GioiTinh", editedDoanVien.GioiTinh);
+      formData.append("NgaySinh", editedDoanVien.NgaySinh);
+      formData.append("NgayVaoDoan", editedDoanVien.NgayVaoDoan);
+      formData.append("IDDanToc", editedDoanVien.IDDanToc);
+      formData.append("IDTonGiao", editedDoanVien.IDTonGiao);
+      formData.append("IDChucVu", editedDoanVien.IDChucVu);
+      formData.append("IDNamHoc", editedDoanVien.IDNamHoc);
+      formData.append("QueQuan", editedDoanVien.QueQuan);
+      formData.append("IDDoanVien", IDDoanVien);
+      formData.append("IDChiTietNamHoc", IDChiTietNamHoc);
+
+      // formData.append("file", image, image.name);
+
+      if (image instanceof Blob) {
+        formData.append("file", image, image.name);
+      }
+
+      console.log(formData);
+      let res = await axios.post(
+        "http://localhost:8080/api/CapNhatDoanVien",
+        formData
+      );
 
       // Sau khi cập nhật thành công, cập nhật lại trạng thái ChiDoan và kết thúc chế độ chỉnh sửa
       setDoanVien(editedDoanVien);
       setShowModalUpdate(true);
+      layMotDoanVien();
       setIsEditing(false);
-      LayMotDoanVien();
     } catch (error) {
       console.error("Lỗi khi cập nhật dữ liệu:", error);
     }
@@ -249,13 +332,26 @@ const BanChapHanh = (props) => {
 
         <div className="margin-top">
           <div className="row formAdd">
-            <div className="col col-2">
+          <div className="col col-2">
               <div className="avatar">
                 <img
                   className="avatar_img"
-                  src={`http://localhost:8080/images/${DoanVien.TenAnh}`}
+                  src={
+                    previewImage ||
+                    `http://localhost:8080/images/${DoanVien.TenAnh}`
+                  }
                   alt=""
                 />
+                <label htmlFor="fileInput" className="camera-icon">
+                  <FontAwesomeIcon icon={faCamera} />
+                  <input
+                    type="file"
+                    name="file"
+                    id="fileInput"
+                    style={{ display: "none" }}
+                    onChange={(e) => handleUpLoadImage(e)}
+                  />
+                </label>
               </div>
             </div>
             <div className="col col-10">
@@ -658,7 +754,7 @@ const BanChapHanh = (props) => {
                 </button>
               )}
 
-              <button
+              {/* <button
                 className="allcus-button button-error"
                 type="button"
                 onClick={() => {
@@ -667,13 +763,13 @@ const BanChapHanh = (props) => {
                 }}
               >
                 <FontAwesomeIcon icon={faTrash} />
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
       </div>
 
-      <DeleteConfirmationModal
+      {/* <DeleteConfirmationModal
         show={showModal}
         onHide={() => setShowModal(false)}
         handleDelete={handleDelete}
@@ -681,7 +777,7 @@ const BanChapHanh = (props) => {
 
       <NavLink to={`/BCH-DoanTruong/DanhSachBCH`} className="navlink">
       <DeleteSuccess show={showModal1} onHide={() => setShowModal1(false)} />
-      </NavLink>
+      </NavLink> */}
 
         <ModalSuccess
           show={showModalUpdate}

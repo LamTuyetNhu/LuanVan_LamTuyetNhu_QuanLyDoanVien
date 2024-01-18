@@ -15,26 +15,21 @@ import {
   faChevronRight,
   faChevronLeft,
 } from "@fortawesome/free-solid-svg-icons";
-import { namhoc, laydshoatdong, searchHoatDong } from "../../../services/apiService";
+import { laydshoatdong, searchHoatDong } from "../../../services/apiService";
 
 const DanhSachHoatDong = (props) => {
   const [DSHoatDong, setDSHoatDong] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const [idnamhoc, setIDNamHoc] = useState(1);
-  const [NamHoc, setNamHoc] = useState([]);
-
   useEffect(() => {
     fetchDSHoatDong();
     fetchAllData();
-    fetchDSNamHoc();
-
-  }, [currentPage, idnamhoc]);
+  }, [currentPage]);
 
   const fetchDSHoatDong = async () => {
     try {
-      let res = await laydshoatdong(currentPage, idnamhoc);
+      let res = await laydshoatdong(currentPage);
 
       if (res.status === 200) {
         setDSHoatDong(res.data.dataHD);
@@ -53,27 +48,6 @@ const DanhSachHoatDong = (props) => {
     Thang: "",
     ttHD: "",
   });
-
-  const fetchDSNamHoc = async () => {
-    try {
-      let res = await namhoc();
-      if (res.status === 200) {
-        // setListKhoa(res.data.dataNH); // Cập nhật state với danh sách khóa học
-        const NamHocdata = res.data.dataNH;
-
-        // Kiểm tra nếu khoaData là mảng trước khi cập nhật state
-        if (Array.isArray(NamHocdata)) {
-          setNamHoc(NamHocdata);
-        } else {
-          console.error("Dữ liệu khóa không hợp lệ:", NamHocdata);
-        }
-      } else {
-        console.error("Lỗi khi gọi API:", res.statusText);
-      }
-    } catch (error) {
-      console.error("Lỗi khi gọi API:", error.message);
-    }
-  };
 
   const handleSearch = async () => {
     try {
@@ -118,7 +92,7 @@ const DanhSachHoatDong = (props) => {
 
       // Lặp qua tất cả các trang
       for (let page = 1; page <= totalPages; page++) {
-        let res = await laydshoatdong(page, idnamhoc);
+        let res = await laydshoatdong(page);
 
         if (res.status === 200) {
           // Tích hợp dữ liệu từ trang hiện tại vào mảng
@@ -169,34 +143,10 @@ const DanhSachHoatDong = (props) => {
     setCurrentPage(newPage);
   };
 
-  const handleNamHocChange = (e) => {
-    const selectedIDNamHoc = e.target.value;
-    setIDNamHoc(selectedIDNamHoc);
-  };
-
   return (
     <>
       <div className="container-fluid app__content">
-      <div className="namhoc-center">
-      <h2 className="text-center">Danh Sách Hoạt Động</h2>
-
-          <div className="searchDV-input">
-            <select
-              type="text"
-              className="search_name"
-              value={idnamhoc}
-              onChange={handleNamHocChange}
-            >
-              {NamHoc.map((item, index) => {
-                return (
-                  <option key={index} value={item.IDNamHoc}>
-                    {item.TenNamHoc}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-        </div>
+        <h2 className="text-center">Danh Sách Hoạt Động</h2>
         <div className="search">
           <div className="searchDV">
             <div className="">
@@ -287,7 +237,7 @@ const DanhSachHoatDong = (props) => {
               <thead>
                 <tr>
                   <th className="table-item">STT</th>
-                  <th className="table-item">Tên hoạt động</th>
+                  <th className="table-item">Tên Hoạt Động</th>
                   <th>Ngày ban hành</th>
                   <th>Ngày bắt đầu</th>
 
@@ -336,7 +286,7 @@ const DanhSachHoatDong = (props) => {
 
                         <td className="btnOnTable1">
                         <NavLink
-                          to={`/BCH-DoanTruong/ChiTietHoatDong/DiemDanhChiDoan/${item.IDHoatDong}`}
+                          to={`/BCH-DoanTruong/ChiTietHoatDong/DiemDanh-ChiDoan/${item.IDHoatDong}`}
                         >
                           <button className="btnOnTable ">
                             <FontAwesomeIcon icon={faEye} />
@@ -359,7 +309,7 @@ const DanhSachHoatDong = (props) => {
                   })}
                 {DSHoatDong && DSHoatDong.length === 0 && (
                   <tr className="tablenone">
-                    <td className="tablenone">Không có hoạt động nào!</td>
+                    <td className="tablenone">Không có danh sách điểm danh nào!</td>
                   </tr>
                 )}
               </tbody>
@@ -367,65 +317,6 @@ const DanhSachHoatDong = (props) => {
           </div>
         </div>
 
-        <div className="pagination pagination1">
-              <button
-                className="btn-footer"
-                onClick={handlePrevPage}
-                disabled={currentPage <= 1}
-              >
-                <FontAwesomeIcon icon={faChevronLeft} />
-              </button>
-
-              {totalPages > 4 && currentPage > 3 && (
-                <div className="footer">
-                  <span className="ellipsis"></span>
-                </div>
-              )}
-
-              {Array.from(
-                { length: totalPages > 4 ? 3 : totalPages },
-                (_, index) => {
-                  let pageToShow;
-                  if (totalPages <= 4) {
-                    pageToShow = index + 1;
-                  } else if (currentPage <= 3) {
-                    pageToShow = index + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    pageToShow = totalPages - 2 + index;
-                  } else {
-                    pageToShow = currentPage - 1 + index;
-                  }
-
-                  return (
-                    <div className="footer" key={index}>
-                      <button
-                        className={`btn-footer ${
-                          currentPage === pageToShow ? "active" : ""
-                        }`}
-                        onClick={() => changePage(pageToShow)}
-                        disabled={currentPage === pageToShow}
-                      >
-                        {pageToShow}
-                      </button>
-                    </div>
-                  );
-                }
-              )}
-
-              {totalPages > 4 && currentPage < totalPages - 2 && (
-                <div className="footer">
-                  <span className="ellipsis"></span>
-                </div>
-              )}
-
-              <button
-                className="btn-footer"
-                onClick={handleNextPage}
-                disabled={currentPage >= totalPages}
-              >
-                <FontAwesomeIcon icon={faChevronRight} />
-              </button>
-            </div>
       </div>
     </>
   );

@@ -9,37 +9,71 @@ import { path } from "path";
 var appRoot = require("app-root-path");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const doantruong = "doantruong";
 
-const tokenExpirationTime = "1h";
+const logTokenMiddleware = (req, res, next) => {
+  const token = req.headers.authorization || req.body.token || req.query.token;
+  console.log("Token:", token);
+  next(); // Pass control to the next middleware or route handler
+};
 
 const initAPIRoute = (app) => {
-  /* Đăng nhập đoàn trường */
-  router.post("/loginDoanTruong", async (req, res) => {
-    // Thay thế đoạn này bằng logic xác thực người dùng từ CSDL hoặc bất kỳ nguồn dữ liệu nào khác
-    const { email, password } = req.body;
-    console.log(req.body);
-    let [admin, setadmin] = await pool.execute(
-      "select * from admin WHERE id = 0"
+  /* Đăng nhập */
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  console.log(req.body)
+  try {
+    // Check if the user is an Admin
+    const [admin] = await pool.execute(
+      "SELECT * FROM admin WHERE emailAdmin = ? AND passAdmin = ?",
+      [email, password]
     );
 
-    let usernamAdmin = admin[0].EmailAdmin;
-    let PassAdmin = admin[0].passAdmin;
-    if (email != usernamAdmin && password === PassAdmin) {
-      res.status(401).json({ success: false, message: "Email không tồn tại" });
-    } else if (email === usernamAdmin && password != PassAdmin) {
-      res.status(401).json({ success: false, message: "Mật khẩu không đúng" });
-    } else if (email === usernamAdmin && password === PassAdmin) {
-      // Người dùng được xác thực thành công, tạo token và gửi về cho client
-      const token = jwt.sign({ email }, doantruong, { expiresIn: "1h" });
-      res.json({ success: true, token });
-    } else {
-      // Sai tên đăng nhập hoặc mật khẩu
-      res.status(401).json({ success: false, message: "Sai tên đăng nhập hoặc mật khẩu" });
+    if (admin.length > 0) {
+      // Redirect to Admin page
+      const token = generateToken(admin[0].email, "Admin");
+      return res.json({ success: true, token });
     }
-  });
+
+    // Check if the user is BCHChiDoan
+    const [BCHChiDoan] = await pool.execute(
+      "SELECT * FROM lop WHERE lop.EmailLop = ? AND lop.PassLop = ?",
+      [email, password]
+    );
+
+    if (BCHChiDoan.length > 0) {
+      // Redirect to BCHChiDoan page
+      const token = generateToken(BCHChiDoan[0].email, "BCHChiDoan");
+      return res.json({ IDLop: BCHChiDoan[0].IDLop, success: true, token });
+    }
+
+    // Check if the user is DoanVien
+    const [doanvien] = await pool.execute(
+      "SELECT * FROM doanvien WHERE doanvien.email = ? AND doanvien.password = ?",
+      [email, password]
+    );
+
+    if (doanvien.length > 0) {
+      // Redirect to DoanVien page
+      const token = generateToken(doanvien[0].email, "DoanVien");
+      return res.json({ success: true, token });
+    }
+
+    // If none of the above conditions match, the login is unsuccessful
+    return res.status(401).json({ success: false, message: "Invalid credentials" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+function generateToken(email, role) {
+  const secretKey = "yourSecretKey"; // Replace with your actual secret key
+  const token = jwt.sign({ email, role }, secretKey, { expiresIn: "1h" });
+  return token;
+}
 
   /* Trường */
+  // router.use(verifyToken);
   router.get("/dschidoan/:page", APIController.getAllChiDoan);
   router.get("/dskhoa", APIController.getKhoa);
   router.post("/searchChiDoan", APIController.getSearchChiDoan);
@@ -446,7 +480,11 @@ const initAPIRoute = (app) => {
   );
   router.post("/saveCheckboxStates", APIController.SaveCheckboxStates);
 
-  return app.use("/api", router);
+  return app.use("/api", logTokenMiddleware, router);
 };
 
 export default initAPIRoute;
+
+
+
+

@@ -5,15 +5,17 @@ import { format } from "date-fns";
 import { NavLink } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
-import DeleteSuccess from "../Modal/DeleteSuccess";
-import DeleteConfirmationModal from "../Modal/DeleteConfirmationModal";
-import ModalSuccess from "../Modal/ModalSuccess";
+import DeleteSuccess from "../../Modal/DeleteSuccess";
+import DeleteConfirmationModal from "../../Modal/DeleteConfirmationModal";
+import ModalSuccess from "../../Modal/ModalSuccess";
+import axios from "axios";
 
 import {
   faBackward,
   faTrash,
   faSave,
   faEdit,
+  faCamera,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   chucvu,
@@ -24,7 +26,7 @@ import {
   CapNhatDoanVien,
   namhoc,
   laymotlop,
-} from "../../services/apiService";
+} from "../../../services/apiService";
 
 const DoanVien = (props) => {
   const { IDLop, IDDoanVien, IDChiTietNamHoc } = useParams();
@@ -46,6 +48,22 @@ const DoanVien = (props) => {
   const [isEditing, setIsEditing] = useState(false);
 
   const [logo, setLogo] = useState("http://localhost:8080/images/logo.jpg");
+  const [image, setImage] = useState("");
+  const [previewImage, setPreviewImage] = useState("");
+  const [selectedImage, setSelectedImage] = useState("");
+
+  const [MSSV, setMSSV] = useState("");
+  const [HoTen, setHoTen] = useState("");
+  const [Email, setEmail] = useState("");
+  const [SoDT, setSoDT] = useState("");
+  const [GioiTinh, setGioiTinh] = useState("");
+  const [NgaySinh, setNgaySinh] = useState("");
+  const [QueQuan, setQueQuan] = useState("");
+  const [NgayVaoDoan, setNgayVaoDoan] = useState("");
+  const [IDDanToc, setIDDanToc] = useState("");
+  const [IDTonGiao, setIDTonGiao] = useState("");
+  const [IDChucVu, setIDChucVu] = useState("");
+  const [IDNamHoc, setIDNamHoc] = useState("");
 
   const handleDelete = async () => {
     try {
@@ -216,28 +234,66 @@ const DoanVien = (props) => {
     setIsEditing((prevIsEditing) => !prevIsEditing);
   };
 
+  const handleUpLoadImage = (event) => {
+    if (event.target && event.target.files && event.target.files[0]) {
+      setPreviewImage(URL.createObjectURL(event.target.files[0]));
+      setImage(event.target.files[0]);
+    }
+  };
+
+  const validateEmail = (Email) => {
+    return String(Email)
+      .toLowerCase()
+      .match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/);
+  };
+
+  const validatePhoneNumber = (sdt) => {
+    return String(sdt).match(/^0[2-9][0-9]{8}$/);
+};
+
+  const validateNgay = (Ngay) => {
+    return String(Ngay).match(
+      /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/
+    );
+  };
+
   const handleSaveChanges = async (e) => {
     e.preventDefault();
 
     const newErrors = {
-      // MaLop: !editedDoanVien.MaLop.trim() ? "Vui lòng nhập mã lớp" : "",
-      // TenLop: !editedDoanVien.TenLop.trim() ? "Vui lòng nhập tên lớp" : "",
-      // Khoa: !editedDoanVien.Khoa.trim() ? "Vui lòng nhập khóa" : "",
-      Email: !editedDoanVien.Email.trim() ? "Vui lòng nhập Email" : "",
-      HoTen: !editedDoanVien.HoTen.trim() ? "Vui lòng nhập họ tên" : "",
-      MSSV: !editedDoanVien.MSSV.trim() ? "Vui lòng nhập MSSV" : "",
-      SoDT: !editedDoanVien.SoDT.trim() ? "Vui lòng nhập số điện thoại" : "",
-      QueQuan: !editedDoanVien.QueQuan.trim() ? "Vui lòng nhập quê quán" : "",
+      Email:
+        !editedDoanVien.Email.trim() === ""
+          ? "Vui lòng nhập Email"
+          : !validateEmail(editedDoanVien.Email)
+          ? "Email không hợp lệ!"
+          : "",
+      HoTen: !editedDoanVien.HoTen.trim() === "" ? "Vui lòng nhập họ tên" : "",
+      MSSV: !editedDoanVien.MSSV.trim() === "" ? "Vui lòng nhập MSSV" : "",
+      SoDT: !editedDoanVien.SoDT.trim() === ""
+        ? "Vui lòng nhập số điện thoại"
+        : !validatePhoneNumber(editedDoanVien.SoDT)
+        ? "Số điện thoại không hợp lệ!"
+        : "",
+      QueQuan:
+        !editedDoanVien.QueQuan.trim() === "" ? "Vui lòng nhập quê quán" : "",
       GioiTinh:
         editedDoanVien.GioiTinh === undefined || editedDoanVien.GioiTinh === ""
           ? "Vui lòng nhập giới tính"
           : "",
-      NgaySinh: !editedDoanVien.NgaySinh.trim()
-        ? "Vui lòng nhập ngày sinh"
-        : "",
-      NgayVaoDoan: !editedDoanVien.NgayVaoDoan.trim()
-        ? "Vui lòng nhập ngày vào đoàn"
-        : "",
+      NgaySinh:
+        !editedDoanVien.NgaySinh.trim() === ""
+          ? "Vui lòng nhập ngày sinh"
+          : !validateNgay(editedDoanVien.NgaySinh)
+          ? "Ngày định dạng là dd/MM/yyyy"
+          : "",
+
+      NgayVaoDoan:
+        !editedDoanVien.NgayVaoDoan.trim() === ""
+          ? "Vui lòng nhập ngày vào đoàn"
+          : !validateNgay(editedDoanVien.NgayVaoDoan)
+          ? "Ngày định dạng là dd/MM/yyyy"
+          : "",
+
       IDDanToc: !editedDoanVien.IDDanToc ? "Vui lòng nhập tên dân tộc" : "",
       IDTonGiao: !editedDoanVien.IDTonGiao ? "Vui lòng nhập tên tôn giáo" : "",
       IDChucVu: !editedDoanVien.IDChucVu ? "Vui lòng chọn tên chức vụ" : "",
@@ -252,25 +308,44 @@ const DoanVien = (props) => {
     }
 
     try {
-      // Gọi API hoặc hàm cập nhật dữ liệu ở đây
-      await CapNhatDoanVien(editedDoanVien);
-      LayMotDoanVien();
+      const formData = new FormData();
+      formData.append("MSSV", editedDoanVien.MSSV);
+      formData.append("HoTen", editedDoanVien.HoTen);
+      formData.append("Email", editedDoanVien.Email);
+      formData.append("SoDT", editedDoanVien.SoDT);
+      formData.append("GioiTinh", editedDoanVien.GioiTinh);
+      formData.append("NgaySinh", editedDoanVien.NgaySinh);
+      formData.append("NgayVaoDoan", editedDoanVien.NgayVaoDoan);
+      formData.append("IDDanToc", editedDoanVien.IDDanToc);
+      formData.append("IDTonGiao", editedDoanVien.IDTonGiao);
+      formData.append("IDChucVu", editedDoanVien.IDChucVu);
+      formData.append("IDNamHoc", editedDoanVien.IDNamHoc);
+      formData.append("QueQuan", editedDoanVien.QueQuan);
+      formData.append("IDDoanVien", IDDoanVien);
+      formData.append("IDChiTietNamHoc", IDChiTietNamHoc);
 
-      // if (!gioiTinhChanged) {
-      //   seteditedDoanVien((prevData) => ({
-      //     ...prevData,
-      //     GioiTinh: DoanVien.GioiTinh,
-      //   }));
-      // }
+      // formData.append("file", image, image.name);
+
+      if (image instanceof Blob) {
+        formData.append("file", image, image.name);
+      }
+
+      console.log(formData);
+      let res = await axios.post(
+        "http://localhost:8080/api/CapNhatDoanVien",
+        formData
+      );
 
       // Sau khi cập nhật thành công, cập nhật lại trạng thái ChiDoan và kết thúc chế độ chỉnh sửa
       setDoanVien(editedDoanVien);
       setShowModalUpdate(true);
+      layMotDoanVien();
       setIsEditing(false);
     } catch (error) {
       console.error("Lỗi khi cập nhật dữ liệu:", error);
     }
   };
+
   return (
     <>
       <div className="container-fluid app__content">
@@ -281,25 +356,28 @@ const DoanVien = (props) => {
               <div className="avatar">
                 <img
                   className="avatar_img"
-                  src={`http://localhost:8080/images/${DoanVien.TenAnh}`}
+                  src={
+                    previewImage ||
+                    `http://localhost:8080/images/${DoanVien.TenAnh}`
+                  }
                   alt=""
                 />
+                <label htmlFor="fileInput" className="camera-icon">
+                  <FontAwesomeIcon icon={faCamera} />
+                  <input
+                    type="file"
+                    name="file"
+                    id="fileInput"
+                    style={{ display: "none" }}
+                    onChange={(e) => handleUpLoadImage(e)}
+                  />
+                </label>
               </div>
             </div>
             <div className="col col-10">
               <div className="row">
                 <div className="form-group col col-4">
                   <Form.Label htmlFor="MaLop">Mã chi đoàn</Form.Label>
-                  {/* {isEditing ? (
-                    <Form.Control
-                      className="form-control"
-                      type="text"
-                      id="MaLop"
-                      aria-describedby="MaLop"
-                      value={editedDoanVien.MaLop}
-                      onChange={handleChange}
-                    />
-                  ) : ( */}
                   <Form.Control
                     className="form-control"
                     type="text"
@@ -308,21 +386,9 @@ const DoanVien = (props) => {
                     value={DoanVien.MaLop}
                     disabled
                   />
-                  {/* )} */}
-                  {/* <div className="error-message">{errors.MaLop}</div> */}
                 </div>
                 <div className="form-group col col-4">
                   <Form.Label htmlFor="TenLop">Tên chi đoàn</Form.Label>
-                  {/* {isEditing ? (
-                    <Form.Control
-                      className="form-control"
-                      type="text"
-                      id="TenLop"
-                      aria-describedby="TenLop"
-                      value={editedDoanVien.TenLop}
-                      onChange={handleChange}
-                    />
-                  ) : ( */}
                   <Form.Control
                     className="form-control"
                     type="text"
@@ -331,21 +397,9 @@ const DoanVien = (props) => {
                     value={DoanVien.TenLop}
                     disabled
                   />
-                  {/* )} */}
-                  {/* <div className="error-message">{errors.TenLop}</div> */}
                 </div>
                 <div className="form-group col col-4">
                   <Form.Label htmlFor="Khoa">Khóa</Form.Label>
-                  {/* {isEditing ? (
-                    <Form.Control
-                      className="form-control"
-                      type="text"
-                      id="Khoa"
-                      aria-describedby="Khoa"
-                      value={editedDoanVien.Khoa}
-                      onChange={handleChange}
-                    />
-                  ) : ( */}
                   <Form.Control
                     className="form-control"
                     type="text"
@@ -354,8 +408,6 @@ const DoanVien = (props) => {
                     value={DoanVien.Khoa}
                     disabled
                   />
-                  {/* )} */}
-                  {/* <div className="error-message">{errors.Khoa}</div> */}
                 </div>
                 <div className="form-group col col-4">
                   <Form.Label htmlFor="MSSV">Mã số sinh viên</Form.Label>
@@ -451,7 +503,7 @@ const DoanVien = (props) => {
                   <div className="error-message">{errors.SoDT}</div>
                 </div>
                 <div className="form-group col col-4">
-                  <Form.Label htmlFor="QueQuan">Quê Quán</Form.Label>
+                  <Form.Label htmlFor="QueQuan">Quê quán</Form.Label>
                   {isEditing ? (
                     <Form.Control
                       className="form-control"
@@ -509,7 +561,7 @@ const DoanVien = (props) => {
                 </div>
                 <div className="form-group col col-4">
                   <Form.Label htmlFor="NgaySinh">
-                    Ngày sinh (dd/mm/yyyy)
+                    Ngày sinh
                   </Form.Label>
                   {isEditing ? (
                     <Form.Control
@@ -534,7 +586,7 @@ const DoanVien = (props) => {
                 </div>
                 <div className="form-group col col-4">
                   <Form.Label htmlFor="NgayVaoDoan">
-                    Ngày vào đoàn (dd/mm/yyyy)
+                    Ngày vào đoàn
                   </Form.Label>
                   {isEditing ? (
                     <Form.Control
@@ -558,7 +610,7 @@ const DoanVien = (props) => {
                   <div className="error-message">{errors.NgayVaoDoan}</div>
                 </div>
                 <div className="form-group col col-4">
-                  <Form.Label htmlFor="IDDanToc">Dân Tộc</Form.Label>
+                  <Form.Label htmlFor="IDDanToc">Dân tộc</Form.Label>
                   {isEditing ? (
                     <Form.Select
                       className="form-control"
@@ -637,7 +689,7 @@ const DoanVien = (props) => {
                       onChange={handleChange}
                     >
                       <option value="" disabled selected>
-                        {/* {DoanVien.TenCV} */} Chọn chức vụ
+                        Chọn chức vụ
                       </option>
                       {ChucVu.map((chucvu, index) => {
                         return (
@@ -709,7 +761,10 @@ const DoanVien = (props) => {
 
               {isEditing ? (
                 <>
-                  <button className="allcus-button" onClick={handleSaveChanges}>
+                  <button
+                    className="allcus-button bgcapnhat"
+                    onClick={handleSaveChanges}
+                  >
                     <FontAwesomeIcon icon={faSave} /> Lưu
                   </button>
                 </>
@@ -746,15 +801,15 @@ const DoanVien = (props) => {
         <DeleteSuccess show={showModal1} onHide={() => setShowModal1(false)} />
       </NavLink>
 
-      <NavLink
+      {/* <NavLink
         to={`/BCH-DoanTruong/ChiTietChiDoan/${DoanVien.IDLop}`}
         className="navlink"
-      >
+      > */}
         <ModalSuccess
           show={showModalUpdate}
           onHide={() => setShowModalUpdate(false)}
         />
-      </NavLink>
+      {/* </NavLink> */}
     </>
   );
 };

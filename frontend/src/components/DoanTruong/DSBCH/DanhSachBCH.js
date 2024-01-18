@@ -4,7 +4,8 @@ import { useParams } from "react-router-dom";
 import * as XLSX from "xlsx";
 import { format } from "date-fns";
 import { NavLink } from "react-router-dom";
-import logo from "../../../assets/logo.jpg";
+import axios from "axios";
+
 import {
   faPlus,
   faPenNib,
@@ -14,14 +15,27 @@ import {
   faChevronRight,
   faChevronLeft,
 } from "@fortawesome/free-solid-svg-icons";
-import { laydsBCH, chucvu, searchBCH } from "../../../services/apiService";
+import {
+  laydsBCH,
+  chucvu,
+  searchBCH,
+  namhoc,
+} from "../../../services/apiService";
 
 const DanhSachBCH = (props) => {
   const { IDLop } = useParams();
   const [DoanVien, setDoanVien] = useState([]);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [DSChucVu, setListChucVu] = useState([]);
+
+  const [idnamhoc, setNamHoc] = useState(1);
+  const [DSNamHoc, setDSNamHoc] = useState([]);
+
+  const [showModalUpdate, setShowModalUpdate] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const [searchData, setSearchData] = useState({
     MSSV: "",
@@ -37,14 +51,14 @@ const DanhSachBCH = (props) => {
   useEffect(() => {
     fetchDoanVien();
     fetchDSChucVu();
-
+    fetchDSNamHoc();
     fetchAllData();
-  }, [currentPage, totalPages]);
+  }, [currentPage, idnamhoc]);
 
   const fetchDoanVien = async () => {
     try {
-      let res = await laydsBCH(currentPage);
-
+      let res = await laydsBCH(currentPage, idnamhoc);
+      console.log(res);
       if (res.status === 200) {
         setDoanVien(res.data.dataCD);
         setTotalPages(res.data.totalPages);
@@ -69,6 +83,27 @@ const DanhSachBCH = (props) => {
           setListChucVu(khoaData);
         } else {
           console.error("Dữ liệu khóa không hợp lệ:", khoaData);
+        }
+      } else {
+        console.error("Lỗi khi gọi API:", res.statusText);
+      }
+    } catch (error) {
+      console.error("Lỗi khi gọi API:", error.message);
+    }
+  };
+
+  const fetchDSNamHoc = async () => {
+    try {
+      let res = await namhoc();
+      if (res.status === 200) {
+        // setListKhoa(res.data.dataNH); // Cập nhật state với danh sách khóa học
+        const NamHocdata = res.data.dataNH;
+
+        // Kiểm tra nếu khoaData là mảng trước khi cập nhật state
+        if (Array.isArray(NamHocdata)) {
+          setDSNamHoc(NamHocdata);
+        } else {
+          console.error("Dữ liệu khóa không hợp lệ:", NamHocdata);
         }
       } else {
         console.error("Lỗi khi gọi API:", res.statusText);
@@ -123,7 +158,7 @@ const DanhSachBCH = (props) => {
 
       // Lặp qua tất cả các trang
       for (let page = 1; page <= totalPages; page++) {
-        let res = await laydsBCH(page);
+        let res = await laydsBCH(page, idnamhoc);
 
         if (res.status === 200) {
           // Tích hợp dữ liệu từ trang hiện tại vào mảng
@@ -141,8 +176,10 @@ const DanhSachBCH = (props) => {
     }
   };
 
-  const exportToExcel = () => {
+  const exportToExcel = async () => {
     // Tạo một mảng chứa dữ liệu bạn muốn xuất
+    await fetchAllData();
+
     const dataToExport = allData.map((item) => {
       return {
         "Mã Chi Đoàn": item.MaLop,
@@ -172,10 +209,34 @@ const DanhSachBCH = (props) => {
     XLSX.writeFile(wb, "DanhSachDoanVien.xlsx");
   };
 
+  const handleNamHocChange = (e) => {
+    const selectedIDNamHoc = e.target.value;
+    setNamHoc(selectedIDNamHoc);
+  };
+
   return (
     <>
       <div className="container-fluid app__content">
-        <h2 className="text-center">Danh Sách Ban Chấp Hành</h2>
+        <div className="namhoc-center">
+          <h2 className="text-center">Danh Sách Ban Chấp Hành</h2>
+          <div className="searchDV-input">
+            <select
+              type="text"
+              className="search_name"
+              value={idnamhoc}
+              onChange={handleNamHocChange}
+            >
+              {DSNamHoc.map((item, index) => {
+                return (
+                  <option key={index} value={item.IDNamHoc}>
+                    {item.TenNamHoc}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+        </div>
+
         <div className="search">
           <div className="searchDV">
             <div className="">
@@ -236,13 +297,12 @@ const DanhSachBCH = (props) => {
                 </select>
               </div>
               <button className="formatButton" onClick={handleSearch}>
-                <FontAwesomeIcon icon={faMagnifyingGlass} /> Tìm
+                <FontAwesomeIcon icon={faMagnifyingGlass} />
               </button>
             </div>
-            <div className="buttonSearch">
-           
+            <div className="">
               <button className="formatButton" onClick={exportToExcel}>
-                <FontAwesomeIcon icon={faCloudArrowDown} /> Tải xuống
+                <FontAwesomeIcon icon={faCloudArrowDown} /> 
               </button>
             </div>
           </div>
@@ -257,33 +317,34 @@ const DanhSachBCH = (props) => {
                     DoanVien.length > 0 &&
                     DoanVien.map((item, index) => {
                       return (
-                        
                         <div className="col-lg-3 col-md-6 col-sm-6 giang-vien-col lazy">
                           <NavLink
-                            to={`/BCH-DoanTruong/DanhSachBCH/${item.IDLop}/${item.IDDoanVien}/${item.IDChiTietNamHoc}` } className="NavLink-item"
+                            to={`/BCH-DoanTruong/DanhSachBCH/${item.IDLop}/${item.IDDoanVien}/${item.IDChiTietNamHoc}`}
+                            className="NavLink-item"
                           >
-                          <div className="giang-vien-item">
-                            <div className="gv-image img-hover-zoom gv1">
-                              <a>
-                                <img src={`http://localhost:8080/images/${item.TenAnh}`} />
-                              </a>
+                            <div className="giang-vien-item">
+                              <div className="gv-image img-hover-zoom gv1">
+                                <a>
+                                  <img
+                                    src={`http://localhost:8080/images/${item.TenAnh}`}
+                                  />
+                                </a>
+                              </div>
+                              <div className="gv-body">
+                                <div className="giang-vien-subtitle">
+                                  {item.MSSV}
+                                </div>
+                                <div className="giang-vien-title">
+                                  <a>{item.HoTen}</a>
+                                </div>
+                                <div className="giang-vien-subtitle">
+                                  {item.TenLop}
+                                </div>
+                                <p>{item.TenCV}</p>
+                              </div>
                             </div>
-                            <div className="gv-body">
-                            <div className="giang-vien-subtitle">
-                                {item.MSSV}
-                              </div>
-                              <div className="giang-vien-title">
-                                <a>{item.HoTen}</a>
-                              </div>
-                              <div className="giang-vien-subtitle">
-                                {item.TenLop}
-                              </div>
-                              <p>{item.TenCV}</p>
-                            </div>
-                          </div>
-                        </NavLink>
+                          </NavLink>
                         </div>
-
                       );
                     })}
 
@@ -299,65 +360,73 @@ const DanhSachBCH = (props) => {
         </div>
       </div>
 
-      <div className="pagination">
-              <button
-                className="btn-footer"
-                onClick={handlePrevPage}
-                disabled={currentPage <= 1}
-              >
-                <FontAwesomeIcon icon={faChevronLeft} />
-              </button>
+      {DoanVien && DoanVien.length > 0 && (
+        <div className="pagination pagination1">
+          <button
+            className="btn-footer"
+            onClick={handlePrevPage}
+            disabled={currentPage <= 1}
+          >
+            <FontAwesomeIcon icon={faChevronLeft} />
+          </button>
 
-              {totalPages > 4 && currentPage > 3 && (
-                <div className="footer">
-                  <span className="ellipsis"></span>
-                </div>
-              )}
-
-              {Array.from(
-                { length: totalPages > 4 ? 3 : totalPages },
-                (_, index) => {
-                  let pageToShow;
-                  if (totalPages <= 4) {
-                    pageToShow = index + 1;
-                  } else if (currentPage <= 3) {
-                    pageToShow = index + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    pageToShow = totalPages - 2 + index;
-                  } else {
-                    pageToShow = currentPage - 1 + index;
-                  }
-
-                  return (
-                    <div className="footer" key={index}>
-                      <button
-                        className={`btn-footer ${
-                          currentPage === pageToShow ? "active" : ""
-                        }`}
-                        onClick={() => changePage(pageToShow)}
-                        disabled={currentPage === pageToShow}
-                      >
-                        {pageToShow}
-                      </button>
-                    </div>
-                  );
-                }
-              )}
-
-              {totalPages > 4 && currentPage < totalPages - 2 && (
-                <div className="footer">
-                  <span className="ellipsis"></span>
-                </div>
-              )}
-
-              <button
-                className="btn-footer"
-                onClick={handleNextPage}
-                disabled={currentPage >= totalPages}
-              >
-                <FontAwesomeIcon icon={faChevronRight} />
-              </button>
+          {totalPages > 4 && currentPage > 3 && (
+            <div className="footer">
+              <span className="ellipsis"></span>
             </div>
+          )}
+
+          {Array.from(
+            { length: totalPages > 4 ? 3 : totalPages },
+            (_, index) => {
+              let pageToShow;
+              if (totalPages <= 4) {
+                pageToShow = index + 1;
+              } else if (currentPage <= 3) {
+                pageToShow = index + 1;
+              } else if (currentPage >= totalPages - 2) {
+                pageToShow = totalPages - 2 + index;
+              } else {
+                pageToShow = currentPage - 1 + index;
+              }
+
+              return (
+                <div className="footer" key={index}>
+                  <button
+                    className={`btn-footer ${
+                      currentPage === pageToShow ? "active" : ""
+                    }`}
+                    onClick={() => changePage(pageToShow)}
+                    disabled={currentPage === pageToShow}
+                  >
+                    {pageToShow}
+                  </button>
+                </div>
+              );
+            }
+          )}
+
+          {totalPages > 4 && currentPage < totalPages - 2 && (
+            <div className="footer">
+              <span className="ellipsis"></span>
+            </div>
+          )}
+
+          <button
+            className="btn-footer"
+            onClick={handleNextPage}
+            disabled={currentPage >= totalPages}
+          >
+            <FontAwesomeIcon icon={faChevronRight} />
+          </button>
+        </div>
+      )}
+
+      {DoanVien && DoanVien.length <= 5 && (
+        <div className="pagination pagination1">
+          {/* You can add some message or content indicating that pagination is not shown */}
+        </div>
+      )}
     </>
   );
 };

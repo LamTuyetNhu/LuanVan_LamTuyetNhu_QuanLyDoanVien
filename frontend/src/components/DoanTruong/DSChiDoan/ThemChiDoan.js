@@ -34,15 +34,23 @@ const DoanVien = (props) => {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
+  const validateEmail = (Email) => {
+    return String(Email)
+      .toLowerCase()
+      .match(
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+      );
+  };
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const newErrors = {
       MaLop: !themchidoan.MaLop ? "Vui lòng nhập mã lớp" : "",
-
       TenLop: !themchidoan.TenLop ? "Vui lòng nhập tên lớp" : "",
       Khoa: !themchidoan.Khoa ? "Vui lòng nhập khóa" : "",
-      Email: !themchidoan.Email ? "Vui lòng nhập Email" : "",
+      Email: !themchidoan.Email ? "Vui lòng nhập Email" : !validateEmail(themchidoan.Email) ? "Email không hợp lệ!" : "",
     };
 
     setErrors(newErrors);
