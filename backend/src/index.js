@@ -1,10 +1,10 @@
 import express from "express";
-// import initWebRoute from "./configs/viewEngine";
-// import configViewEngine from "./route/web";
 import initAPIRoute from "./route/api";
 const cors = require('cors');
 
 const bodyParser = require('body-parser');
+const jwt = require("jsonwebtoken");
+
 const Sequelize = require('sequelize');
 const XLSX = require('xlsx');
 const multer = require('multer');
@@ -15,43 +15,44 @@ const app = express();
 const port = process.env.PORT || 8080;
 
 
-
-// Cấu hình tùy chọn CORS
 const corsOptions = {
-  origin: "http://localhost:3000", // Thay thế bằng tên miền của trang frontend của bạn
+  origin: "http://localhost:3000",
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  credentials: true, // Nếu bạn sử dụng phiên đăng nhập
+  credentials: true, 
   optionsSuccessStatus: 204,
 };
 
+const secretKey = "doantruong";
+
 app.use(cors(corsOptions));
 app.use(express.static("./src/public"));
-// Hỗ trợ lấy data từ client về server
+
 app.use(express.urlencoded({ extended: true })); // MiddleWare
 app.use(express.json()); // MiddleWare
 
-/* Vi du muon xem thong tin tu phia client */
 app.use((req, res, next) => {
-  // console.log(">>> RUN INTO MY MIDDLEWARE");
-  // console.log(req); //lay tat ca thong tin
-  // console.log(req.header); //Muon lay ip nguoi dung
-  // console.log(req.method);
   next();
 });
 
-//Setup view engine
-// configViewEngine(app);
+  // Middleware để xác thực token
+  const authenticateToken = (req, res, next) => {
+    const token = req.header("Authorization");
+    if (!token) return res.status(401).json({ success: false, message: "Access denied" });
+  
+    jwt.verify(token, secretKey, (err, user) => {
+      if (err) return res.status(403).json({ success: false, message: "Invalid token" });
+  
+      // Lưu thông tin người dùng từ token vào request để sử dụng ở các route khác
+      req.user = user;
+      next();
+    });
+  };
+  
+  // Route yêu cầu token để truy cập
+  app.get("/api/protected", authenticateToken, (req, res) => {
+    res.json({ success: true, message: "Protected route", user: req.user });
+  });
 
-//init web route
-// initWebRoute(app);
-
-//init API route
 initAPIRoute(app);
-
-//handle 404 not found
-// app.use((req, res) => {
-  // MiddleWare
-  // return res.render("404.ejs");
-// });
 
 app.listen(port, () => console.log(`Examples at http://localhost:${port}`));
