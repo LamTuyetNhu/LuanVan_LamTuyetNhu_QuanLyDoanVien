@@ -64,13 +64,12 @@ const DangNhap = (props) => {
       });
 
       if (response.data.success) {
-        // Lưu token vào local storage hoặc cookie để sử dụng trong các yêu cầu sau này
-        // localStorage.setItem("token", response.data.token);
         const decodedToken = jwtDecode(response.data.token);
 
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("role", decodedToken.role);
         localStorage.setItem("IDLop", response.data.IDLop);
+        localStorage.setItem("IDDoanVien", response.data.IDDoanVien);
 
         setModalMessage("Đăng nhập thành công!");
         setModalIsError(false);
@@ -81,7 +80,7 @@ const DangNhap = (props) => {
           if (decodedToken.role === "Admin") {
             navigate("/BCH-DoanTruong");
           } else if (decodedToken.role === "BCHChiDoan") {
-            navigate("/DanhSachDoanVien");
+            navigate(`/ChiDoan/${response.data.IDLop}`);
           } else if (decodedToken.role === "DoanVien") {
             navigate("/DoanVien");
           }

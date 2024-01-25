@@ -1,20 +1,47 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useParams  } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 
 import huyhieu from "../../assets/huyhieu.png";
 import logo from "../../assets/logo.jpg";
 
+import {
+  laytenlop
+} from "../../services/apiService"
+import { useState, useEffect } from "react";
+
 function Header() {
+  const { IDLop } = useParams();
+  const [TenLop, setTenLop] = useState([])
+  useEffect(() => {
+    fetchTenLop()
+  }, [IDLop])
+
+  const fetchTenLop = async () => {
+    try {
+      let res = await laytenlop(IDLop);
+      console.log(res);
+
+      if (res.status === 200) {
+        setTenLop(res.data.dataCD.MaLop)
+
+      } else {
+        console.error("Lỗi khi gọi API:", res.statusText);
+      }
+    } catch (error) {
+      console.error("Lỗi khi gọi API:", error.message);
+    }
+  };
+
   return (
     <header>
       <div className="header">
         <div className="logo">
-          <NavLink to="/BCH-DoanTruong">
+          <NavLink to={`/ChiDoan/${IDLop}`}>
             <img className="logo-img" src={huyhieu} alt="Huy hieu" />
           </NavLink>
-          <NavLink to="/BCH-DoanTruong" className="logo-content">
-            Đoàn Thanh Niên Trường CNTT&TT
+          <NavLink to={`/ChiDoan/${IDLop}`} className="logo-content">
+            Đoàn Thanh Niên
           </NavLink>
         </div>
 
@@ -22,11 +49,11 @@ function Header() {
           <img className="logo-img1" src={logo} alt="logo-dtn" />
 
           <div className="username">
-            Ban Chấp Hành
+            {TenLop}
             <div className="header__cart-list">
               <ul className="header__cart-list-item">
                 <li className="header__cart-item">
-                  <a className="header__cart-item-info">Đăng xuất</a>
+                  <a href="/" className="header__cart-item-info">Đăng xuất</a>
                 </li>
               </ul>
             </div>
@@ -42,15 +69,15 @@ function Header() {
             </a>
             <ul className="subnav">
               <li>
-                <NavLink to="/BCH-DoanTruong">Danh sách đoàn viên</NavLink>
+                <NavLink to={`/ChiDoan/${IDLop}`}>Danh sách đoàn viên</NavLink>
               </li>
               <li>
-                <NavLink to="/BCH-DoanTruong/DanhSachBCH">
+                <NavLink to={`/ChiDoan/${IDLop}/DanhSachBCH`}>
                   Danh sách BCH
                 </NavLink>
               </li>
               <li>
-              <NavLink to="/BCH-DoanTruong/SinhVienNamTot">Sinh viên 5 tốt</NavLink>
+              <NavLink to={`/ChiDoan/${IDLop}/DanhSachSVNamTot`}>Sinh viên 5 tốt</NavLink>
               </li>
             </ul>
           </li>
@@ -61,11 +88,8 @@ function Header() {
             </a>
             <ul className="subnav">
               <li>
-              <NavLink to="/BCH-DoanTruong/DoanPhi">Đoàn phí</NavLink>
+              <NavLink to={`/ChiDoan/${IDLop}/DoanPhi`}>Đoàn phí</NavLink>
               </li>
-              {/* <li>
-                <a>Khai trừ chi đoàn</a>
-              </li> */}
               <li>
                 <a>Đánh giá và xếp loại đoàn viên</a>
               </li>
@@ -73,7 +97,7 @@ function Header() {
           </li>
           <li className="nav-item">
 
-            <NavLink to="/BCH-DoanTruong/HoatDong">HOẠT ĐỘNG</NavLink>
+            <NavLink to={`/ChiDoan/${IDLop}/HoatDong`}>HOẠT ĐỘNG</NavLink>
 
           </li>
         </ul>

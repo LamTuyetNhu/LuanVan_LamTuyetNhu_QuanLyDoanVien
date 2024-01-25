@@ -5,8 +5,8 @@ import { useParams } from "react-router-dom";
 import Modal from "../../Modal/Modal";
 import { faSave, faEdit } from "@fortawesome/free-solid-svg-icons";
 import {
-  LayDSNopDoanPhi,
-  SaveCheckboxStates,
+  LayDSNopDoanPhiCuaMotLop,
+  SaveCheckboxStatesCuaMotLop,
 } from "../../../services/apiService";
 
 const NopDoanPhi = (props) => {
@@ -15,7 +15,7 @@ const NopDoanPhi = (props) => {
   const [TenNamHoc, setTenNamHoc] = useState([]);
 
   const [checkboxStates, setCheckboxStates] = useState([]);
-  const { IDDoanPhi, IDNamHoc } = useParams();
+  const { IDLop, IDDoanPhi, IDNamHoc } = useParams();
 
   useEffect(() => {
     fetchDSNopDoanPhi();
@@ -28,12 +28,13 @@ const NopDoanPhi = (props) => {
 
   const fetchDSNopDoanPhi = async () => {
     try {
-      let res = await LayDSNopDoanPhi(IDDoanPhi, IDNamHoc);
-      console.log("API Response:", res.data);
+      let res = await LayDSNopDoanPhiCuaMotLop(IDLop, IDDoanPhi, IDNamHoc);
+      console.log("API Response:", res.data); 
       if (res.status === 200) {
         setDSNopDoanPhi(res.data.ChiTietDoanPhi);
         setTenDP(res.data.TenDoanPhi);
         setTenNamHoc(res.data.TenNamHoc);
+
       } else {
         // Xử lý trường hợp lỗi
         console.error("Lỗi khi gọi API:", res.statusText);
@@ -63,13 +64,13 @@ const NopDoanPhi = (props) => {
   const handleSave = async () => {
     try {
       const dataToSave = DSNopDoanPhi.map((item, index) => ({
-        IDChiTietDoanPhi: item.IDChiTietDoanPhi, // Replace with the actual property name
+        IDThuDP: item.IDThuDP, // Replace with the actual property name
         isChecked: checkboxStates[index],
       }));
 
-      console.log(dataToSave);
-
-      let res = await SaveCheckboxStates(IDDoanPhi, dataToSave);
+      console.log(dataToSave)
+  
+      let res = await SaveCheckboxStatesCuaMotLop(IDDoanPhi, dataToSave);
       if (res.status === 200) {
         setModalMessage("Cập nhật thành công!");
         setIsErrorModal(false);
@@ -99,21 +100,17 @@ const NopDoanPhi = (props) => {
   return (
     <>
       <div className="container-fluid app__content">
-        <h5 className="text-center">
-          {TenDP} ({TenNamHoc})
-        </h5>
+        <h5 className="text-center">{TenDP} - {TenNamHoc}</h5>
 
         <div className="table-container">
           <table className="table table-striped">
             <thead>
               <tr>
                 <th className="table-item1">STT</th>
-                <th>Tên chi đoàn</th>
-                <th>Khóa</th>
-                <th>Số đoàn viên</th>
+                <th>MSSV</th>
+                <th>Tên đoàn viên</th>
                 <th>Số tiền</th>
-                <th>Tổng tiền</th>
-                <th>Đã thu</th>
+                <th>Đã đóng</th>
               </tr>
             </thead>
             <tbody id="myTable">
@@ -123,15 +120,11 @@ const NopDoanPhi = (props) => {
                   return (
                     <tr key={`table-chidoan-${index}`} className="tableRow">
                       <td className="col-center">{index + 1}</td>
-                      <td className="">{item.TenLop}</td>
-                      <td className="col-center">{item.Khoa}</td>
-                      <td className="col-center">{item.SoLuongDoanVien}</td>
+                      <td className="">{item.MSSV}</td>
+                      <td className="">{item.HoTen}</td>
 
                       <td className="col-right">
                         {formatCurrency(item.SoTienLop)}
-                      </td>
-                      <td className="col-right">
-                        {formatCurrency(item.ThanhTien)}
                       </td>
                       <td className="col-center">
                         <input
@@ -152,13 +145,13 @@ const NopDoanPhi = (props) => {
           </table>
 
           <div>
-            {DSNopDoanPhi && DSNopDoanPhi.length > 0 && (
-              <button className="formatButton btnRight" onClick={handleSave}>
-                <FontAwesomeIcon icon={faSave} /> Lưu
-              </button>
-            )}
+            <button className="formatButton btnRight" onClick={handleSave}>
+              <FontAwesomeIcon icon={faSave} /> Lưu
+            </button>
           </div>
         </div>
+
+        <div className="margin-bottom"></div>
       </div>
 
       <Modal

@@ -1,13 +1,12 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { format } from "date-fns";
 import { NavLink } from "react-router-dom";
-import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
+import ModalSuccess from "../../Modal/ModalSuccess";
 import DeleteSuccess from "../../Modal/DeleteSuccess";
 import DeleteConfirmationModal from "../../Modal/DeleteConfirmationModal";
-import ModalSuccess from "../../Modal/ModalSuccess";
+import logo from "../../../assets/logo.jpg"
 import axios from "axios";
 
 import {
@@ -15,39 +14,35 @@ import {
   faTrash,
   faSave,
   faEdit,
-  faCamera,
+  faCamera
 } from "@fortawesome/free-solid-svg-icons";
 import {
+  LayMotDoanVien,
+  XoaBanChapHanh,
   chucvu,
   LayTonGiao,
   LayDanToc,
-  LayMotDoanVien,
-  XoaDoanVien,
   CapNhatDoanVien,
   namhoc,
-  laymotlop,
 } from "../../../services/apiService";
 
-const DoanVien = (props) => {
+const BanChapHanh = (props) => {
   const { IDLop, IDDoanVien, IDChiTietNamHoc } = useParams();
   const [DoanVien, setDoanVien] = useState([]);
-  const [DSDoanVien, setListDoanVien] = useState([]);
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [select, setSelect] = useState([]);
+
+  const [showModal, setShowModal] = useState(false);
+  const [showModal1, setShowModal1] = useState(false);
 
   const [NamHoc, setNamHoc] = useState([]);
   const [DanToc, setDanToc] = useState([]);
   const [TonGiao, setTonGiao] = useState([]);
   const [ChucVu, setChucVu] = useState([]);
 
-  const [showModal, setShowModal] = useState(false);
-  const [showModal1, setShowModal1] = useState(false);
-
   const [editedDoanVien, seteditedDoanVien] = useState({});
   const [isEditing, setIsEditing] = useState(false);
 
-  const [logo, setLogo] = useState("http://localhost:8080/images/logo.jpg");
   const [image, setImage] = useState("");
   const [previewImage, setPreviewImage] = useState("");
   const [selectedImage, setSelectedImage] = useState("");
@@ -67,10 +62,10 @@ const DoanVien = (props) => {
 
   const handleDelete = async () => {
     try {
-      await XoaDoanVien(IDChiTietNamHoc);
+      await XoaBanChapHanh(select);
       setShowModal(false);
-      fetchDSDoanVien();
       setShowModal1(true);
+
       console.log("Hoạt động đã được xóa thành công!");
     } catch (error) {
       console.error("Lỗi khi xóa hoạt động:", error);
@@ -78,36 +73,20 @@ const DoanVien = (props) => {
   };
 
   useEffect(() => {
-    fetchDSDoanVien();
     layMotDoanVien();
     fetchDSNamHoc();
     fetchChucVu();
     fetchTonGiao();
     fetchDanToc();
-  }, [IDLop, IDDoanVien]);
-
-  const fetchDSDoanVien = async () => {
-    try {
-      let res = await laymotlop(IDLop, currentPage);
-      console.log(res);
-
-      if (res.status === 200) {
-        setListDoanVien(res.data.dataCD);
-        setTotalPages(res.data.totalPages);
-      } else {
-        // Xử lý trường hợp lỗi
-        console.error("Lỗi khi gọi API:", res.statusText);
-      }
-    } catch (error) {
-      console.error("Lỗi khi gọi API:", error.message);
-    }
-  };
+  }, [IDLop, IDDoanVien, IDChiTietNamHoc]);
 
   const layMotDoanVien = async () => {
     try {
       let res = await LayMotDoanVien(IDLop, IDDoanVien, IDChiTietNamHoc);
+
       if (res.status === 200) {
         setDoanVien(res.data.dataDV);
+        console.log(res.data.dataDV);
         seteditedDoanVien(res.data.dataDV);
       } else {
         // Xử lý trường hợp lỗi
@@ -284,14 +263,14 @@ const DoanVien = (props) => {
         !editedDoanVien.NgaySinh.trim() === ""
           ? "Vui lòng nhập ngày sinh"
           : !validateNgay(editedDoanVien.NgaySinh)
-          ? "Ngày định dạng là dd/mm/yyyy"
+          ? "Ngày định dạng là dd/MM/yyyy"
           : "",
 
       NgayVaoDoan:
         !editedDoanVien.NgayVaoDoan.trim() === ""
           ? "Vui lòng nhập ngày vào đoàn"
           : !validateNgay(editedDoanVien.NgayVaoDoan)
-          ? "Ngày định dạng là dd/mm/yyyy"
+          ? "Ngày định dạng là dd/MM/yyyy"
           : "",
 
       IDDanToc: !editedDoanVien.IDDanToc ? "Vui lòng nhập tên dân tộc" : "",
@@ -349,10 +328,11 @@ const DoanVien = (props) => {
   return (
     <>
       <div className="container-fluid app__content">
-        <h2 className="text-center">Đoàn Viên</h2>
+        <h2 className="text-center">Ban Chấp Hành</h2>
+
         <div className="margin-top">
           <div className="row formAdd">
-            <div className="col col-2">
+          <div className="col col-2">
               <div className="avatar">
                 <img
                   className="avatar_img"
@@ -378,6 +358,7 @@ const DoanVien = (props) => {
               <div className="row">
                 <div className="form-group col col-4">
                   <Form.Label htmlFor="MaLop">Mã chi đoàn</Form.Label>
+              
                   <Form.Control
                     className="form-control"
                     type="text"
@@ -386,9 +367,11 @@ const DoanVien = (props) => {
                     value={DoanVien.MaLop}
                     disabled
                   />
+                 
                 </div>
                 <div className="form-group col col-4">
                   <Form.Label htmlFor="TenLop">Tên chi đoàn</Form.Label>
+            
                   <Form.Control
                     className="form-control"
                     type="text"
@@ -397,9 +380,11 @@ const DoanVien = (props) => {
                     value={DoanVien.TenLop}
                     disabled
                   />
+               
                 </div>
                 <div className="form-group col col-4">
                   <Form.Label htmlFor="Khoa">Khóa</Form.Label>
+            
                   <Form.Control
                     className="form-control"
                     type="text"
@@ -408,6 +393,7 @@ const DoanVien = (props) => {
                     value={DoanVien.Khoa}
                     disabled
                   />
+                 
                 </div>
                 <div className="form-group col col-4">
                   <Form.Label htmlFor="MSSV">Mã số sinh viên</Form.Label>
@@ -503,7 +489,7 @@ const DoanVien = (props) => {
                   <div className="error-message">{errors.SoDT}</div>
                 </div>
                 <div className="form-group col col-4">
-                  <Form.Label htmlFor="QueQuan">Quê quán</Form.Label>
+                  <Form.Label htmlFor="QueQuan">Quê Quán</Form.Label>
                   {isEditing ? (
                     <Form.Control
                       className="form-control"
@@ -561,7 +547,7 @@ const DoanVien = (props) => {
                 </div>
                 <div className="form-group col col-4">
                   <Form.Label htmlFor="NgaySinh">
-                    Ngày sinh
+                    Ngày sinh (dd/mm/yyyy)
                   </Form.Label>
                   {isEditing ? (
                     <Form.Control
@@ -586,7 +572,7 @@ const DoanVien = (props) => {
                 </div>
                 <div className="form-group col col-4">
                   <Form.Label htmlFor="NgayVaoDoan">
-                    Ngày vào đoàn
+                    Ngày vào đoàn (dd/mm/yyyy)
                   </Form.Label>
                   {isEditing ? (
                     <Form.Control
@@ -610,7 +596,7 @@ const DoanVien = (props) => {
                   <div className="error-message">{errors.NgayVaoDoan}</div>
                 </div>
                 <div className="form-group col col-4">
-                  <Form.Label htmlFor="IDDanToc">Dân tộc</Form.Label>
+                  <Form.Label htmlFor="IDDanToc">Dân Tộc</Form.Label>
                   {isEditing ? (
                     <Form.Select
                       className="form-control"
@@ -655,7 +641,7 @@ const DoanVien = (props) => {
                       onChange={handleChange}
                     >
                       <option value="" disabled selected>
-                        Chọn tôn giáo
+                        {/* {DoanVien.TenTonGiao} */} Chọn tôn giáo
                       </option>
                       {TonGiao.map((tongiao, index) => {
                         return (
@@ -689,7 +675,7 @@ const DoanVien = (props) => {
                       onChange={handleChange}
                     >
                       <option value="" disabled selected>
-                        Chọn chức vụ
+                        {/* {DoanVien.TenCV} */} Chọn chức vụ
                       </option>
                       {ChucVu.map((chucvu, index) => {
                         return (
@@ -751,67 +737,34 @@ const DoanVien = (props) => {
           <div className="update row">
             <div className="btns">
               <button className="allcus-button" type="submit">
-                <NavLink
-                  to={`/BCH-DoanTruong/ChiTietChiDoan/${DoanVien.IDLop}`}
-                  className="navlink"
-                >
+                <NavLink to={`/ChiDoan/${IDLop}/DanhSachBCH`} className="navlink">
                   <FontAwesomeIcon icon={faBackward} />
                 </NavLink>
               </button>
 
               {isEditing ? (
                 <>
-                  <button
-                    className="allcus-button bgcapnhat"
-                    onClick={handleSaveChanges}
-                  >
+                  <button className="allcus-button bgcapnhat" onClick={handleSaveChanges}>
                     <FontAwesomeIcon icon={faSave} /> Lưu
                   </button>
                 </>
               ) : (
-                <button
-                  className="allcus-button bgcapnhat"
-                  onClick={handleToggleEdit}
-                >
+                <button className="allcus-button bgcapnhat" onClick={handleToggleEdit}>
                   <FontAwesomeIcon icon={faEdit} /> Cập nhật
                 </button>
               )}
 
-              <button
-                className="allcus-button button-error"
-                type="button"
-                onClick={() => setShowModal(true)}
-              >
-                <FontAwesomeIcon icon={faTrash} />
-              </button>
             </div>
           </div>
         </div>
       </div>
-      <DeleteConfirmationModal
-        show={showModal}
-        onHide={() => setShowModal(false)}
-        handleDelete={handleDelete}
-      />
 
-      <NavLink
-        to={`/BCH-DoanTruong/ChiTietChiDoan/${DoanVien.IDLop}`}
-        className="navlink"
-      >
-        <DeleteSuccess show={showModal1} onHide={() => setShowModal1(false)} />
-      </NavLink>
-
-      {/* <NavLink
-        to={`/BCH-DoanTruong/ChiTietChiDoan/${DoanVien.IDLop}`}
-        className="navlink"
-      > */}
         <ModalSuccess
           show={showModalUpdate}
           onHide={() => setShowModalUpdate(false)}
         />
-      {/* </NavLink> */}
     </>
   );
 };
 
-export default DoanVien;
+export default BanChapHanh;

@@ -29,6 +29,7 @@ const DanhSachChiDoan = (props) => {
   const [DSKhoa, setListKhoa] = useState([]);
 
   const token = localStorage.getItem("token");
+  const [pageSize, setPageSize] = useState(5);
 
   const [searchData, setSearchData] = useState({
     MaLop: "",
@@ -50,7 +51,6 @@ const DanhSachChiDoan = (props) => {
   const fetchDSChiDoan = async () => {
     try {
       let res = await getAllChiDoan(currentPage);
-      // console.log(res);
 
       if (res.status === 200) {
         setListChiDoan(res.data.dataCD);
@@ -181,6 +181,10 @@ const DanhSachChiDoan = (props) => {
     }
   };
 
+  const calculateIndex = (pageIndex, pageSize, itemIndex) => {
+    return (pageIndex - 1) * pageSize + itemIndex + 1;
+  };
+
   return (
     <>
       <div className="container-fluid app__content">
@@ -270,8 +274,8 @@ const DanhSachChiDoan = (props) => {
             <thead>
               <tr>
                 <th className="table-item1">STT</th>
-                <th>Mã Chi Đoàn</th>
-                <th>Tên Chi Đoàn</th>
+                <th>Mã chi đoàn</th>
+                <th>Tên chi đoàn</th>
                 <th>Email</th>
                 <th className="table-item">Khóa</th>
                 <th>Trạng thái</th>
@@ -284,9 +288,10 @@ const DanhSachChiDoan = (props) => {
               {DSChiDoan &&
                 DSChiDoan.length > 0 &&
                 DSChiDoan.map((item, index) => {
+                  const stt = calculateIndex(currentPage, pageSize, index);
                   return (
                     <tr key={`table-chidoan-${index}`} className="tableRow">
-                      <td className=" col-center">{index + 1}</td>
+                      <td className=" col-center">{stt}</td>
                       <td className="">{item.MaLop}</td>
                       <td className="">{item.TenLop}</td>
                       <td className="">{item.EmailLop}</td>
@@ -341,67 +346,75 @@ const DanhSachChiDoan = (props) => {
         </div>
       </div>
 
-      {/* <div className="pagination-container"> */}
-      <div className="pagination pagination1">
-              <button
-                className="btn-footer"
-                onClick={handlePrevPage}
-                disabled={currentPage <= 1}
-              >
-                <FontAwesomeIcon icon={faChevronLeft} />
-              </button>
+      {DSChiDoan && DSChiDoan.length > 0 && (
+        <div className="pagination pagination1">
+          <button
+            className="btn-footer"
+            onClick={handlePrevPage}
+            disabled={currentPage <= 1}
+          >
+            <FontAwesomeIcon icon={faChevronLeft} />
+          </button>
 
-              {totalPages > 4 && currentPage > 3 && (
-                <div className="footer">
-                  <span className="ellipsis"></span>
-                </div>
-              )}
-
-              {Array.from(
-                { length: totalPages > 4 ? 3 : totalPages },
-                (_, index) => {
-                  let pageToShow;
-                  if (totalPages <= 4) {
-                    pageToShow = index + 1;
-                  } else if (currentPage <= 3) {
-                    pageToShow = index + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    pageToShow = totalPages - 2 + index;
-                  } else {
-                    pageToShow = currentPage - 1 + index;
-                  }
-
-                  return (
-                    <div className="footer" key={index}>
-                      <button
-                        className={`btn-footer ${
-                          currentPage === pageToShow ? "active" : ""
-                        }`}
-                        onClick={() => changePage(pageToShow)}
-                        disabled={currentPage === pageToShow}
-                      >
-                        {pageToShow}
-                      </button>
-                    </div>
-                  );
-                }
-              )}
-
-              {totalPages > 4 && currentPage < totalPages - 2 && (
-                <div className="footer">
-                  <span className="ellipsis"></span>
-                </div>
-              )}
-
-              <button
-                className="btn-footer"
-                onClick={handleNextPage}
-                disabled={currentPage >= totalPages}
-              >
-                <FontAwesomeIcon icon={faChevronRight} />
-              </button>
+          {totalPages > 4 && currentPage > 3 && (
+            <div className="footer">
+              <span className="ellipsis"></span>
             </div>
-            {/* </div> */}
+          )}
+
+          {Array.from(
+            { length: totalPages > 4 ? 3 : totalPages },
+            (_, index) => {
+              let pageToShow;
+              if (totalPages <= 4) {
+                pageToShow = index + 1;
+              } else if (currentPage <= 3) {
+                pageToShow = index + 1;
+              } else if (currentPage >= totalPages - 2) {
+                pageToShow = totalPages - 2 + index;
+              } else {
+                pageToShow = currentPage - 1 + index;
+              }
+
+              return (
+                <div className="footer" key={index}>
+                  <button
+                    className={`btn-footer ${
+                      currentPage === pageToShow ? "active" : ""
+                    }`}
+                    onClick={() => changePage(pageToShow)}
+                    disabled={currentPage === pageToShow}
+                  >
+                    {pageToShow}
+                  </button>
+                </div>
+              );
+            }
+          )}
+
+          {totalPages > 4 && currentPage < totalPages - 2 && (
+            <div className="footer">
+              <span className="ellipsis"></span>
+            </div>
+          )}
+
+          <button
+            className="btn-footer"
+            onClick={handleNextPage}
+            disabled={currentPage >= totalPages}
+          >
+            <FontAwesomeIcon icon={faChevronRight} />
+          </button>
+        </div>
+      )}
+
+      {DSChiDoan && DSChiDoan.length <= 5 && (
+        <div className="pagination pagination">
+          {/* You can add some message or content indicating that pagination is not shown */}
+        </div>
+      )}
+
+     
       <DeleteConfirmationModal
         show={showModal}
         onHide={() => setShowModal(false)}

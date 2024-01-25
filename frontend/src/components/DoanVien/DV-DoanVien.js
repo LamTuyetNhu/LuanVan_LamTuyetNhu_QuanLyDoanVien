@@ -1,18 +1,13 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { format } from "date-fns";
 import { NavLink } from "react-router-dom";
-import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
-import DeleteSuccess from "../../Modal/DeleteSuccess";
-import DeleteConfirmationModal from "../../Modal/DeleteConfirmationModal";
-import ModalSuccess from "../../Modal/ModalSuccess";
+import ModalSuccess from "../Modal/ModalSuccess";
 import axios from "axios";
 
 import {
   faBackward,
-  faTrash,
   faSave,
   faEdit,
   faCamera,
@@ -22,27 +17,17 @@ import {
   LayTonGiao,
   LayDanToc,
   LayMotDoanVien,
-  XoaDoanVien,
-  CapNhatDoanVien,
   namhoc,
-  laymotlop,
-} from "../../../services/apiService";
+} from "../../services/apiService";
 
 const DoanVien = (props) => {
   const { IDLop, IDDoanVien, IDChiTietNamHoc } = useParams();
   const [DoanVien, setDoanVien] = useState([]);
-  const [DSDoanVien, setListDoanVien] = useState([]);
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
 
   const [NamHoc, setNamHoc] = useState([]);
   const [DanToc, setDanToc] = useState([]);
   const [TonGiao, setTonGiao] = useState([]);
   const [ChucVu, setChucVu] = useState([]);
-
-  const [showModal, setShowModal] = useState(false);
-  const [showModal1, setShowModal1] = useState(false);
 
   const [editedDoanVien, seteditedDoanVien] = useState({});
   const [isEditing, setIsEditing] = useState(false);
@@ -65,43 +50,14 @@ const DoanVien = (props) => {
   const [IDChucVu, setIDChucVu] = useState("");
   const [IDNamHoc, setIDNamHoc] = useState("");
 
-  const handleDelete = async () => {
-    try {
-      await XoaDoanVien(IDChiTietNamHoc);
-      setShowModal(false);
-      fetchDSDoanVien();
-      setShowModal1(true);
-      console.log("Hoạt động đã được xóa thành công!");
-    } catch (error) {
-      console.error("Lỗi khi xóa hoạt động:", error);
-    }
-  };
 
   useEffect(() => {
-    fetchDSDoanVien();
     layMotDoanVien();
     fetchDSNamHoc();
     fetchChucVu();
     fetchTonGiao();
     fetchDanToc();
   }, [IDLop, IDDoanVien]);
-
-  const fetchDSDoanVien = async () => {
-    try {
-      let res = await laymotlop(IDLop, currentPage);
-      console.log(res);
-
-      if (res.status === 200) {
-        setListDoanVien(res.data.dataCD);
-        setTotalPages(res.data.totalPages);
-      } else {
-        // Xử lý trường hợp lỗi
-        console.error("Lỗi khi gọi API:", res.statusText);
-      }
-    } catch (error) {
-      console.error("Lỗi khi gọi API:", error.message);
-    }
-  };
 
   const layMotDoanVien = async () => {
     try {
@@ -122,7 +78,6 @@ const DoanVien = (props) => {
     try {
       let res = await namhoc();
       if (res.status === 200) {
-        // setListKhoa(res.data.dataNH); // Cập nhật state với danh sách khóa học
         const NamHocdata = res.data.dataNH;
 
         // Kiểm tra nếu khoaData là mảng trước khi cập nhật state
@@ -777,39 +732,15 @@ const DoanVien = (props) => {
                 </button>
               )}
 
-              <button
-                className="allcus-button button-error"
-                type="button"
-                onClick={() => setShowModal(true)}
-              >
-                <FontAwesomeIcon icon={faTrash} />
-              </button>
             </div>
           </div>
         </div>
       </div>
-      <DeleteConfirmationModal
-        show={showModal}
-        onHide={() => setShowModal(false)}
-        handleDelete={handleDelete}
-      />
-
-      <NavLink
-        to={`/BCH-DoanTruong/ChiTietChiDoan/${DoanVien.IDLop}`}
-        className="navlink"
-      >
-        <DeleteSuccess show={showModal1} onHide={() => setShowModal1(false)} />
-      </NavLink>
-
-      {/* <NavLink
-        to={`/BCH-DoanTruong/ChiTietChiDoan/${DoanVien.IDLop}`}
-        className="navlink"
-      > */}
+     
         <ModalSuccess
           show={showModalUpdate}
           onHide={() => setShowModalUpdate(false)}
         />
-      {/* </NavLink> */}
     </>
   );
 };

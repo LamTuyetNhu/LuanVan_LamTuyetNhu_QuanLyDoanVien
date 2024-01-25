@@ -697,7 +697,7 @@ const [apiError, setApiError] = useState(false);
             <div className="btns">
               <button className="allcus-button" type="submit">
                 <NavLink
-                  to={`/BCH-DoanTruong/ChiTietChiDoan/${IDLop}`}
+                  to={`/ChiDoan/${IDLop}`}
                   className="navlink"
                 >
                   <FontAwesomeIcon icon={faBackward} />

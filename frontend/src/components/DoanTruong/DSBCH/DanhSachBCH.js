@@ -7,10 +7,7 @@ import { NavLink } from "react-router-dom";
 import axios from "axios";
 
 import {
-  faPlus,
-  faPenNib,
   faCloudArrowDown,
-  faDownload,
   faMagnifyingGlass,
   faChevronRight,
   faChevronLeft,
@@ -20,6 +17,7 @@ import {
   chucvu,
   searchBCH,
   namhoc,
+  getKhoa
 } from "../../../services/apiService";
 
 const DanhSachBCH = (props) => {
@@ -32,16 +30,14 @@ const DanhSachBCH = (props) => {
 
   const [idnamhoc, setNamHoc] = useState(1);
   const [DSNamHoc, setDSNamHoc] = useState([]);
-
-  const [showModalUpdate, setShowModalUpdate] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+  const [DSKhoa, setKhoa] = useState([]);
 
   const [searchData, setSearchData] = useState({
+    IDNamHoc: idnamhoc,
     MSSV: "",
     HoTen: "",
     IDChucVu: "",
-    GioiTinh: "",
+    Khoa: "",
   });
 
   const changePage = (newPage) => {
@@ -53,6 +49,7 @@ const DanhSachBCH = (props) => {
     fetchDSChucVu();
     fetchDSNamHoc();
     fetchAllData();
+    fetchDSKhoa()
   }, [currentPage, idnamhoc]);
 
   const fetchDoanVien = async () => {
@@ -63,7 +60,6 @@ const DanhSachBCH = (props) => {
         setDoanVien(res.data.dataCD);
         setTotalPages(res.data.totalPages);
       } else {
-        // Xử lý trường hợp lỗi
         console.error("Lỗi khi gọi API:", res.statusText);
       }
     } catch (error) {
@@ -75,10 +71,8 @@ const DanhSachBCH = (props) => {
     try {
       let res = await chucvu();
       if (res.status === 200) {
-        // setListKhoa(res.data.DSKhoa); // Cập nhật state với danh sách khóa học
         const khoaData = res.data.dataCV;
 
-        // Kiểm tra nếu khoaData là mảng trước khi cập nhật state
         if (Array.isArray(khoaData)) {
           setListChucVu(khoaData);
         } else {
@@ -96,10 +90,8 @@ const DanhSachBCH = (props) => {
     try {
       let res = await namhoc();
       if (res.status === 200) {
-        // setListKhoa(res.data.dataNH); // Cập nhật state với danh sách khóa học
         const NamHocdata = res.data.dataNH;
 
-        // Kiểm tra nếu khoaData là mảng trước khi cập nhật state
         if (Array.isArray(NamHocdata)) {
           setDSNamHoc(NamHocdata);
         } else {
@@ -113,17 +105,33 @@ const DanhSachBCH = (props) => {
     }
   };
 
+  const fetchDSKhoa = async () => {
+    try {
+      let res = await getKhoa();
+      if (res.status === 200) {
+        const Khoa = res.data.dataCD;
+
+        // if (Array.isArray(NamHocdata)) {
+          setKhoa(Khoa);
+        // } else {
+        //   console.error("Dữ liệu khóa không hợp lệ:", NamHocdata);
+        // }
+      } else {
+        console.error("Lỗi khi gọi API:", res.statusText);
+      }
+    } catch (error) {
+      console.error("Lỗi khi gọi API:", error.message);
+    }
+  };
+
   const handleNextPage = () => {
     if (currentPage < totalPages) {
-      // Chỉ tăng currentPage nếu không phải là trang cuối cùng
       setCurrentPage(currentPage + 1);
     }
   };
 
-  // Hàm xử lý khi nhấn nút sang trái
   const handlePrevPage = () => {
     if (currentPage > 1) {
-      // Chỉ giảm currentPage nếu không phải là trang đầu tiên
       setCurrentPage(currentPage - 1);
     }
   };
@@ -156,20 +164,16 @@ const DanhSachBCH = (props) => {
     try {
       let allDataArray = [];
 
-      // Lặp qua tất cả các trang
       for (let page = 1; page <= totalPages; page++) {
         let res = await laydsBCH(page, idnamhoc);
 
         if (res.status === 200) {
-          // Tích hợp dữ liệu từ trang hiện tại vào mảng
           allDataArray = [...allDataArray, ...res.data.dataCD];
         } else {
-          // Xử lý trường hợp lỗi
           console.error("Lỗi khi gọi API:", res.statusText);
         }
       }
 
-      // Cập nhật mảng dữ liệu chung
       setAllData(allDataArray);
     } catch (error) {
       console.error("Lỗi khi gọi API:", error.message);
@@ -177,25 +181,24 @@ const DanhSachBCH = (props) => {
   };
 
   const exportToExcel = async () => {
-    // Tạo một mảng chứa dữ liệu bạn muốn xuất
     await fetchAllData();
 
     const dataToExport = allData.map((item) => {
       return {
         "Mã Chi Đoàn": item.MaLop,
         "Tên Chi Đoàn": item.TenLop,
-        Khóa: item.Khoa,
-        MSSV: item.MSSV,
-        HoTen: item.HoTen,
-        Email: item.Email,
-        SoDT: item.SoDT,
-        GioiTinh:
+        "Khóa": item.Khoa,
+        "MSSV": item.MSSV,
+        "Họ tên": item.HoTen,
+        "Email": item.Email,
+        "Số điện thoại": item.SoDT,
+        "Giới tính":
           item.GioiTinh === 0 ? "Nữ" : item.GioiTinh === 1 ? "Nam" : "Khác",
-        QueQuan: item.QueQuan,
-        DanToc: item.TenDanToc,
-        TonGiao: item.TenTonGiao,
-        NgaySinh: format(new Date(item.NgaySinh), "dd/MM/yyyy"),
-        NgayVaoDoan: format(new Date(item.NgayVaoDoan), "dd/MM/yyyy"),
+        "Quê quán": item.QueQuan,
+        "Dân tộc": item.TenDanToc,
+        "TÔn giáo": item.TenTonGiao,
+        "Ngày sinh": format(new Date(item.NgaySinh), "dd/MM/yyyy"),
+        "Ngày vào đoàn": format(new Date(item.NgayVaoDoan), "dd/MM/yyyy"),
         "Trạng thái": item.ttLop === 1 ? "Đang hoạt động" : "Đã tốt nghiệp",
       };
     });
@@ -271,7 +274,7 @@ const DanhSachBCH = (props) => {
                     setSearchData({ ...searchData, IDChucVu: e.target.value });
                   }}
                 >
-                  <option value="Chức vụ">Chọn chức vụ</option>
+                  <option value="" disabled selected>Chọn chức vụ</option>
                   {DSChucVu.map((item, index) => {
                     return (
                       <option key={index} value={item.IDChucVu}>
@@ -282,6 +285,26 @@ const DanhSachBCH = (props) => {
                 </select>
               </div>
               <div className="searchDV-input">
+              <select
+                className="search_name"
+                value={searchData.Khoa}
+                onChange={(e) =>
+                  setSearchData({ ...searchData, Khoa: e.target.value })
+                }
+              >
+                <option value="" disabled selected>
+                  Chọn khóa
+                </option>
+                {DSKhoa.map((khoa, index) => {
+                  return (
+                    <option key={index} value={khoa.khoa}>
+                      {khoa.khoa}
+                    </option>
+                  );
+                })}
+              </select>
+              </div>
+              {/* <div className="searchDV-input">
                 <select
                   type="text"
                   className="search_name"
@@ -295,7 +318,7 @@ const DanhSachBCH = (props) => {
                   <option value="0">Nữ</option>
                   <option value="2">Khác</option>
                 </select>
-              </div>
+              </div> */}
               <button className="formatButton" onClick={handleSearch}>
                 <FontAwesomeIcon icon={faMagnifyingGlass} />
               </button>

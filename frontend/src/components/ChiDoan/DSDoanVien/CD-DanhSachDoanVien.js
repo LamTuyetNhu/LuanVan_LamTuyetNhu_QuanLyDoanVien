@@ -21,7 +21,6 @@ import {
   searchDoanVien,
   laymotlop,
   namhoc,
-  namhoccuachidoan,
   chucvu,
 } from "../../../services/apiService";
 
@@ -57,7 +56,6 @@ const DanhSachDoanVien = (props) => {
     fetchDSChucVu();
     fetchAllData();
     fetchDSNamHoc();
-    // fetchDSNamHocCuaLop()
   }, [IDLop, currentPage, totalPages, idnamhoc]);
 
   const fetchDSDoanVien = async () => {
@@ -395,7 +393,7 @@ const DanhSachDoanVien = (props) => {
               </button>
             </div>
             <div className="buttonSearch">
-              <NavLink to={`/BCH-DoanTruong/ThemMoi-DoanVien/${IDLop}`}>
+              <NavLink to={`/ChiDoan/${IDLop}/ThemMoi-DoanVien`}>
                 <button className="formatButton">
                   <FontAwesomeIcon icon={faPlus} />
                 </button>
@@ -467,7 +465,7 @@ const DanhSachDoanVien = (props) => {
 
                       <td className="btnOnTable1">
                         <NavLink
-                          to={`/BCH-DoanTruong/ChiTietChiDoan/${item.IDLop}/${item.IDDoanVien}/${item.IDChiTietNamHoc}`}
+                          to={`/ChiDoan/${item.IDLop}/${item.IDDoanVien}/${item.IDChiTietNamHoc}`}
                         >
                           <button className="btnOnTable">
                             <FontAwesomeIcon icon={faEye} />

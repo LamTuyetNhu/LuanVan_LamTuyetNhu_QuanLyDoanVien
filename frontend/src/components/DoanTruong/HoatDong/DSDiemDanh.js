@@ -28,7 +28,7 @@ const DiemDanh = (props) => {
 
   const fetchDSDiemDanh = async () => {
     try {
-      let res = await LayDSDiemDanh(IDHoatDong);
+      let res = await LayDSDiemDanh(IDHoatDong, IDNamHoc);
       console.log("API Response:", res.data); 
       if (res.status === 200) {
         setDSDiemDanh(res.data.ChiTietHD);
@@ -124,7 +124,7 @@ const DiemDanh = (props) => {
                 })}
               {DSDiemDanh && DSDiemDanh.length === 0 && (
                 <tr className="tablenone">
-                  <td className="tablenone">Chưa có có chi đoàn đóng phí!</td>
+                  <td className="tablenone">Chưa có có chi đoàn nào!</td>
                 </tr>
               )}
             </tbody>

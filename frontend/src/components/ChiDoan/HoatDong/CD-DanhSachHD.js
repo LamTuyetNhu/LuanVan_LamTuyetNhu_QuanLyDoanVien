@@ -6,34 +6,35 @@ import { format } from "date-fns";
 import { NavLink } from "react-router-dom";
 
 import {
-  faPlus,
   faEye,
-  faPenToSquare,
-  faCloudArrowDown,
-  faDownload,
+  faEdit,
   faMagnifyingGlass,
-  faChevronRight,
-  faChevronLeft,
 } from "@fortawesome/free-solid-svg-icons";
-import { laydshoatdong, searchHoatDong } from "../../../services/apiService";
+import {
+  namhoc,
+  laydshoatdongcualop,
+  searchHoatDong,
+} from "../../../services/apiService";
 
 const DanhSachHoatDong = (props) => {
+  const { IDLop } = useParams();
+
   const [DSHoatDong, setDSHoatDong] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+
+  const [idnamhoc, setIDNamHoc] = useState(1);
+  const [NamHoc, setNamHoc] = useState([]);
 
   useEffect(() => {
     fetchDSHoatDong();
-    fetchAllData();
-  }, [currentPage]);
+    fetchDSNamHoc();
+  }, [IDLop, idnamhoc]);
 
   const fetchDSHoatDong = async () => {
     try {
-      let res = await laydshoatdong(currentPage);
+      let res = await laydshoatdongcualop(IDLop, idnamhoc);
 
       if (res.status === 200) {
         setDSHoatDong(res.data.dataHD);
-        setTotalPages(res.data.totalPages);
       } else {
         // Xử lý trường hợp lỗi
         console.error("Lỗi khi gọi API:", res.statusText);
@@ -49,6 +50,27 @@ const DanhSachHoatDong = (props) => {
     ttHD: "",
   });
 
+  const fetchDSNamHoc = async () => {
+    try {
+      let res = await namhoc();
+      if (res.status === 200) {
+        // setListKhoa(res.data.dataNH); // Cập nhật state với danh sách khóa học
+        const NamHocdata = res.data.dataNH;
+
+        // Kiểm tra nếu khoaData là mảng trước khi cập nhật state
+        if (Array.isArray(NamHocdata)) {
+          setNamHoc(NamHocdata);
+        } else {
+          console.error("Dữ liệu khóa không hợp lệ:", NamHocdata);
+        }
+      } else {
+        console.error("Lỗi khi gọi API:", res.statusText);
+      }
+    } catch (error) {
+      console.error("Lỗi khi gọi API:", error.message);
+    }
+  };
+
   const handleSearch = async () => {
     try {
       const trimmedTenHoatDong = searchData.TenHoatDong.trim();
@@ -56,7 +78,7 @@ const DanhSachHoatDong = (props) => {
       let res = await searchHoatDong({
         ...searchData,
         TenHoatDong: trimmedTenHoatDong,
-      }); // Assuming you have implemented the search API
+      }); 
 
       console.log(res);
       if (res.status === 200) {
@@ -69,84 +91,34 @@ const DanhSachHoatDong = (props) => {
     }
   };
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      // Chỉ tăng currentPage nếu không phải là trang cuối cùng
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  // Hàm xử lý khi nhấn nút sang trái
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      // Chỉ giảm currentPage nếu không phải là trang đầu tiên
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const [allData, setAllData] = useState([]);
-
-  const fetchAllData = async () => {
-    try {
-      let allDataArray = [];
-
-      // Lặp qua tất cả các trang
-      for (let page = 1; page <= totalPages; page++) {
-        let res = await laydshoatdong(page);
-
-        if (res.status === 200) {
-          // Tích hợp dữ liệu từ trang hiện tại vào mảng
-          allDataArray = [...allDataArray, ...res.data.dataHD];
-        } else {
-          // Xử lý trường hợp lỗi
-          console.error("Lỗi khi gọi API:", res.statusText);
-        }
-      }
-
-      // Cập nhật mảng dữ liệu chung
-      setAllData(allDataArray);
-    } catch (error) {
-      console.error("Lỗi khi gọi API:", error.message);
-    }
-  };
-
-  const exportToExcel = () => {
-    // Tạo một mảng chứa dữ liệu bạn muốn xuất
-    const dataToExport = allData.map((item) => {
-      return {
-        TenHoatDong: item.TenHoatDong,
-        NgayBanHanh: format(new Date(item.NgayTao), "dd/MM/yyyy"),
-
-        NgayBatDau: format(new Date(item.NgayBanHanh), "dd/MM/yyyy"),
-        NgayHetHan: format(new Date(item.NgayHetHan), "dd/MM/yyyy"),
-        "Trạng thái":
-          item.ttHD === 0
-            ? "Chưa ban hành"
-            : item.ttHD === 1
-            ? "Đã ban hành"
-            : item.ttHD === 2
-            ? "Hoàn thành"
-            : "Đã xóa",
-      };
-    });
-
-    // Tạo một đối tượng Workbook từ mảng dữ liệu
-    const ws = XLSX.utils.json_to_sheet(dataToExport);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "DanhSachHD");
-
-    // Xuất file Excel
-    XLSX.writeFile(wb, "DanhSachHoatDong.xlsx");
-  };
-
-  const changePage = (newPage) => {
-    setCurrentPage(newPage);
+  const handleNamHocChange = (e) => {
+    const selectedIDNamHoc = e.target.value;
+    setIDNamHoc(selectedIDNamHoc);
   };
 
   return (
     <>
       <div className="container-fluid app__content">
-        <h2 className="text-center">Danh Sách Hoạt Động</h2>
+        <div className="namhoc-center">
+          <h2 className="text-center">Danh Sách Hoạt Động</h2>
+
+          <div className="searchDV-input">
+            <select
+              type="text"
+              className="search_name"
+              value={idnamhoc}
+              onChange={handleNamHocChange}
+            >
+              {NamHoc.map((item, index) => {
+                return (
+                  <option key={index} value={item.IDNamHoc}>
+                    {item.TenNamHoc}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+        </div>
         <div className="search">
           <div className="searchDV">
             <div className="">
@@ -209,25 +181,10 @@ const DanhSachHoatDong = (props) => {
               </div>
               <button className="formatButton" onClick={handleSearch}>
                 {" "}
-                <FontAwesomeIcon icon={faMagnifyingGlass} /> 
+                <FontAwesomeIcon icon={faMagnifyingGlass} />
               </button>
             </div>
-            <div className="buttonSearch">
-              {" "}
-              <NavLink to="/BCH-DoanTruong/ThemMoi">
-                <button className="formatButton">
-                  {" "}
-                  <FontAwesomeIcon icon={faPlus} /> 
-                </button>
-              </NavLink>
-              <div>
 
-              <button className="formatButton" onClick={exportToExcel}>
-                {" "}
-                <FontAwesomeIcon icon={faCloudArrowDown} /> 
-              </button>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -237,15 +194,14 @@ const DanhSachHoatDong = (props) => {
               <thead>
                 <tr>
                   <th className="table-item">STT</th>
-                  <th className="table-item">Tên Hoạt Động</th>
+                  <th className="table-item">Tên hoạt động</th>
                   <th>Ngày ban hành</th>
                   <th>Ngày bắt đầu</th>
 
                   <th>Ngày hết hạn</th>
                   <th>Trạng thái</th>
-                  <th className="table-item2">Điểm danh</th>
-                  <th className="table-item2">Cập nhật</th>
-
+                  <th className="table-item2"> Danh sách điểm danh</th>
+                  <th className="table-item2">Chi tiết</th>
                 </tr>
               </thead>
               <tbody id="myTable">
@@ -266,15 +222,17 @@ const DanhSachHoatDong = (props) => {
                           {format(new Date(item.NgayHetHan), "dd/MM/yyyy")}
                         </td>
 
-                        <td className={` ${
-                          item.ttHD === 0
-                          ? ""
-                          : item.ttHD === 1
-                          ? "daTotNghiep"
-                          : item.ttHD === 2
-                          ? "chuaTotNghiep"
-                          : "hoanthanh"
-                        }`}>
+                        <td
+                          className={` ${
+                            item.ttHD === 0
+                              ? ""
+                              : item.ttHD === 1
+                              ? "daTotNghiep"
+                              : item.ttHD === 2
+                              ? "chuaTotNghiep"
+                              : "hoanthanh"
+                          }`}
+                        >
                           {item.ttHD === 0
                             ? "Chưa ban hành"
                             : item.ttHD === 1
@@ -285,22 +243,21 @@ const DanhSachHoatDong = (props) => {
                         </td>
 
                         <td className="btnOnTable1">
-                        <NavLink
-                          to={`/BCH-DoanTruong/ChiTietHoatDong/DiemDanh-ChiDoan/${item.IDHoatDong}`}
-                        >
-                          <button className="btnOnTable ">
-                            <FontAwesomeIcon icon={faEye} />
-                          </button>
-                        </NavLink>
-                      </td>
+                          <NavLink
+                            to={`/ChiDoan/${IDLop}/ChiTietDiemDanh/${item.IDHoatDong}/${item.IDNamHoc}`}
+                          >
+                            <button className="btnOnTable clcapnhat ">
+                              <FontAwesomeIcon icon={faEdit} />
+                            </button>
+                          </NavLink>
+                        </td>
 
                         <td className="btnOnTable1 thButton">
                           <NavLink
-                            to={`/BCH-DoanTruong/ChiTietHoatDong/${item.IDHoatDong}`}
+                            to={`/ChiDoan/${IDLop}/ChiTietHoatDong/${item.IDHoatDong}`}
                           >
                             <button className="btnOnTable">
-                            <FontAwesomeIcon icon={faPenToSquare} />
-
+                              <FontAwesomeIcon icon={faEye} />
                             </button>
                           </NavLink>
                         </td>
@@ -309,14 +266,13 @@ const DanhSachHoatDong = (props) => {
                   })}
                 {DSHoatDong && DSHoatDong.length === 0 && (
                   <tr className="tablenone">
-                    <td className="tablenone">Không có danh sách điểm danh nào!</td>
+                    <td className="tablenone">Không có hoạt động nào!</td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
         </div>
-
       </div>
     </>
   );

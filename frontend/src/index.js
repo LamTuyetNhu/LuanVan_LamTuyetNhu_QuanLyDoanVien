@@ -2,6 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import BCH from "./BCH"
+import DVDoanVien from "./DoanVien";
+
 import reportWebVitals from "./reportWebVitals";
 import { Provider } from "react-redux";
 import store from "./redux/store";
@@ -29,6 +31,26 @@ import DanhSachHoatDong from "./components/DoanTruong/HoatDong/DanhSachHD";
 import ThemMoiHoatDong from "./components/DoanTruong/HoatDong/ThemMoiHD";
 import ChiTietHoatDong from "./components/DoanTruong/HoatDong/ChiTietHoatDong";
 import DiemDanhChiDoan from "./components/DoanTruong/HoatDong/DSDiemDanh"
+
+/* Chi đoàn */
+import CDDanhSachDoanVien from "./components/ChiDoan/DSDoanVien/CD-DanhSachDoanVien"
+import CDDoanVien from "./components/ChiDoan/DSDoanVien/CD-DoanVien"
+import CDThemMoiDoanVien from "./components/ChiDoan/DSDoanVien/CD-ThemMoiDoanVien"
+import CDDanhSachBCH from "./components/ChiDoan/DSBCH/CD-DanhSachBCH"
+import CDBanChapHanh from "./components/ChiDoan/DSBCH/CD-BCH"
+
+// import CDSinhVienNamTot from "./components/ChiDoan/DSBCH/CD-BCH"
+
+import CDDoanPhi from "./components/ChiDoan/DoanPhi/CD-DoanPhi"
+import CDDSNopDoanPhi from "./components/ChiDoan/DoanPhi/CD-DSNopDoanPhi"
+
+import CDHoatDong from "./components/ChiDoan/HoatDong/CD-DanhSachHD"
+import CDDSDiemDanhHD from "./components/ChiDoan/HoatDong/CD-DSDiemDanh"
+import CDChiTietHoatDong from "./components/ChiDoan/HoatDong/CD-ChiTietHoatDong";
+
+/* Doàn viên */
+import DVDoanVienTrangChu from "./components/DoanVien/DV-DoanVienTrangChu"
+import DVThongTinCaNhan from "./components/DoanVien/DV-DoanVien"
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -59,16 +81,33 @@ root.render(
           <Route path="HoatDong" element={<DanhSachHoatDong />} />
           <Route path="ThemMoi" element={<ThemMoiHoatDong />} />
           <Route path="ChiTietHoatDong/:IDHoatDong" element={<ChiTietHoatDong />} />
-          <Route path="ChiTietHoatDong/DiemDanhChiDoan/:IDHoatDong" element={<DiemDanhChiDoan />} />
+          <Route path="ChiTietHoatDong/DiemDanhChiDoan/:IDHoatDong/:IDNamHoc" element={<DiemDanhChiDoan />} />
 
         </Route>
 
-        <Route path="/DanhSachDoanVien" element={<BCH />}>
-          <Route index element={<DanhSachDoanVien />} />
+        <Route path="/ChiDoan/:IDLop" element={<BCH />}>
+          <Route index element={<CDDanhSachDoanVien />} />
+          <Route path=":IDDoanVien/:IDChiTietNamHoc" element={<CDDoanVien />} />
+          <Route path="ThemMoi-DoanVien" element={<CDThemMoiDoanVien />} />
+          <Route path="DanhSachBCH" element={<CDDanhSachBCH />} />
+          <Route path="DanhSachBCH/:IDDoanVien/:IDChiTietNamHoc" element={<CDBanChapHanh />} />
+
+          <Route path="DoanPhi" element={<CDDoanPhi />} />
+          <Route path="ChiTietDoanPhi/:IDDoanPhi/:IDNamHoc" element={<CDDSNopDoanPhi />} />
+
+          <Route path="HoatDong" element={<CDHoatDong />} />
+          <Route path="ChiTietDiemDanh/:IDHoatDong/:IDNamHoc" element={<CDDSDiemDanhHD />} />
+          <Route path="ChiTietHoatDong/:IDHoatDong" element={<CDChiTietHoatDong />} />
+
+          {/* <Route path="DanhSachSVNamTot" element={<CDSinhVienNamTot />} /> */}
+
+          
+
         </Route>
 
-        <Route path="/DoanVien" element={<App />}>
-          <Route index element={<DoanVien />} />
+        <Route path="/DoanVien" element={<DVDoanVien />}>
+          <Route index element={<DVDoanVienTrangChu />} />
+          <Route path="ThongTinCaNhan" element={<DVThongTinCaNhan />} />
         </Route>
       </Routes>
     </BrowserRouter>

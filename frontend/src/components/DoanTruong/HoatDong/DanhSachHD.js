@@ -15,12 +15,17 @@ import {
   faChevronRight,
   faChevronLeft,
 } from "@fortawesome/free-solid-svg-icons";
-import { namhoc, laydshoatdong, searchHoatDong } from "../../../services/apiService";
+import {
+  namhoc,
+  laydshoatdong,
+  searchHoatDong,
+} from "../../../services/apiService";
 
 const DanhSachHoatDong = (props) => {
   const [DSHoatDong, setDSHoatDong] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
 
   const [idnamhoc, setIDNamHoc] = useState(1);
   const [NamHoc, setNamHoc] = useState([]);
@@ -29,7 +34,6 @@ const DanhSachHoatDong = (props) => {
     fetchDSHoatDong();
     fetchAllData();
     fetchDSNamHoc();
-
   }, [currentPage, idnamhoc]);
 
   const fetchDSHoatDong = async () => {
@@ -174,11 +178,15 @@ const DanhSachHoatDong = (props) => {
     setIDNamHoc(selectedIDNamHoc);
   };
 
+  const calculateIndex = (pageIndex, pageSize, itemIndex) => {
+    return (pageIndex - 1) * pageSize + itemIndex + 1;
+  };
+
   return (
     <>
       <div className="container-fluid app__content">
-      <div className="namhoc-center">
-      <h2 className="text-center">Danh Sách Hoạt Động</h2>
+        <div className="namhoc-center">
+          <h2 className="text-center">Danh Sách Hoạt Động</h2>
 
           <div className="searchDV-input">
             <select
@@ -259,7 +267,7 @@ const DanhSachHoatDong = (props) => {
               </div>
               <button className="formatButton" onClick={handleSearch}>
                 {" "}
-                <FontAwesomeIcon icon={faMagnifyingGlass} /> 
+                <FontAwesomeIcon icon={faMagnifyingGlass} />
               </button>
             </div>
             <div className="buttonSearch">
@@ -267,15 +275,14 @@ const DanhSachHoatDong = (props) => {
               <NavLink to="/BCH-DoanTruong/ThemMoi">
                 <button className="formatButton">
                   {" "}
-                  <FontAwesomeIcon icon={faPlus} /> 
+                  <FontAwesomeIcon icon={faPlus} />
                 </button>
               </NavLink>
               <div>
-
-              <button className="formatButton" onClick={exportToExcel}>
-                {" "}
-                <FontAwesomeIcon icon={faCloudArrowDown} /> 
-              </button>
+                <button className="formatButton" onClick={exportToExcel}>
+                  {" "}
+                  <FontAwesomeIcon icon={faCloudArrowDown} />
+                </button>
               </div>
             </div>
           </div>
@@ -295,16 +302,17 @@ const DanhSachHoatDong = (props) => {
                   <th>Trạng thái</th>
                   <th className="table-item2">Điểm danh</th>
                   <th className="table-item2">Cập nhật</th>
-
                 </tr>
               </thead>
               <tbody id="myTable">
                 {DSHoatDong &&
                   DSHoatDong.length > 0 &&
                   DSHoatDong.map((item, index) => {
+                    const stt = calculateIndex(currentPage, pageSize, index);
+
                     return (
                       <tr key={`table-hoatdong-${index}`} className="tableRow">
-                        <td className="col-center">{index + 1}</td>
+                        <td className="col-center">{stt}</td>
                         <td className="">{item.TenHoatDong}</td>
                         <td className="col-center">
                           {format(new Date(item.NgayTao), "dd/MM/yyyy")}
@@ -316,15 +324,17 @@ const DanhSachHoatDong = (props) => {
                           {format(new Date(item.NgayHetHan), "dd/MM/yyyy")}
                         </td>
 
-                        <td className={` ${
-                          item.ttHD === 0
-                          ? ""
-                          : item.ttHD === 1
-                          ? "daTotNghiep"
-                          : item.ttHD === 2
-                          ? "chuaTotNghiep"
-                          : "hoanthanh"
-                        }`}>
+                        <td
+                          className={` ${
+                            item.ttHD === 0
+                              ? ""
+                              : item.ttHD === 1
+                              ? "daTotNghiep"
+                              : item.ttHD === 2
+                              ? "chuaTotNghiep"
+                              : "hoanthanh"
+                          }`}
+                        >
                           {item.ttHD === 0
                             ? "Chưa ban hành"
                             : item.ttHD === 1
@@ -335,22 +345,21 @@ const DanhSachHoatDong = (props) => {
                         </td>
 
                         <td className="btnOnTable1">
-                        <NavLink
-                          to={`/BCH-DoanTruong/ChiTietHoatDong/DiemDanhChiDoan/${item.IDHoatDong}`}
-                        >
-                          <button className="btnOnTable ">
-                            <FontAwesomeIcon icon={faEye} />
-                          </button>
-                        </NavLink>
-                      </td>
+                          <NavLink
+                            to={`/BCH-DoanTruong/ChiTietHoatDong/DiemDanhChiDoan/${item.IDHoatDong}/${item.IDNamHoc}`}
+                          >
+                            <button className="btnOnTable ">
+                              <FontAwesomeIcon icon={faEye} />
+                            </button>
+                          </NavLink>
+                        </td>
 
                         <td className="btnOnTable1 thButton">
                           <NavLink
                             to={`/BCH-DoanTruong/ChiTietHoatDong/${item.IDHoatDong}`}
                           >
                             <button className="btnOnTable">
-                            <FontAwesomeIcon icon={faPenToSquare} />
-
+                              <FontAwesomeIcon icon={faPenToSquare} />
                             </button>
                           </NavLink>
                         </td>
@@ -367,65 +376,133 @@ const DanhSachHoatDong = (props) => {
           </div>
         </div>
 
+        {DSHoatDong && DSHoatDong.length > 0 && (
         <div className="pagination pagination1">
-              <button
-                className="btn-footer"
-                onClick={handlePrevPage}
-                disabled={currentPage <= 1}
-              >
-                <FontAwesomeIcon icon={faChevronLeft} />
-              </button>
+          <button
+            className="btn-footer"
+            onClick={handlePrevPage}
+            disabled={currentPage <= 1}
+          >
+            <FontAwesomeIcon icon={faChevronLeft} />
+          </button>
 
-              {totalPages > 4 && currentPage > 3 && (
-                <div className="footer">
-                  <span className="ellipsis"></span>
-                </div>
-              )}
-
-              {Array.from(
-                { length: totalPages > 4 ? 3 : totalPages },
-                (_, index) => {
-                  let pageToShow;
-                  if (totalPages <= 4) {
-                    pageToShow = index + 1;
-                  } else if (currentPage <= 3) {
-                    pageToShow = index + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    pageToShow = totalPages - 2 + index;
-                  } else {
-                    pageToShow = currentPage - 1 + index;
-                  }
-
-                  return (
-                    <div className="footer" key={index}>
-                      <button
-                        className={`btn-footer ${
-                          currentPage === pageToShow ? "active" : ""
-                        }`}
-                        onClick={() => changePage(pageToShow)}
-                        disabled={currentPage === pageToShow}
-                      >
-                        {pageToShow}
-                      </button>
-                    </div>
-                  );
-                }
-              )}
-
-              {totalPages > 4 && currentPage < totalPages - 2 && (
-                <div className="footer">
-                  <span className="ellipsis"></span>
-                </div>
-              )}
-
-              <button
-                className="btn-footer"
-                onClick={handleNextPage}
-                disabled={currentPage >= totalPages}
-              >
-                <FontAwesomeIcon icon={faChevronRight} />
-              </button>
+          {totalPages > 4 && currentPage > 3 && (
+            <div className="footer">
+              <span className="ellipsis"></span>
             </div>
+          )}
+
+          {Array.from(
+            { length: totalPages > 4 ? 3 : totalPages },
+            (_, index) => {
+              let pageToShow;
+              if (totalPages <= 4) {
+                pageToShow = index + 1;
+              } else if (currentPage <= 3) {
+                pageToShow = index + 1;
+              } else if (currentPage >= totalPages - 2) {
+                pageToShow = totalPages - 2 + index;
+              } else {
+                pageToShow = currentPage - 1 + index;
+              }
+
+              return (
+                <div className="footer" key={index}>
+                  <button
+                    className={`btn-footer ${
+                      currentPage === pageToShow ? "active" : ""
+                    }`}
+                    onClick={() => changePage(pageToShow)}
+                    disabled={currentPage === pageToShow}
+                  >
+                    {pageToShow}
+                  </button>
+                </div>
+              );
+            }
+          )}
+
+          {totalPages > 4 && currentPage < totalPages - 2 && (
+            <div className="footer">
+              <span className="ellipsis"></span>
+            </div>
+          )}
+
+          <button
+            className="btn-footer"
+            onClick={handleNextPage}
+            disabled={currentPage >= totalPages}
+          >
+            <FontAwesomeIcon icon={faChevronRight} />
+          </button>
+        </div>
+      )}
+
+      {DSHoatDong && DSHoatDong.length <= 5 && (
+        <div className="pagination pagination1">
+          {/* You can add some message or content indicating that pagination is not shown */}
+        </div>
+      )}
+{/* 
+        <div className="pagination pagination1">
+          <button
+            className="btn-footer"
+            onClick={handlePrevPage}
+            disabled={currentPage <= 1}
+          >
+            <FontAwesomeIcon icon={faChevronLeft} />
+          </button>
+
+          {totalPages > 4 && currentPage > 3 && (
+            <div className="footer">
+              <span className="ellipsis"></span>
+            </div>
+          )}
+
+          {Array.from(
+            { length: totalPages > 4 ? 3 : totalPages },
+            (_, index) => {
+              let pageToShow;
+              if (totalPages <= 4) {
+                pageToShow = index + 1;
+              } else if (currentPage <= 3) {
+                pageToShow = index + 1;
+              } else if (currentPage >= totalPages - 2) {
+                pageToShow = totalPages - 2 + index;
+              } else {
+                pageToShow = currentPage - 1 + index;
+              }
+
+              return (
+                <div className="footer" key={index}>
+                  <button
+                    className={`btn-footer ${
+                      currentPage === pageToShow ? "active" : ""
+                    }`}
+                    onClick={() => changePage(pageToShow)}
+                    disabled={currentPage === pageToShow}
+                  >
+                    {pageToShow}
+                  </button>
+                </div>
+              );
+            }
+          )}
+
+          {totalPages > 4 && currentPage < totalPages - 2 && (
+            <div className="footer">
+              <span className="ellipsis"></span>
+            </div>
+          )}
+
+          <button
+            className="btn-footer"
+            onClick={handleNextPage}
+            disabled={currentPage >= totalPages}
+          >
+            <FontAwesomeIcon icon={faChevronRight} />
+          </button>
+        </div> */}
       </div>
     </>
   );

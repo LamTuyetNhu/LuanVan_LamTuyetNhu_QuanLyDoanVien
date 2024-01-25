@@ -17,6 +17,7 @@ body {
   --color: rgb(0, 0, 146);
   --border: #e1e1e1;
   --red: hsl(0, 50%, 50%);
+  --capnhat: #EECFA1;
 }
 
 html {
@@ -359,11 +360,15 @@ header {
 }
 
 .bgcapnhat {
-  background-color: #bba075 !important;
+  background-color: var(--capnhat) !important;
+}
+
+.bgcapnhat:hover {
+  box-shadow: 0 0 1px var(--capnhat), 0 0 6px var(--capnhat), 0 0 18px var(--capnhat) !important;
 }
 
 .clcapnhat {
-color: yellowgreen !important;
+color: var(--capnhat) !important;
 }
 
 .mauxoa {
@@ -841,10 +846,9 @@ color: yellowgreen !important;
   justify-content: center;
 }
 
-// .pagination1 {
-//   position: fixed;
-//   bottom: 0;
-// }
+.pagination1 {
+ display: none;
+}
 
 .btn-footer {
   padding: 12px 18px;
@@ -863,6 +867,12 @@ color: yellowgreen !important;
 .giang-vien-item img {
   width: 100%;
 }
+
+.giang-vien-item1 {
+  position: relative;
+  justify-content: center;
+}
+
 .giang-vien-item .img-hover-zoom {
   width: 180px;
   height: 180px;
@@ -969,4 +979,44 @@ color: yellowgreen !important;
 .date-input {
   appearance: none !important;
   padding-right: 30px; /* Cho không gian cho icon */
+}
+
+.margin-bottom {
+  height: 100px;
+  // margin-bottom: 32px;
+}
+
+.card-title1,
+.card-title2,
+.card-title3 {
+  text-align: center;
+  font-size: 1.5em;
+  padding: 12px;
+}
+
+.card-title1 {
+  background-color: var(--rgba);
+}
+
+.card-title2 {
+  background-color: #FFFACD;
+}
+
+.card-title3 {
+  background-color: #C1CDC1;
+}
+
+.card-opacity1 {
+  cursor: pointer;
+  box-shadow: 0 0 1px var(--rgba), 0 0 6px var(--rgba), 0 0 18px var(--rgba);
+}
+
+.card-opacity2 {
+  cursor: pointer;
+  box-shadow: 0 0 1px #FFFACD, 0 0 6px #FFFACD, 0 0 18px #FFFACD;
+}
+
+.card-opacity3 {
+  cursor: pointer;
+  box-shadow: 0 0 1px #C1CDC1, 0 0 6px #C1CDC1, 0 0 18px #C1CDC1;
 }

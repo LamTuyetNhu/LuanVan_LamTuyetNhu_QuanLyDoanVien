@@ -5,34 +5,36 @@ import { useParams } from "react-router-dom";
 import Modal from "../../Modal/Modal";
 import { faSave, faEdit } from "@fortawesome/free-solid-svg-icons";
 import {
-  LayDSNopDoanPhi,
-  SaveCheckboxStates,
+  LayDSDiemDanhCuaLop,
+  SaveCheckboxStatesDiemDanhCuaLop,
 } from "../../../services/apiService";
 
-const NopDoanPhi = (props) => {
-  const [DSNopDoanPhi, setDSNopDoanPhi] = useState([]);
-  const [TenDP, setTenDP] = useState([]);
+const DiemDanh = (props) => {
+  const { IDLop } = useParams();
+
+  const [DSDiemDanh, setDSDiemDanh] = useState([]);
+  const [TenHoatDong, setTenHoatDong] = useState([]);
   const [TenNamHoc, setTenNamHoc] = useState([]);
 
   const [checkboxStates, setCheckboxStates] = useState([]);
-  const { IDDoanPhi, IDNamHoc } = useParams();
+  const { IDHoatDong, IDNamHoc } = useParams();
 
   useEffect(() => {
-    fetchDSNopDoanPhi();
-  }, [IDDoanPhi, IDNamHoc]);
+    fetchDSDiemDanh();
+  }, [IDHoatDong, IDNamHoc]);
 
   useEffect(() => {
-    const initialCheckboxStates = DSNopDoanPhi.map((item) => item.Check === 1);
+    const initialCheckboxStates = DSDiemDanh.map((item) => item.Check === 1);
     setCheckboxStates(initialCheckboxStates);
-  }, [DSNopDoanPhi]);
+  }, [DSDiemDanh]);
 
-  const fetchDSNopDoanPhi = async () => {
+  const fetchDSDiemDanh = async () => {
     try {
-      let res = await LayDSNopDoanPhi(IDDoanPhi, IDNamHoc);
+      let res = await LayDSDiemDanhCuaLop(IDLop, IDHoatDong, IDNamHoc);
       console.log("API Response:", res.data);
       if (res.status === 200) {
-        setDSNopDoanPhi(res.data.ChiTietDoanPhi);
-        setTenDP(res.data.TenDoanPhi);
+        setDSDiemDanh(res.data.ChiTietHD);
+        setTenHoatDong(res.data.TenHoatDong);
         setTenNamHoc(res.data.TenNamHoc);
       } else {
         // Xử lý trường hợp lỗi
@@ -41,15 +43,6 @@ const NopDoanPhi = (props) => {
     } catch (error) {
       console.error("Lỗi khi gọi API:", error.message);
     }
-  };
-
-  const formatCurrency = (amount) => {
-    const formatter = new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-      minimumFractionDigits: 0,
-    });
-    return formatter.format(amount);
   };
 
   const handleCheckboxChange = (index) => {
@@ -62,14 +55,14 @@ const NopDoanPhi = (props) => {
 
   const handleSave = async () => {
     try {
-      const dataToSave = DSNopDoanPhi.map((item, index) => ({
-        IDChiTietDoanPhi: item.IDChiTietDoanPhi, // Replace with the actual property name
+      const dataToSave = DSDiemDanh.map((item, index) => ({
+        IDDDDoanVien: item.IDDDDoanVien, // Replace with the actual property name
         isChecked: checkboxStates[index],
       }));
 
       console.log(dataToSave);
 
-      let res = await SaveCheckboxStates(IDDoanPhi, dataToSave);
+      let res = await SaveCheckboxStatesDiemDanhCuaLop(IDHoatDong, dataToSave);
       if (res.status === 200) {
         setModalMessage("Cập nhật thành công!");
         setIsErrorModal(false);
@@ -100,7 +93,7 @@ const NopDoanPhi = (props) => {
     <>
       <div className="container-fluid app__content">
         <h5 className="text-center">
-          {TenDP} ({TenNamHoc})
+          {TenHoatDong} - {TenNamHoc}
         </h5>
 
         <div className="table-container">
@@ -108,31 +101,20 @@ const NopDoanPhi = (props) => {
             <thead>
               <tr>
                 <th className="table-item1">STT</th>
-                <th>Tên chi đoàn</th>
-                <th>Khóa</th>
-                <th>Số đoàn viên</th>
-                <th>Số tiền</th>
-                <th>Tổng tiền</th>
-                <th>Đã thu</th>
+                <th>MSSV</th>
+                <th>Tên đoàn viên </th>
+                <th>Điểm danh</th>
               </tr>
             </thead>
             <tbody id="myTable">
-              {DSNopDoanPhi &&
-                DSNopDoanPhi.length > 0 &&
-                DSNopDoanPhi.map((item, index) => {
+              {DSDiemDanh &&
+                DSDiemDanh.length > 0 &&
+                DSDiemDanh.map((item, index) => {
                   return (
                     <tr key={`table-chidoan-${index}`} className="tableRow">
                       <td className="col-center">{index + 1}</td>
-                      <td className="">{item.TenLop}</td>
-                      <td className="col-center">{item.Khoa}</td>
-                      <td className="col-center">{item.SoLuongDoanVien}</td>
-
-                      <td className="col-right">
-                        {formatCurrency(item.SoTienLop)}
-                      </td>
-                      <td className="col-right">
-                        {formatCurrency(item.ThanhTien)}
-                      </td>
+                      <td className="">{item.MSSV}</td>
+                      <td className="">{item.HoTen}</td>
                       <td className="col-center">
                         <input
                           type="checkbox"
@@ -143,22 +125,24 @@ const NopDoanPhi = (props) => {
                     </tr>
                   );
                 })}
-              {DSNopDoanPhi && DSNopDoanPhi.length === 0 && (
+              {DSDiemDanh && DSDiemDanh.length === 0 && (
                 <tr className="tablenone">
-                  <td className="tablenone">Chưa có có chi đoàn đóng phí!</td>
+                  <td className="tablenone">Chưa có có chi đoàn nào!</td>
                 </tr>
               )}
             </tbody>
           </table>
 
-          <div>
-            {DSNopDoanPhi && DSNopDoanPhi.length > 0 && (
+          {DSDiemDanh && DSDiemDanh.length > 0 && (
+            <div>
               <button className="formatButton btnRight" onClick={handleSave}>
                 <FontAwesomeIcon icon={faSave} /> Lưu
               </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
+        <div className="margin-bottom"></div>
+
       </div>
 
       <Modal
@@ -171,4 +155,4 @@ const NopDoanPhi = (props) => {
   );
 };
 
-export default NopDoanPhi;
+export default DiemDanh;

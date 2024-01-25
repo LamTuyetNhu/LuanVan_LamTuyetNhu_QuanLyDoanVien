@@ -752,7 +752,7 @@ const DoanVien = (props) => {
             <div className="btns">
               <button className="allcus-button" type="submit">
                 <NavLink
-                  to={`/BCH-DoanTruong/ChiTietChiDoan/${DoanVien.IDLop}`}
+                  to={`/ChiDoan/${IDLop}`}
                   className="navlink"
                 >
                   <FontAwesomeIcon icon={faBackward} />
@@ -795,7 +795,7 @@ const DoanVien = (props) => {
       />
 
       <NavLink
-        to={`/BCH-DoanTruong/ChiTietChiDoan/${DoanVien.IDLop}`}
+        to={`/ChiDoan/${IDLop}`}
         className="navlink"
       >
         <DeleteSuccess show={showModal1} onHide={() => setShowModal1(false)} />

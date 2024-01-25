@@ -14,7 +14,7 @@ function Header() {
             <img className="logo-img" src={huyhieu} alt="Huy hieu" />
           </NavLink>
           <NavLink to="/BCH-DoanTruong" className="logo-content">
-            Đoàn Thanh Niên Trường CNTT&TT
+            Đoàn Thanh Niên
           </NavLink>
         </div>
 
@@ -26,7 +26,7 @@ function Header() {
             <div className="header__cart-list">
               <ul className="header__cart-list-item">
                 <li className="header__cart-item">
-                  <a className="header__cart-item-info">Đăng xuất</a>
+                  <a href="/" className="header__cart-item-info">Đăng xuất</a>
                 </li>
               </ul>
             </div>

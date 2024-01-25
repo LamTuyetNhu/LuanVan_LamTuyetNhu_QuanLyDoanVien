@@ -18,59 +18,73 @@ const logTokenMiddleware = (req, res, next) => {
 
 const initAPIRoute = (app) => {
   /* Đăng nhập */
-router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-  console.log(req.body)
-  try {
-    // Check if the user is an Admin
-    const [admin] = await pool.execute(
-      "SELECT * FROM admin WHERE emailAdmin = ? AND passAdmin = ?",
-      [email, password]
-    );
+  router.post("/login", async (req, res) => {
+    const { email, password } = req.body;
+    console.log(req.body);
 
-    if (admin.length > 0) {
-      // Redirect to Admin page
-      const token = generateToken(admin[0].email, "Admin");
-      return res.json({ success: true, token });
+    try {
+      const [admin] = await pool.execute(
+        "SELECT * FROM admin WHERE emailAdmin = ? and passAdmin = ?",
+        [email, password]
+      );
+
+      if (admin.length > 0) {
+        const token = generateToken(admin[0].email, "Admin");
+        return res.json({ success: true, token });
+      }
+
+      const [BCHChiDoan] = await pool.execute(
+        "SELECT * FROM lop WHERE EmailLop = ?",
+        [email]
+      );
+
+      if (BCHChiDoan.length > 0) {
+        const passwordHash = BCHChiDoan[0].PassLop;
+        const passwordMatch = await bcrypt.compare(password, passwordHash);
+
+        if (passwordMatch) {
+          const token = generateToken(BCHChiDoan[0].email, "BCHChiDoan");
+          return res.json({ IDLop: BCHChiDoan[0].IDLop, success: true, token });
+        }
+      }
+
+      // Check if the user is DoanVien
+      const [doanvien] = await pool.execute(
+        "SELECT * FROM doanvien WHERE email = ?",
+        [email]
+      );
+
+      console.log(doanvien);
+
+      if (doanvien.length > 0) {
+        // Check the password
+        const passwordHash = doanvien[0].Password;
+        const passwordMatch = await bcrypt.compare(password, passwordHash);
+
+        if (passwordMatch) {
+          // Redirect to DoanVien page
+          const token = generateToken(doanvien[0].email, "DoanVien");
+          return res.json({ IDDoanVien: doanvien[0].IDDoanVien, success: true, token });
+        }
+      }
+
+      // If none of the above conditions match, the login is unsuccessful
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid credentials" });
+    } catch (error) {
+      console.error(error);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal server error" });
     }
+  });
 
-    // Check if the user is BCHChiDoan
-    const [BCHChiDoan] = await pool.execute(
-      "SELECT * FROM lop WHERE lop.EmailLop = ? AND lop.PassLop = ?",
-      [email, password]
-    );
-
-    if (BCHChiDoan.length > 0) {
-      // Redirect to BCHChiDoan page
-      const token = generateToken(BCHChiDoan[0].email, "BCHChiDoan");
-      return res.json({ IDLop: BCHChiDoan[0].IDLop, success: true, token });
-    }
-
-    // Check if the user is DoanVien
-    const [doanvien] = await pool.execute(
-      "SELECT * FROM doanvien WHERE doanvien.email = ? AND doanvien.password = ?",
-      [email, password]
-    );
-
-    if (doanvien.length > 0) {
-      // Redirect to DoanVien page
-      const token = generateToken(doanvien[0].email, "DoanVien");
-      return res.json({ success: true, token });
-    }
-
-    // If none of the above conditions match, the login is unsuccessful
-    return res.status(401).json({ success: false, message: "Invalid credentials" });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ success: false, message: "Internal server error" });
+  function generateToken(email, role) {
+    const secretKey = "yourSecretKey"; // Replace with your actual secret key
+    const token = jwt.sign({ email, role }, secretKey, { expiresIn: "1h" });
+    return token;
   }
-});
-
-function generateToken(email, role) {
-  const secretKey = "yourSecretKey"; // Replace with your actual secret key
-  const token = jwt.sign({ email, role }, secretKey, { expiresIn: "1h" });
-  return token;
-}
 
   /* Trường */
   // router.use(verifyToken);
@@ -127,63 +141,69 @@ function generateToken(email, role) {
 
     const QueQuan = `${Ward}, ${District}, ${Province}`;
 
+    const password = MSSV;
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
     try {
-      // const [existingRows, existingFields] = await pool.execute(
-      //   "SELECT * FROM doanvien WHERE doanvien.Email = ?",
-      //   [Email]
-      // );
-
-      // if (existingRows.length > 0) {
-      //   return res.status(200).json({
-      //     message: "Email đã tồn tại",
-      //   });
-      // }
-
-      // const [existingRows1, existingFields1] = await pool.execute(
-      //   "SELECT * FROM doanvien WHERE doanvien.MSSV = ?",
-      //   [MSSV]
-      // );
-
-      // if (existingRows1.length > 0) {
-      //   return res.status(200).json({
-      //     message: "MSSV đã tồn tại",
-      //   });
-      // }
-
-      let [resultDoanVien] = await pool.execute(
-        "INSERT INTO doanvien (IDLop, MSSV, HoTen, Email, SoDT, GioiTinh, QueQuan, IDDanToc, IDTonGiao, NgaySinh, NgayVaoDoan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [
-          IDLop,
-          MSSV,
-          HoTen,
-          Email,
-          SoDT,
-          GioiTinh,
-          QueQuan,
-          IDDanToc,
-          IDTonGiao,
-          NgaySinh,
-          NgayVaoDoan,
-        ]
+      const [existingRows1, existingFields1] = await pool.execute(
+        "SELECT * FROM doanvien WHERE doanvien.MSSV = ?",
+        [MSSV]
       );
 
-      let IDDoanVien = resultDoanVien.insertId;
+      if (existingRows1.length > 0) {
+        const [existedNamHoc, existingNamHocFields1] = await pool.execute(
+          "SELECT * FROM chitietnamhoc WHERE chitietnamhoc.IDDoanVien = ? and chitietnamhoc.idnamhoc = ?",
+          [existingRows1[0].IDDoanVien, IDNamHoc]
+        );
 
-      if (filename === undefined || filename === "" || filename === null) {
-        filename = "logo.jpg";
+        if (existedNamHoc.length > 0) {
+          console.log("Nam Hoc va MSSV da ton tai");
+          res.status(500).json({ message: "Nam Hoc va MSSV da ton tai" });
+          return;
+        } else {
+          await pool.execute(
+            "INSERT INTO chitietnamhoc (IDDoanVien, IDChucVu, IDNamHoc) VALUES (?, ?, ?)",
+            [existingRows1[0].IDDoanVien, IDChucVu, IDNamHoc]
+          );
+        }
+      } else {
+        let [resultDoanVien] = await pool.execute(
+          "INSERT INTO doanvien (IDLop, MSSV, HoTen, Email, Password, SoDT, GioiTinh, QueQuan, IDDanToc, IDTonGiao, NgaySinh, NgayVaoDoan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          [
+            IDLop,
+            MSSV,
+            HoTen,
+            Email,
+            hashedPassword,
+            SoDT,
+            GioiTinh,
+            QueQuan,
+            IDDanToc,
+            IDTonGiao,
+            NgaySinh,
+            NgayVaoDoan,
+          ]
+        );
+
+        let IDDoanVien = resultDoanVien.insertId;
+
+        if (filename === undefined || filename === "" || filename === null) {
+          filename = "logo.jpg";
+        }
+
+        await pool.execute(
+          "INSERT INTO anh (TenAnh, IDDoanVien) VALUES (?, ?)",
+          [filename, IDDoanVien]
+        );
+
+        await pool.execute(
+          "INSERT INTO chitietnamhoc (IDDoanVien, IDChucVu, IDNamHoc) VALUES (?, ?, ?)",
+          [IDDoanVien, IDChucVu, IDNamHoc]
+        );
+
+        res.status(200).json({ message: "Thêm đoàn viên thành công!" });
       }
-
-      await pool.execute("INSERT INTO anh (TenAnh, IDDoanVien) VALUES (?, ?)", [
-        filename,
-        IDDoanVien,
-      ]);
-
-      await pool.execute(
-        "INSERT INTO chitietnamhoc (IDDoanVien, IDChucVu, IDNamHoc) VALUES (?, ?, ?)",
-        [IDDoanVien, IDChucVu, IDNamHoc]
-      );
-
-      res.status(200).json({ message: "Thêm đoàn viên thành công!" });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Có lỗi xảy ra" });
@@ -295,7 +315,10 @@ function generateToken(email, role) {
   router.get("/layMotHoatDong/:IDHoatDong", APIController.layMotHoatDong);
   router.post("/CapNhatHoatDong", APIController.capNhatHoatDong);
   router.post("/XoaHoatDong/:IDHoatDong", APIController.deleteHoatDong);
-  router.get("/LayDSDiemDanh/:IDHoatDong", APIController.LayDSDiemDanh);
+  router.get(
+    "/LayDSDiemDanh/:IDHoatDong/:IDNamHoc",
+    APIController.LayDSDiemDanh
+  );
   router.post(
     "/saveCheckboxStatesDiemDanh",
     APIController.SaveCheckboxStatesDiemDanh
@@ -402,6 +425,21 @@ function generateToken(email, role) {
                 [existingRows1[0].IDDoanVien, idnamhoc]
               );
 
+              // try {
+
+              //   if (existedNamHoc.length == 0) {
+              //     await pool.execute(
+              //       "INSERT INTO chitietnamhoc (IDDoanVien, IDChucVu, IDNamHoc) VALUES (?, ?, ?)",
+              //       [existingRows1[0].IDDoanVien, chucvu[0].IDChucVu, idnamhoc]
+              //     );
+
+              //   }
+              // } catch (error) {
+              //   console.error(error);
+              //   res.status(500).json({ message: "Có lỗi xảy ra" });
+              //   return;
+              // }
+
               if (existedNamHoc.length > 0) {
                 console.log("Nam Hoc va MSSV da ton tai");
                 res.status(500).json({ message: "Nam Hoc va MSSV da ton tai" });
@@ -413,13 +451,18 @@ function generateToken(email, role) {
                 );
               }
             } else {
+              const password = trimmedMSSV;
+              const saltRounds = 10;
+              const hashedPassword = await bcrypt.hash(password, saltRounds);
+
               const [resultDoanVien] = await pool.execute(
-                "INSERT INTO doanvien (IDLop, MSSV, HoTen, Email, SoDT, GioiTinh, QueQuan, IDDanToc, IDTonGiao, NgaySinh, NgayVaoDoan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO doanvien (IDLop, MSSV, HoTen, Email, Password, SoDT, GioiTinh, QueQuan, IDDanToc, IDTonGiao, NgaySinh, NgayVaoDoan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 [
                   IDLop,
                   trimmedMSSV,
                   trimmedHoTen,
                   trimmedEmail,
+                  hashedPassword,
                   trimmedSoDienThoai,
                   GioiTinh,
                   trimmedQueQuan,
@@ -467,6 +510,8 @@ function generateToken(email, role) {
   router.post("/XoaBanChapHanh/:select", APIController.deleteBanChapHanh);
 
   router.get("/namhoc", APIController.namhoc);
+  router.get("/namhoccuamotchidoan/:IDLop", APIController.namhoccuamotchidoan);
+
   router.post("/searchNamHoc", APIController.searchNamHoc);
 
   router.get("/dsdoanphi/:page/:idnamhoc", APIController.layDSDoanPhi);
@@ -480,11 +525,36 @@ function generateToken(email, role) {
   );
   router.post("/saveCheckboxStates", APIController.SaveCheckboxStates);
 
-  return app.use("/api", logTokenMiddleware, router);
+  router.get("/laytenlop/:IDLop", APIController.laytenlop);
+  router.get("/dsachBCH/:IDLop/:idnamhoc", APIController.getBCHMotLop);
+  router.get(
+    "/dsdoanphi/:idLop/:idnamhoc",
+    APIController.layDSDoanPhiCuaMotLop
+  );
+  router.get(
+    "/LayDSNopDoanPhi/:IDLop/:IDDoanPhi/:IDNamHoc",
+    APIController.LayDSNopDoanPhiCuaMotLop
+  );
+  router.post(
+    "/SaveCheckboxStatesCuaMotLop",
+    APIController.SaveCheckboxStatesCuaMotLop
+  );
+  router.get(
+    "/layDSHoatDongCuaLop/:IDLop/:idnamhoc",
+    APIController.layDSHoatDongCuaLop
+  );
+  router.get(
+    "/LayDSDiemDanhCuaLop/:IDLop/:IDHoatDong/:IDNamHoc",
+    APIController.LayDSDiemDanhCuaLop
+  );
+  router.post(
+    "/saveCheckboxStatesDiemDanhCuaLop",
+    APIController.SaveCheckboxStatesDiemDanhCuaLop
+  );
+
+  router.get("/laytendoanvien/:IDDoanVien", APIController.laytendoanvien);
+
+  return app.use("/api", router);
 };
 
 export default initAPIRoute;
-
-
-
-
