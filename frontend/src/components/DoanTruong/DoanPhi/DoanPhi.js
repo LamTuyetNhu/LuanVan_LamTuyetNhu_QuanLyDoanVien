@@ -122,7 +122,7 @@ const DanhSachDoanPhi = (props) => {
       <div className="container-fluid app__content">
         <div className="namhoc-center">
           <h5 className="text-center">Danh Sách Đoàn Phí</h5>
-          <div className="searchDV-input">
+          <div className="searchDV-input"> Năm học: 
             <select
               type="text"
               className="search_name"
@@ -158,7 +158,7 @@ const DanhSachDoanPhi = (props) => {
                 <th>Tên đoàn phí</th>
                 <th>Năm học</th>
                 <th>Số tiền/Đoàn viên</th>
-                <th className="table-item2">Chi tiết</th>
+                <th className="table-item2">Danh sách thu đoàn phí</th>
                 <th className="table-item2">Cập nhật</th>
                 <th className="table-item2">Xóa</th>
               </tr>
@@ -217,74 +217,6 @@ const DanhSachDoanPhi = (props) => {
           </table>
         </div>
       </div>
-
-      {DSDoanPhi && DSDoanPhi.length > 0 && (
-        <div className="pagination pagination1">
-          <button
-            className="btn-footer"
-            onClick={handlePrevPage}
-            disabled={currentPage <= 1}
-          >
-            <FontAwesomeIcon icon={faChevronLeft} />
-          </button>
-
-          {totalPages > 4 && currentPage > 3 && (
-            <div className="footer">
-              <span className="ellipsis"></span>
-            </div>
-          )}
-
-          {Array.from(
-            { length: totalPages > 4 ? 3 : totalPages },
-            (_, index) => {
-              let pageToShow;
-              if (totalPages <= 4) {
-                pageToShow = index + 1;
-              } else if (currentPage <= 3) {
-                pageToShow = index + 1;
-              } else if (currentPage >= totalPages - 2) {
-                pageToShow = totalPages - 2 + index;
-              } else {
-                pageToShow = currentPage - 1 + index;
-              }
-
-              return (
-                <div className="footer" key={index}>
-                  <button
-                    className={`btn-footer ${
-                      currentPage === pageToShow ? "active" : ""
-                    }`}
-                    onClick={() => changePage(pageToShow)}
-                    disabled={currentPage === pageToShow}
-                  >
-                    {pageToShow}
-                  </button>
-                </div>
-              );
-            }
-          )}
-
-          {totalPages > 4 && currentPage < totalPages - 2 && (
-            <div className="footer">
-              <span className="ellipsis"></span>
-            </div>
-          )}
-
-          <button
-            className="btn-footer"
-            onClick={handleNextPage}
-            disabled={currentPage >= totalPages}
-          >
-            <FontAwesomeIcon icon={faChevronRight} />
-          </button>
-        </div>
-      )}
-
-      {DSDoanPhi && DSDoanPhi.length <= 5 && (
-        <div className="pagination pagination1">
-          {/* You can add some message or content indicating that pagination is not shown */}
-        </div>
-      )}
 
       <DeleteConfirmationModal
         show={showModal}

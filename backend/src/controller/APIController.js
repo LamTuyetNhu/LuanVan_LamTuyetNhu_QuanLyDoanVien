@@ -365,6 +365,38 @@ let getSearchChiDoan = async (req, res) => {
   }
 };
 
+let getSearchManyChiDoan = async (req, res) => {
+  console.log(req.body);
+
+  let { trimmedInfo } = req.body;
+  console.log(trimmedInfo);
+
+  try {
+    if (trimmedInfo !== undefined) {
+      const [rowsMaLop, fields] = await pool.execute(
+        "SELECT * FROM lop where MaLop LIKE ? or TenLop LIKE ? or Khoa = ?",
+        ["%" + trimmedInfo + "%", "%" + trimmedInfo + "%", trimmedInfo]
+      );
+
+      console.log(rowsMaLop);
+
+      return res.status(200).json({
+        dataCD: rowsMaLop,
+      });
+    } else {
+      console.log("Không tìm thấy kết quả");
+      return res.status(200).json({
+        dataCD: [],
+      });
+    }
+  } catch (error) {
+    console.error("Lỗi truy vấn:", error);
+    return res
+      .status(500)
+      .json({ error: "Có lỗi xảy ra trong quá trình tìm kiếm." });
+  }
+};
+
 let ThemChiDoan = async (req, res) => {
   let { MaLop, TenLop, Khoa, Email } = req.body;
   console.log(MaLop);
@@ -520,17 +552,17 @@ let getKhoa = async (req, res) => {
 let laymotdoanvien = async (req, res) => {
   const IDDoanVien = req.params.IDDoanVien;
   const IDLop = req.params.IDLop;
-  const IDChiTietNamHoc = req.params.IDChiTietNamHoc;
+  // const IDChiTietNamHoc = req.params.IDChiTietNamHoc;
 
   console.log(IDDoanVien);
   console.log(IDLop);
-  console.log(IDChiTietNamHoc);
+  // console.log(IDChiTietNamHoc);
 
   try {
     const [rows, fields] = await pool.execute(
-      "SELECT * FROM doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc, lop, anh where lop.IDLop = ? and lop.IDLop = doanvien.IDLop and doanvien.IDDoanVien = ? and chitietnamhoc.IDChiTietNamHoc = ? and doanvien.ttDoanVien = 1 and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and namhoc.IDNamHoc = chitietnamhoc.IDNamHoc and chitietnamhoc.IDChucVu = chucvu.IDChucVu and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.IDDoanVien = anh.IDDoanVien",
+      "SELECT * FROM doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc, lop, anh where lop.IDLop = ? and lop.IDLop = doanvien.IDLop and doanvien.IDDoanVien = ? and doanvien.ttDoanVien = 1 and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and namhoc.IDNamHoc = chitietnamhoc.IDNamHoc and chitietnamhoc.IDChucVu = chucvu.IDChucVu and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.IDDoanVien = anh.IDDoanVien",
 
-      [IDLop, IDDoanVien, IDChiTietNamHoc]
+      [IDLop, IDDoanVien]
     );
 
     console.log(rows);
@@ -579,19 +611,21 @@ let getBCH = async (req, res) => {
     const page = parseInt(req.params.page) || 1; // Lấy trang từ query parameters, mặc định là trang 1
     const pageSize = parseInt(req.query.pageSize) || 4; // Lấy số lượng mục trên mỗi trang, mặc định là 5
     const idnamhoc = req.params.idnamhoc;
+    const khoa = req.params.khoa;
+
     const offset = (page - 1) * pageSize;
     console.log("+==============");
 
     console.log(idnamhoc);
 
     const [sotrang, fields1] = await pool.execute(
-      "SELECT * FROM lop, anh, doanvien, chitietnamhoc, namhoc, chucvu, dantoc, tongiao where lop.IDLop = doanvien.IDLop and doanvien.ttDoanVien = 1 and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and (chucvu.IDChucVu = 1 or chucvu.IDChucVu = 2 or chucvu.IDChucVu = 4 or chucvu.IDChucVu = 5 or chucvu.IDChucVu = 6 or chucvu.IDChucVu = 7) and doanvien.IDDOanVien = anh.IDDoanVien and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and chitietnamhoc.IDNamHoc = ?",
-      [idnamhoc]
+      "SELECT * FROM lop, anh, doanvien, chitietnamhoc, namhoc, chucvu, dantoc, tongiao where lop.IDLop = doanvien.IDLop and doanvien.ttDoanVien = 1 and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and (chucvu.IDChucVu = 1 or chucvu.IDChucVu = 2 or chucvu.IDChucVu = 4 or chucvu.IDChucVu = 5 or chucvu.IDChucVu = 6 or chucvu.IDChucVu = 7) and doanvien.IDDOanVien = anh.IDDoanVien and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and chitietnamhoc.IDNamHoc = ? and lop.khoa = ?",
+      [idnamhoc, khoa]
     );
 
     const [rows, fields] = await pool.execute(
-      "SELECT * FROM lop, anh, doanvien, chitietnamhoc, namhoc, chucvu, dantoc, tongiao where lop.IDLop = doanvien.IDLop and doanvien.ttDoanVien = 1 and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and (chucvu.IDChucVu = 1 or chucvu.IDChucVu = 2 or chucvu.IDChucVu = 4 or chucvu.IDChucVu = 5 or chucvu.IDChucVu = 6 or chucvu.IDChucVu = 7) and doanvien.IDDOanVien = anh.IDDoanVien and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and chitietnamhoc.IDNamHoc = ? LIMIT ? OFFSET ?",
-      [idnamhoc, pageSize, offset]
+      "SELECT * FROM lop, anh, doanvien, chitietnamhoc, namhoc, chucvu, dantoc, tongiao where lop.IDLop = doanvien.IDLop and doanvien.ttDoanVien = 1 and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and (chucvu.IDChucVu = 1 or chucvu.IDChucVu = 2 or chucvu.IDChucVu = 4 or chucvu.IDChucVu = 5 or chucvu.IDChucVu = 6 or chucvu.IDChucVu = 7) and doanvien.IDDOanVien = anh.IDDoanVien and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and chitietnamhoc.IDNamHoc = ? and lop.khoa = ? LIMIT ? OFFSET ?",
+      [idnamhoc, khoa, pageSize, offset]
     );
 
     console.log(rows);
@@ -644,7 +678,7 @@ let getBCHMotLop = async (req, res) => {
 
 let getSearchBCH = async (req, res) => {
   let { IDNamHoc, MSSV, HoTen, IDChucVu, Khoa } = req.body;
-
+console.log(req.body)
   console.log(IDNamHoc);
   console.log(MSSV);
   console.log(HoTen);
@@ -652,10 +686,10 @@ let getSearchBCH = async (req, res) => {
   console.log(Khoa);
 
   try {
-    if (MSSV !== undefined && HoTen === "" && IDChucVu === "" && Khoa === "") {
+    if (MSSV !== undefined && HoTen === "" && IDChucVu === "") {
       const [rowsMaLop, fields] = await pool.execute(
-        "SELECT * FROM anh, lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where anh.IDDoanVien = doanvien.IDDoanVien and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.MSSV LIKE ? and chucvu.IDChucVu != 3  and chitietnamhoc.IDNamHoc = ?",
-        ["%" + MSSV + "%", IDNamHoc]
+        "SELECT * FROM anh, lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where anh.IDDoanVien = doanvien.IDDoanVien and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.MSSV LIKE ? and chucvu.IDChucVu != 3  and chitietnamhoc.IDNamHoc = ? and lop.Khoa = ?",
+        ["%" + MSSV + "%", IDNamHoc, Khoa]
       );
 
       console.log(rowsMaLop);
@@ -666,13 +700,12 @@ let getSearchBCH = async (req, res) => {
     } else if (
       MSSV === "" &&
       HoTen !== undefined &&
-      IDChucVu === "" &&
-      Khoa === ""
+      IDChucVu === ""
     ) {
       const [rowsTenLop, fields] = await pool.execute(
-        "SELECT * FROM anh, lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where anh.IDDoanVien = doanvien.IDDoanVien and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.HoTen LIKE ? and chucvu.IDChucVu != 3 and chitietnamhoc.IDNamHoc = ?",
+        "SELECT * FROM anh, lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where anh.IDDoanVien = doanvien.IDDoanVien and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.HoTen LIKE ? and chucvu.IDChucVu != 3 and chitietnamhoc.IDNamHoc = ? and lop.Khoa = ?",
 
-        ["%" + HoTen + "%", IDNamHoc]
+        ["%" + HoTen + "%", IDNamHoc, Khoa]
       );
 
       console.log(rowsTenLop);
@@ -683,13 +716,12 @@ let getSearchBCH = async (req, res) => {
     } else if (
       MSSV === "" &&
       HoTen === "" &&
-      IDChucVu !== undefined &&
-      Khoa === ""
+      IDChucVu !== undefined 
     ) {
       const [rowsKhoa, fields] = await pool.execute(
-        "SELECT * FROM anh, lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where anh.IDDoanVien = doanvien.IDDoanVien and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and chucvu.IDChucVu LIKE ? and chucvu.IDChucVu != 3 and chitietnamhoc.IDNamHoc = ?",
+        "SELECT * FROM anh, lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where anh.IDDoanVien = doanvien.IDDoanVien and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and chitietnamhoc.IDChucVu = ? and chucvu.IDChucVu != 3 and chitietnamhoc.IDNamHoc = ? and lop.Khoa = ?",
 
-        ["%" + IDChucVu + "%", IDNamHoc]
+        [IDChucVu, IDNamHoc, Khoa]
       );
 
       console.log(rowsKhoa);
@@ -698,32 +730,14 @@ let getSearchBCH = async (req, res) => {
         dataCD: rowsKhoa,
       });
     } else if (
-      MSSV === "" &&
-      HoTen === "" &&
-      IDChucVu === "" &&
-      Khoa !== undefined
-    ) {
-      const [rowsTrangThai, fields] = await pool.execute(
-        "SELECT * FROM anh, lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where anh.IDDoanVien = doanvien.IDDoanVien and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and lop.khoa = ? and chucvu.IDChucVu != 3 and chitietnamhoc.IDNamHoc = ?",
-
-        [Khoa, IDNamHoc]
-      );
-
-      console.log(rowsTrangThai);
-
-      return res.status(200).json({
-        dataCD: rowsTrangThai,
-      });
-    } else if (
       MSSV !== undefined &&
       HoTen !== undefined &&
-      IDChucVu === "" &&
-      Khoa === ""
+      IDChucVu === ""
     ) {
       const [rows, fields] = await pool.execute(
-        "SELECT * FROM anh, lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where anh.IDDoanVien = doanvien.IDDoanVien and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.MSSV LIKE ? and doanvien.HoTen LIKE ? and chucvu.IDChucVu != 3 and chitietnamhoc.IDNamHoc = ?",
+        "SELECT * FROM anh, lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where anh.IDDoanVien = doanvien.IDDoanVien and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.MSSV LIKE ? and doanvien.HoTen LIKE ? and chucvu.IDChucVu != 3 and chitietnamhoc.IDNamHoc = ? and lop.Khoa = ?",
 
-        ["%" + MSSV + "%", "%" + HoTen + "%", IDNamHoc]
+        ["%" + MSSV + "%", "%" + HoTen + "%", IDNamHoc, Khoa]
       );
 
       console.log(rows);
@@ -734,30 +748,12 @@ let getSearchBCH = async (req, res) => {
     } else if (
       MSSV !== undefined &&
       HoTen === "" &&
-      IDChucVu !== undefined &&
-      Khoa === ""
+      IDChucVu !== undefined 
     ) {
       const [rows, fields] = await pool.execute(
-        "SELECT * FROM anh, lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where anh.IDDoanVien = doanvien.IDDoanVien and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.MSSV LIKE ? and chucvu.IDChucVu LIKE ? and chucvu.IDChucVu != 3 and chitietnamhoc.IDNamHoc = ?",
+        "SELECT * FROM anh, lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where anh.IDDoanVien = doanvien.IDDoanVien and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.MSSV LIKE ? and chucvu.IDChucVu LIKE ? and chucvu.IDChucVu != 3 and chitietnamhoc.IDNamHoc = ? and lop.Khoa = ?",
 
-        ["%" + MSSV + "%", "%" + IDChucVu + "%", IDNamHoc]
-      );
-
-      console.log(rows);
-
-      return res.status(200).json({
-        dataCD: rows,
-      });
-    } else if (
-      MSSV !== undefined &&
-      HoTen === "" &&
-      IDChucVu === "" &&
-      Khoa !== undefined
-    ) {
-      const [rows, fields] = await pool.execute(
-        "SELECT * FROM anh, lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where anh.IDDoanVien = doanvien.IDDoanVien and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.MSSV LIKE ? and lop.khoa = ? and chucvu.IDChucVu != 3 and chitietnamhoc.IDNamHoc = ?",
-
-        ["%" + MSSV + "%", Khoa, IDNamHoc]
+        ["%" + MSSV + "%", "%" + IDChucVu + "%", IDNamHoc, Khoa]
       );
 
       console.log(rows);
@@ -768,47 +764,12 @@ let getSearchBCH = async (req, res) => {
     } else if (
       MSSV === "" &&
       HoTen !== undefined &&
-      IDChucVu !== undefined &&
-      Khoa === ""
+      IDChucVu !== undefined
     ) {
       const [rows, fields] = await pool.execute(
-        "SELECT * FROM anh, lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where anh.IDDoanVien = doanvien.IDDoanVien and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.HoTen LIKE ? and chucvu.IDChucVu = ? and chucvu.IDChucVu != 3 and chitietnamhoc.IDNamHoc = ?",
+        "SELECT * FROM anh, lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where anh.IDDoanVien = doanvien.IDDoanVien and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.HoTen LIKE ? and chucvu.IDChucVu = ? and chucvu.IDChucVu != 3 and chitietnamhoc.IDNamHoc = ? and lop.Khoa = ?",
 
-        ["%" + HoTen + "%", IDChucVu, IDNamHoc]
-      );
-
-      console.log(rows);
-
-      return res.status(200).json({
-        dataCD: rows,
-      });
-    } else if (
-      MSSV === "" &&
-      HoTen !== undefined &&
-      IDChucVu === "" &&
-      Khoa !== undefined
-    ) {
-      const [rows, fields] = await pool.execute(
-        "SELECT * FROM anh, lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where anh.IDDoanVien = doanvien.IDDoanVien and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.HoTen LIKE ? and lop.khoa = ? and chucvu.IDChucVu != 3 and chitietnamhoc.IDNamHoc = ?",
-
-        ["%" + HoTen + "%", Khoa, IDNamHoc]
-      );
-
-      console.log(rows);
-
-      return res.status(200).json({
-        dataCD: rows,
-      });
-    } else if (
-      MSSV === "" &&
-      HoTen === "" &&
-      IDChucVu !== undefined &&
-      Khoa !== undefined
-    ) {
-      const [rows, fields] = await pool.execute(
-        "SELECT * FROM anh, lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where anh.IDDoanVien = doanvien.IDDoanVien and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and chucvu.IDChucVu = ? and lop.khoa = ? and chucvu.IDChucVu != 3 and chitietnamhoc.IDNamHoc = ?",
-
-        [IDChucVu, Khoa, IDNamHoc]
+        ["%" + HoTen + "%", IDChucVu, IDNamHoc, Khoa]
       );
 
       console.log(rows);
@@ -819,80 +780,12 @@ let getSearchBCH = async (req, res) => {
     } else if (
       MSSV !== undefined &&
       HoTen !== undefined &&
-      IDChucVu !== undefined &&
-      Khoa === ""
+      IDChucVu !== undefined
     ) {
       const [rows, fields] = await pool.execute(
-        "SELECT * FROM anh, lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where anh.IDDoanVien = doanvien.IDDoanVien and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.MSSV LIKE ? and doanvien.HoTen LIKE ? and chucvu.IDChucVu = ? and chucvu.IDChucVu != 3 and chitietnamhoc.IDNamHoc = ?",
+        "SELECT * FROM anh, lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where anh.IDDoanVien = doanvien.IDDoanVien and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.MSSV LIKE ? and doanvien.HoTen LIKE ? and chucvu.IDChucVu = ? and chucvu.IDChucVu != 3 and chitietnamhoc.IDNamHoc = ? and lop.Khoa = ?",
 
-        ["%" + MSSV + "%", "%" + HoTen + "%", IDChucVu, IDNamHoc]
-      );
-
-      console.log(rows);
-
-      return res.status(200).json({
-        dataCD: rows,
-      });
-    } else if (
-      MSSV !== undefined &&
-      HoTen === "" &&
-      IDChucVu !== undefined &&
-      Khoa !== undefined
-    ) {
-      const [rows, fields] = await pool.execute(
-        "SELECT * FROM anh, lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where anh.IDDoanVien = doanvien.IDDoanVien and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.MSSV LIKE ? and chucvu.IDChucVu = ? and lop.khoa = ? and chucvu.IDChucVu != 3 and chitietnamhoc.IDNamHoc = ?",
-
-        ["%" + MSSV + "%", IDChucVu, Khoa, IDNamHoc]
-      );
-
-      console.log(rows);
-
-      return res.status(200).json({
-        dataCD: rows,
-      });
-    } else if (
-      MSSV !== undefined &&
-      HoTen !== undefined &&
-      IDChucVu === "" &&
-      Khoa !== undefined
-    ) {
-      const [rows, fields] = await pool.execute(
-        "SELECT * FROM anh, lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where anh.IDDoanVien = doanvien.IDDoanVien and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.MSSV LIKE ? and doanvien.HoTen LIKE ? and lop.khoa = ? and chucvu.IDChucVu != 3 and chitietnamhoc.IDNamHoc = ?",
-
-        ["%" + MSSV + "%", "%" + HoTen + "%", Khoa, IDNamHoc]
-      );
-
-      console.log(rows);
-
-      return res.status(200).json({
-        dataCD: rows,
-      });
-    } else if (
-      MSSV === "" &&
-      HoTen !== undefined &&
-      IDChucVu !== undefined &&
-      Khoa !== undefined
-    ) {
-      const [rows, fields] = await pool.execute(
-        "SELECT * FROM anh, lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where anh.IDDoanVien = doanvien.IDDoanVien and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.HoTen LIKE ? and chucvu.IDChucVu = ? and lop.khoa = ? and chucvu.IDChucVu != 3 and chitietnamhoc.IDNamHoc = ?",
-        ["%" + HoTen + "%", IDChucVu, Khoa, IDNamHoc]
-      );
-
-      console.log(rows);
-
-      return res.status(200).json({
-        dataCD: rows,
-      });
-    } else if (
-      MSSV !== undefined &&
-      HoTen !== undefined &&
-      IDChucVu !== undefined &&
-      Khoa !== undefined
-    ) {
-      const [rows, fields] = await pool.execute(
-        "SELECT * FROM anh, lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where anh.IDDoanVien = doanvien.IDDoanVien and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.MSSV LIKE ? and doanvien.HoTen LIKE ? and chucvu.IDChucVu = ? and lop.khoa = ? and chucvu.IDChucVu != 3 and chitietnamhoc.IDNamHoc = ?",
-
-        ["%" + MSSV + "%", "%" + HoTen + "%", IDChucVu, Khoa, IDNamHoc]
+        ["%" + MSSV + "%", "%" + HoTen + "%", IDChucVu, IDNamHoc, Khoa]
       );
 
       console.log(rows);
@@ -1344,6 +1237,36 @@ let getSearchDoanVien = async (req, res) => {
   }
 };
 
+let getSearchManyDoanVien = async (req, res) => {
+  let { IDNamHoc, trimmedInfo, IDLop } = req.body;
+  console.log(trimmedInfo);
+
+  try {
+    if (trimmedInfo !== undefined ) {
+      const [rowsMaLop, fields] = await pool.execute(
+        "SELECT * FROM lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where doanvien.IDLop = ? and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and chitietnamhoc.IDNamHoc = ? and (doanvien.MSSV LIKE ? or doanvien.HoTen LIKE ? or chucvu.TenCV LIKE ?)",
+        [IDLop, IDNamHoc, "%" + trimmedInfo + "%", "%" + trimmedInfo + "%", "%" + trimmedInfo + "%"]
+      );
+
+      console.log(rowsMaLop);
+
+      return res.status(200).json({
+        dataCD: rowsMaLop,
+      });
+    } else {
+      console.log("Không tìm thấy kết quả");
+      return res.status(200).json({
+        dataCD: [],
+      });
+    }
+  } catch (error) {
+    console.error("Lỗi truy vấn:", error);
+    return res
+      .status(500)
+      .json({ error: "Có lỗi xảy ra trong quá trình tìm kiếm." });
+  }
+};
+
 //Lấy danh sách hoạt động
 let layDSHoatDong = async (req, res) => {
   try {
@@ -1606,28 +1529,26 @@ let TaoHoatDong = async (req, res) => {
       [TenHoatDong, NgayBatDau, NgayHetHan, ChiTietHoatDong, IDNamHoc]
     );
 
-    console.log("1")
+    console.log("1");
 
     pool.execute(
       "UPDATE hoatdong SET ttHD = CASE WHEN ttHD = 3 THEN 3 WHEN NgayBanHanh > CURRENT_DATE THEN 0 WHEN NgayBanHanh <= CURRENT_DATE AND NgayHetHan > CURRENT_DATE THEN 1 WHEN NgayHetHan < CURRENT_DATE THEN 2 END"
     );
 
-    console.log("2")
+    console.log("2");
 
-  
     const [newHoatDong] = await pool.execute(
       "SELECT * FROM hoatdong WHERE idhoatdong = ?",
       [rows.insertId]
     );
 
-    console.log("3")
-
+    console.log("3");
 
     let [tatcalop, fields2] = await pool.execute(
       "SELECT * FROM lop where ttLop = 1"
     );
 
-    console.log("4")
+    console.log("4");
 
     console.log(tatcalop);
 
@@ -2241,9 +2162,9 @@ let layDSHoatDongCuaLop = async (req, res) => {
     console.log(result2);
 
     if (result2[0] && result2[0].length > 0) {
-    return res.status(200).json({
-      dataHD: result2[0],
-    });
+      return res.status(200).json({
+        dataHD: result2[0],
+      });
     } else {
       console.log("Không tìm thấy kết quả");
       return res.status(200).json({
@@ -2298,7 +2219,7 @@ let LayDSDiemDanhCuaLop = async (req, res) => {
 let SaveCheckboxStatesDiemDanhCuaLop = async (req, res) => {
   let { IDHoatDong, checkboxStates } = req.body;
 
-  console.log(IDHoatDong)
+  console.log(IDHoatDong);
   console.log(req.body);
   console.log("+=============");
   console.log(checkboxStates);
@@ -2330,7 +2251,7 @@ let SaveCheckboxStatesDiemDanhCuaLop = async (req, res) => {
 
 let laytendoanvien = async (req, res) => {
   const IDDoanVien = req.params.IDDoanVien;
-console.log(IDDoanVien)
+  console.log(IDDoanVien);
   try {
     const [rows, fields1] = await pool.execute(
       "SELECT HoTen, TenAnh, GioiTinh FROM doanvien, anh where doanvien.IDDoanVien = anh.IDDoanVien and doanvien.IDDoanVien = ?",
@@ -2352,11 +2273,178 @@ console.log(IDDoanVien)
   }
 };
 
+let dvlaymotdoanvien = async (req, res) => {
+  const IDDoanVien = req.params.IDDoanVien;
+  const IDNamHoc = req.params.IDNamHoc;
+
+  console.log(IDDoanVien);
+  console.log(IDNamHoc);
+
+  try {
+    const [rows, fields] = await pool.execute(
+      "SELECT * FROM lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc, anh where doanvien.IDDoanVien = ? and chitietnamhoc.IDNamHoc = ? and lop.IDLop = doanvien.IDLop and doanvien.ttDoanVien = 1 and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and namhoc.IDNamHoc = chitietnamhoc.IDNamHoc and chitietnamhoc.IDChucVu = chucvu.IDChucVu and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.IDDoanVien = anh.IDDoanVien",
+
+      [IDDoanVien, IDNamHoc]
+    );
+
+    console.log(rows);
+
+    if (rows.length > 0) {
+      // Định dạng lại ngày trong rows[0].NgayHetHan
+      const formattedDate = format(new Date(rows[0].NgaySinh), "dd/MM/yyyy");
+      const formattedDate1 = format(
+        new Date(rows[0].NgayVaoDoan),
+        "dd/MM/yyyy"
+      );
+
+      // Gán lại giá trị đã định dạng vào rows[0].NgayHetHan
+      rows[0].NgaySinh = formattedDate;
+      rows[0].NgayVaoDoan = formattedDate1;
+    }
+
+    return res.status(200).json({
+      dataDV: rows[0],
+    });
+  } catch (error) {
+    return res.status(500).json({ error: "Không hiển thị được!" });
+  }
+};
+
+let layDSHoatDongCuaDoanVien = async (req, res) => {
+  try {
+    const IDNamHoc = req.params.IDNamHoc;
+    const IDDoanVien = req.params.IDDoanVien;
+
+    console.log(req.params);
+
+    const [result2, fieldsResult2] = await Promise.all([
+      pool.execute(
+        "SELECT * FROM diemdanhdoanvien, hoatdong where diemdanhdoanvien.IDHoatDong = hoatdong.IDHoatDong and (hoatdong.ttHD = 0 or hoatdong.ttHD = 1 or hoatdong.ttHD = 2) and hoatdong.IDNamHoc = ? and diemdanhdoanvien.IDDoanVien = ? ORDER BY hoatdong.IDHoatDong DESC",
+        [IDNamHoc, IDDoanVien]
+      ),
+    ]);
+
+    console.log(result2[0]);
+
+
+    if (result2[0] && result2[0].length > 0) {
+      return res.status(200).json({
+        dataHD: result2[0],
+      });
+    } else {
+      console.log("Không tìm thấy kết quả");
+      return res.status(200).json({
+        dataHD: [],
+      });
+    }
+  } catch (error) {
+    console.error("Lỗi khi truy vấn cơ sở dữ liệu: ", error);
+    return res.status(500).json({
+      error: "Lỗi khi truy vấn cơ sở dữ liệu",
+    });
+  }
+};
+
+let DanhSachUngTuyen = async (req, res) => {
+  try {
+    console.log(req.params);
+    const IDNamHoc = req.params.IDNamHoc;
+
+    const [result2, fieldsResult2] = await Promise.all([
+      pool.execute(
+        "SELECT * FROM lop, doanvien, ungtuyen, namhoc where lop.IDLop = doanvien.IDLop and doanvien.IDDoanVien = ungtuyen.IDDoanVien and namhoc.IDNamHoc = ungtuyen.IDNamHoc and namhoc.IDNamHoc = ?",
+        [IDNamHoc]
+      ),
+    ]);
+
+    // Chuyển đổi NgayBanHanh từ định dạng date thành định dạng "yyyy/MM/dd"
+    if (result2[0] && result2[0].length > 0) {
+      return res.status(200).json({
+        dataUT: result2[0],
+      });
+    } else {
+      console.log("Không tìm thấy kết quả");
+      return res.status(200).json({
+        dataUT: [],
+      });
+    }
+  } catch (error) {
+    console.error("Lỗi khi truy vấn cơ sở dữ liệu: ", error);
+    return res.status(500).json({
+      error: "Lỗi khi truy vấn cơ sở dữ liệu",
+    });
+  }
+};
+
+let DanhSachUngTuyenCuaDV = async (req, res) => {
+  try {
+    console.log(req.params);
+    const IDDoanVien = req.params.IDDoanVien;
+
+
+    const [result2, fieldsResult2] = await Promise.all([
+      pool.execute(
+        "SELECT * FROM doanvien, ungtuyen, namhoc where doanvien.IDDoanVien = ungtuyen.IDDoanVien and namhoc.IDNamHoc = ungtuyen.IDNamHoc and ungtuyen.IDDoanVien = ? ORDER BY ungtuyen.IDUngTuyen DESC",
+        [IDDoanVien]
+      ),
+    ]);
+
+    console.log(result2[0].NgayUngTuyen);
+
+    // Chuyển đổi NgayBanHanh từ định dạng date thành định dạng "yyyy/MM/dd"
+    if (result2[0] && result2[0].length > 0) {
+      return res.status(200).json({
+        dataUT: result2[0],
+      });
+    } else {
+      console.log("Không tìm thấy kết quả");
+      return res.status(200).json({
+        dataUT: [],
+      });
+    }
+  } catch (error) {
+    console.error("Lỗi khi truy vấn cơ sở dữ liệu: ", error);
+    return res.status(500).json({
+      error: "Lỗi khi truy vấn cơ sở dữ liệu",
+    });
+  }
+};
+
+let MauUngTuyen = async (req, res) => {
+  try {
+    const [result2, fieldsResult2] = await Promise.all([
+      pool.execute(
+        "SELECT TenFile FROM dieukiensinhviennamtot ORDER BY dieukiensinhviennamtot.IDFile DESC"
+      ),
+    ]);
+
+    console.log(result2[0]);
+
+    // Chuyển đổi NgayBanHanh từ định dạng date thành định dạng "yyyy/MM/dd"
+    if (result2[0] && result2[0].length > 0) {
+      return res.status(200).json({
+        dataUT: result2[0],
+      });
+    } else {
+      console.log("Không tìm thấy kết quả");
+      return res.status(200).json({
+        dataUT: [],
+      });
+    }
+  } catch (error) {
+    console.error("Lỗi khi truy vấn cơ sở dữ liệu: ", error);
+    return res.status(500).json({
+      error: "Lỗi khi truy vấn cơ sở dữ liệu",
+    });
+  }
+};
+
 module.exports = {
   getAllChiDoan,
   laytenlop,
   getKhoa,
   getSearchChiDoan,
+  getSearchManyChiDoan,
   getDetailChiDoan,
   ThemChiDoan,
   XoaChiDoan,
@@ -2370,6 +2458,7 @@ module.exports = {
   deleteBanChapHanh,
 
   getSearchDoanVien,
+  getSearchManyDoanVien,
   laymotdoanvien,
   deleteDoanVien,
 
@@ -2406,4 +2495,9 @@ module.exports = {
   SaveCheckboxStatesDiemDanhCuaLop,
 
   laytendoanvien,
+  dvlaymotdoanvien,
+  layDSHoatDongCuaDoanVien,
+  DanhSachUngTuyen,
+  DanhSachUngTuyenCuaDV,
+  MauUngTuyen,
 };

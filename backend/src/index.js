@@ -22,13 +22,12 @@ const corsOptions = {
   optionsSuccessStatus: 204,
 };
 
-// const secretKey = "doantruong";
 
 app.use(cors(corsOptions));
 app.use(express.static("./src/public"));
 
-app.use(express.urlencoded({ extended: true })); // MiddleWare
-app.use(express.json()); // MiddleWare
+app.use(express.urlencoded({ extended: true })); 
+app.use(express.json()); 
 
 app.use((req, res, next) => {
   next();

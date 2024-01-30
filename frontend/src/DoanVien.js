@@ -9,7 +9,7 @@ const App = () => {
       <div className="header-container">
         <DoanVien />
       </div>
-      <div className="main-container">
+      <div className="main-container1">
         <div className="app-content">
           <Outlet />
         </div>

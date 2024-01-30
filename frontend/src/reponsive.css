@@ -1,0 +1,127 @@
+:root {
+  --rgba: rgb(29, 161, 242, 0.3);
+  --blue: rgb(29, 161, 242);
+  --header: 90px;
+  --black: #000;
+  --white: #fff;
+  --color: rgb(0, 0, 146);
+  --border: #e1e1e1;
+  --red: hsl(0, 50%, 50%);
+  --capnhat: #eecfa1;
+}
+
+/* Tablet */
+@media (min-width: 786px) and (max-width: 1023px) {
+.nav {
+  padding: 0;
+  margin: 0;
+}
+
+.contentHeader {
+  font-size: 0.9em;
+}
+}
+
+/* Mobile */
+@media (max-width: 785px) {
+  .logo {
+    display: none;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+  }
+
+  .flex-mobile {
+    position: absolute;
+    right: 0;
+
+  }
+
+  .menu-icon {
+    display: block;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    color: var(--color);
+  }
+
+  .nav {
+    display: none !important;
+    flex-direction: column;
+    background-color: aliceblue;
+    position: absolute;
+     top: 134px;
+     left: 0;
+     
+     margin: 0;
+  }
+
+  .nav li {
+
+    width: 100% !important;
+  }
+
+  .nav-item {
+    margin-bottom: 10px;
+  }
+
+  .menu-open .contentHeader {
+    position: fixed;
+    top: 90px;
+    background-color:#e1e1e1;
+    z-index: 1000;
+  }
+
+  .menu-open .nav {
+    display: block !important;
+  }
+
+  .subnav  {
+    width: 50% !important;
+    position: absolute;
+    right: 0;
+  }
+
+  .col-none {
+    display: none;
+  }
+}
+
+/* tablet and mobile */
+@media (max-width: 1023px) {
+  .laptop {
+    display: none;
+  }
+
+  .tablet-mobile {
+    display: flex;
+  }
+
+  .table-container {
+    width: 100%;
+    overflow-x: auto; /* Thêm thanh cuộn ngang khi bảng vượt quá kích thước của phần tử bao bọc */
+  }
+
+  .table {
+    width: 100%;
+    min-width: 800px; /* Đặt chiều rộng tối thiểu cho bảng */
+    overflow: auto; /* Thêm thanh trượt khi bảng vượt quá màn hình */
+  }
+
+  .mb-tableItem {
+    position: sticky;
+    left: 0;
+  }
+
+  .mb-tableItem1 {
+    background-color: var(--white) !important; /* Màu nền cho cột cố định */
+  }
+
+}

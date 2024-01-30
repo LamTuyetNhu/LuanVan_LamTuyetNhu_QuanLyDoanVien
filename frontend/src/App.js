@@ -1,9 +1,9 @@
 import "./App.scss";
+import "./reponsive.css"
 import Header from "./components/Header/Header";
 import { Outlet, Link } from "react-router-dom";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
 const App = () => {
   return (
     <div className="app-container">

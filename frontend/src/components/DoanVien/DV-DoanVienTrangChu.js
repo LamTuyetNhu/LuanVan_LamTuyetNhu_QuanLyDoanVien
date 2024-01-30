@@ -35,11 +35,11 @@ const DoanVienTrangChu = (props) => {
   };
   return (
     <>
-      <div className="container">
+      <div className="container d-flex justify-content-center align-items-center">
         <div className="row">
           {/* Cột 1: Thông tin cá nhân */}
-            <div className="col-lg-4 col-md-6 col-sm-12 mb-4 mx-auto">
-          <NavLink to={`/DoanVien/ThongTinCaNhan`} className="NavLink-item">
+          <div className="col-lg-4 col-md-6 col-sm-12 mb-4 mx-auto">
+            <NavLink to={`/DoanVien/ThongTinCaNhan`} className="NavLink-item">
               <div className="card card-opacity1">
                 <div className="card-body">
                   <h5 className="card-title card-title1">Thông tin cá nhân</h5>
@@ -51,32 +51,31 @@ const DoanVienTrangChu = (props) => {
                   )}
                 </div>
               </div>
-          </NavLink>
-            </div>
+            </NavLink>
+          </div>
 
           {/* Cột 2: Hoạt động */}
           <div className="col-lg-4 col-md-6 col-sm-12 mb-4 mx-auto">
-          <NavLink to={`/DoanVien/ThongTinCaNhan`} className="NavLink-item">
-            <div className="card card-opacity2">
-              <div className="card-body">
-                <h5 className="card-title card-title2">Hoạt động</h5>
-                <img src={hoatdong} className="img-fluid" />
+            <NavLink to={`/DoanVien/HoatDong`} className="NavLink-item">
+              <div className="card card-opacity2">
+                <div className="card-body">
+                  <h5 className="card-title card-title2">Hoạt động</h5>
+                  <img src={hoatdong} className="img-fluid" />
+                </div>
               </div>
-            </div>
-          </NavLink>
+            </NavLink>
           </div>
 
           {/* Cột 3: Sinh viên 5 tốt */}
           <div className="col-lg-4 col-md-6 col-sm-12 mb-4 mx-auto">
-          <NavLink to={`/DoanVien/ThongTinCaNhan`} className="NavLink-item">
-
-            <div className="card card-opacity3">
-              <div className="card-body">
-                <h5 className="card-title card-title3">Sinh viên 5 tốt</h5>
-                <img src={svnamtot} className="img-fluid" />
+            <NavLink to={`/DoanVien/SinhVienNamTot`} className="NavLink-item">
+              <div className="card card-opacity3">
+                <div className="card-body">
+                  <h5 className="card-title card-title3">Sinh viên năm tốt</h5>
+                  <img src={svnamtot} className="img-fluid" />
+                </div>
               </div>
-            </div>
-          </NavLink>
+            </NavLink>
           </div>
         </div>
       </div>

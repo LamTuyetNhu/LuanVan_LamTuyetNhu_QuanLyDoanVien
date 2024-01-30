@@ -5,10 +5,13 @@ const XLSX = require("xlsx");
 const multer = require("multer");
 import pool from "../configs/connectDB";
 const { parse, format } = require("date-fns");
-import { path } from "path";
+// import { path } from "path";
+const path = require('path');
+
 var appRoot = require("app-root-path");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+import {authDoanTruong, authChiDoan, authDoanVien} from "../middleware/auther"
 
 const logTokenMiddleware = (req, res, next) => {
   const token = req.headers.authorization || req.body.token || req.query.token;
@@ -91,6 +94,8 @@ const initAPIRoute = (app) => {
   router.get("/dschidoan/:page", APIController.getAllChiDoan);
   router.get("/dskhoa", APIController.getKhoa);
   router.post("/searchChiDoan", APIController.getSearchChiDoan);
+  router.post("/searchManyChiDoan", APIController.getSearchManyChiDoan);
+
   router.post("/ThemChiDoan", APIController.ThemChiDoan);
   router.get(
     "/detailChiDoan/:IDLop/:page/:idnamhoc",
@@ -224,7 +229,6 @@ const initAPIRoute = (app) => {
       IDTonGiao,
       IDChucVu,
       IDNamHoc,
-      IDChiTietNamHoc,
       IDDoanVien,
     } = req.body;
 
@@ -278,8 +282,8 @@ const initAPIRoute = (app) => {
 
       // Cập nhật thông tin chi tiết năm học
       await pool.execute(
-        "UPDATE chitietnamhoc SET IDChucVu = ?, IDNamHoc = ? WHERE IDChiTietNamHoc = ?",
-        [IDChucVu, IDNamHoc, IDChiTietNamHoc]
+        "UPDATE chitietnamhoc SET IDChucVu = ? where IDNamHoc = ? and IDDoanVien = ?",
+        [IDChucVu, IDNamHoc, IDDoanVien]
       );
 
       if (file && file.filename) {
@@ -303,6 +307,8 @@ const initAPIRoute = (app) => {
 
   router.get("/getChucVu", APIController.getChucVu);
   router.post("/searchDoanVien", APIController.getSearchDoanVien);
+  router.post("/searchManyDoanVien", APIController.getSearchManyDoanVien);
+
   router.get(
     "/laymotdoanvien/:IDLop/:IDDoanVien/:IDChiTietNamHoc",
     APIController.laymotdoanvien
@@ -505,7 +511,7 @@ const initAPIRoute = (app) => {
   router.get("/LayTonGiao", APIController.LayTonGiao);
   router.get("/LayDanToc", APIController.LayDanToc);
 
-  router.get("/dsBCH/:page/:idnamhoc", APIController.getBCH);
+  router.get("/dsBCH/:page/:idnamhoc/:khoa", APIController.getBCH);
   router.post("/searchBCH", APIController.getSearchBCH);
   router.post("/XoaBanChapHanh/:select", APIController.deleteBanChapHanh);
 
@@ -553,6 +559,65 @@ const initAPIRoute = (app) => {
   );
 
   router.get("/laytendoanvien/:IDDoanVien", APIController.laytendoanvien);
+  router.get(
+    "/DVlaymotdoanvien/:IDDoanVien/:IDNamHoc",
+    APIController.dvlaymotdoanvien
+  );
+  router.get(
+    "/laydshoatdongcuadoanvien/:IDDoanVien/:IDNamHoc",
+    APIController.layDSHoatDongCuaDoanVien
+  );
+
+  var filename = ''
+  const uploadPFD = multer({
+      storage: multer.diskStorage({
+          destination: './src/public/files',
+          filename: (req, file, cb) => {
+              // tạo tên file duy nhất
+              const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+              const originalName = file.originalname;
+              const extension = originalName.split('.').pop();
+              cb(null, file.fieldname + '-' + uniqueSuffix + '.' + extension);
+              filename = file.fieldname + '-' + uniqueSuffix + '.' + extension
+          }
+      })
+  });
+
+  router.post('/ungtuyen', uploadPFD.single('file'), async (req, res) => {
+      console.log(req.body)
+      let { IDDoanVien, idnamhoc } = req.body
+      console.log(IDDoanVien)
+      console.log(idnamhoc)
+
+      try {
+          // thêm vào CSDL
+          await pool.execute(
+              'INSERT INTO ungtuyen(IDDoanVien, IDNamHoc, FileUngTuyen, NgayUngTuyen) VALUES(?, ?, ?, NOW())',
+              [IDDoanVien, idnamhoc, filename]
+          );
+
+          res.status(200).json({ message: 'Upload thành công' });
+
+      } catch (error) {
+          console.error(error);
+          res.status(500).json({ message: 'Lỗi server' });
+      }
+  });
+
+  router.get(
+    "/DanhSachUngTuyen/:IDNamHoc",
+    APIController.DanhSachUngTuyen
+  );
+  
+  router.get(
+    "/DanhSachUngTuyenCuaDV/:IDDoanVien",
+    APIController.DanhSachUngTuyenCuaDV
+  );
+
+  router.get(
+    "/MauUngTuyen",
+    APIController.MauUngTuyen
+  );
 
   return app.use("/api", router);
 };

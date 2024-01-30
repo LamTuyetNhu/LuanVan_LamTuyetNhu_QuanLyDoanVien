@@ -16,12 +16,13 @@ import {
   chucvu,
   LayTonGiao,
   LayDanToc,
-  LayMotDoanVien,
+  DVLayMotDoanVien,
   namhoc,
 } from "../../services/apiService";
 
 const DoanVien = (props) => {
-  const { IDLop, IDDoanVien, IDChiTietNamHoc } = useParams();
+  const IDDoanVien = localStorage.getItem("IDDoanVien");
+
   const [DoanVien, setDoanVien] = useState([]);
 
   const [NamHoc, setNamHoc] = useState([]);
@@ -48,8 +49,7 @@ const DoanVien = (props) => {
   const [IDDanToc, setIDDanToc] = useState("");
   const [IDTonGiao, setIDTonGiao] = useState("");
   const [IDChucVu, setIDChucVu] = useState("");
-  const [IDNamHoc, setIDNamHoc] = useState("");
-
+  const [IDNamHoc, setIDNamHoc] = useState(1);
 
   useEffect(() => {
     layMotDoanVien();
@@ -57,11 +57,11 @@ const DoanVien = (props) => {
     fetchChucVu();
     fetchTonGiao();
     fetchDanToc();
-  }, [IDLop, IDDoanVien]);
+  }, [IDDoanVien, IDNamHoc]);
 
   const layMotDoanVien = async () => {
     try {
-      let res = await LayMotDoanVien(IDLop, IDDoanVien, IDChiTietNamHoc);
+      let res = await DVLayMotDoanVien(IDDoanVien, IDNamHoc);
       if (res.status === 200) {
         setDoanVien(res.data.dataDV);
         seteditedDoanVien(res.data.dataDV);
@@ -204,7 +204,7 @@ const DoanVien = (props) => {
 
   const validatePhoneNumber = (sdt) => {
     return String(sdt).match(/^0[2-9][0-9]{8}$/);
-};
+  };
 
   const validateNgay = (Ngay) => {
     return String(Ngay).match(
@@ -222,13 +222,20 @@ const DoanVien = (props) => {
           : !validateEmail(editedDoanVien.Email)
           ? "Email không hợp lệ!"
           : "",
-      HoTen: !editedDoanVien.HoTen.trim() === "" ? "Vui lòng nhập họ tên" : "",
-      MSSV: !editedDoanVien.MSSV.trim() === "" ? "Vui lòng nhập MSSV" : "",
-      SoDT: !editedDoanVien.SoDT.trim() === ""
-        ? "Vui lòng nhập số điện thoại"
-        : !validatePhoneNumber(editedDoanVien.SoDT)
-        ? "Số điện thoại không hợp lệ!"
-        : "",
+      HoTen:
+        !editedDoanVien.HoTen || !editedDoanVien.HoTen.trim() === ""
+          ? "Vui lòng nhập họ tên"
+          : "",
+      MSSV:
+        !editedDoanVien.MSSV || !editedDoanVien.MSSV.trim() === ""
+          ? "Vui lòng nhập MSSV"
+          : "",
+      SoDT:
+        !editedDoanVien.SoDT.trim() === ""
+          ? "Vui lòng nhập số điện thoại"
+          : !validatePhoneNumber(editedDoanVien.SoDT)
+          ? "Số điện thoại không hợp lệ!"
+          : "",
       QueQuan:
         !editedDoanVien.QueQuan.trim() === "" ? "Vui lòng nhập quê quán" : "",
       GioiTinh:
@@ -277,9 +284,7 @@ const DoanVien = (props) => {
       formData.append("IDNamHoc", editedDoanVien.IDNamHoc);
       formData.append("QueQuan", editedDoanVien.QueQuan);
       formData.append("IDDoanVien", IDDoanVien);
-      formData.append("IDChiTietNamHoc", IDChiTietNamHoc);
-
-      // formData.append("file", image, image.name);
+      // formData.append("IDChiTietNamHoc", IDChiTietNamHoc);
 
       if (image instanceof Blob) {
         formData.append("file", image, image.name);
@@ -300,447 +305,426 @@ const DoanVien = (props) => {
       console.error("Lỗi khi cập nhật dữ liệu:", error);
     }
   };
+  const handleNamHocChange = (e) => {
+    const selectedIDNamHoc = e.target.value;
+    setIDNamHoc(selectedIDNamHoc);
+  };
 
   return (
     <>
       <div className="container-fluid app__content">
-        <h2 className="text-center">Đoàn Viên</h2>
-        <div className="margin-top">
-          <div className="row formAdd">
-            <div className="col col-2">
-              <div className="avatar">
-                <img
-                  className="avatar_img"
-                  src={
-                    previewImage ||
-                    `http://localhost:8080/images/${DoanVien.TenAnh}`
-                  }
-                  alt=""
+        <div className="namhoc-center mg-bt">
+          <h2 className="text-center">Đoàn Viên</h2>
+          <div className="searchDV-input">
+            {" "}
+            Năm học
+            <select
+              type="text"
+              className="search_name"
+              value={IDNamHoc}
+              onChange={handleNamHocChange}
+            >
+              {NamHoc.map((item, index) => {
+                return (
+                  <option key={index} value={item.IDNamHoc}>
+                    {item.TenNamHoc}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+        </div>
+        <div className="row formAdd">
+          <div className="col-12 col-md-3 col-lg-2">
+            <div className="avatar">
+              <img
+                className="avatar_img"
+                src={
+                  previewImage ||
+                  `http://localhost:8080/images/${DoanVien.TenAnh}`
+                }
+                alt=""
+              />
+              <label htmlFor="fileInput" className="camera-icon">
+                <FontAwesomeIcon icon={faCamera} />
+                <input
+                  type="file"
+                  name="file"
+                  id="fileInput"
+                  style={{ display: "none" }}
+                  onChange={(e) => handleUpLoadImage(e)}
                 />
-                <label htmlFor="fileInput" className="camera-icon">
-                  <FontAwesomeIcon icon={faCamera} />
-                  <input
-                    type="file"
-                    name="file"
-                    id="fileInput"
-                    style={{ display: "none" }}
-                    onChange={(e) => handleUpLoadImage(e)}
-                  />
-                </label>
-              </div>
-            </div>
-            <div className="col col-10">
-              <div className="row">
-                <div className="form-group col col-4">
-                  <Form.Label htmlFor="MaLop">Mã chi đoàn</Form.Label>
-                  <Form.Control
-                    className="form-control"
-                    type="text"
-                    id="MaLop"
-                    aria-describedby="MaLop"
-                    value={DoanVien.MaLop}
-                    disabled
-                  />
-                </div>
-                <div className="form-group col col-4">
-                  <Form.Label htmlFor="TenLop">Tên chi đoàn</Form.Label>
-                  <Form.Control
-                    className="form-control"
-                    type="text"
-                    id="TenLop"
-                    aria-describedby="TenLop"
-                    value={DoanVien.TenLop}
-                    disabled
-                  />
-                </div>
-                <div className="form-group col col-4">
-                  <Form.Label htmlFor="Khoa">Khóa</Form.Label>
-                  <Form.Control
-                    className="form-control"
-                    type="text"
-                    id="Khoa"
-                    aria-describedby="Khoa"
-                    value={DoanVien.Khoa}
-                    disabled
-                  />
-                </div>
-                <div className="form-group col col-4">
-                  <Form.Label htmlFor="MSSV">Mã số sinh viên</Form.Label>
-                  {isEditing ? (
-                    <Form.Control
-                      className="form-control"
-                      type="text"
-                      id="MSSV"
-                      aria-describedby="MSSV"
-                      value={editedDoanVien.MSSV}
-                      onChange={handleChange}
-                    />
-                  ) : (
-                    <Form.Control
-                      className="form-control"
-                      type="text"
-                      id="MSSV"
-                      aria-describedby="MSSV"
-                      value={DoanVien.MSSV}
-                      disabled
-                    />
-                  )}
-                  <div className="error-message">{errors.MSSV}</div>
-                </div>
-                <div className="form-group col col-4">
-                  <Form.Label htmlFor="HoTen">Họ tên đoàn viên</Form.Label>
-                  {isEditing ? (
-                    <Form.Control
-                      className="form-control"
-                      type="text"
-                      id="HoTen"
-                      aria-describedby="HoTen"
-                      value={editedDoanVien.HoTen}
-                      onChange={handleChange}
-                    />
-                  ) : (
-                    <Form.Control
-                      className="form-control"
-                      type="text"
-                      id="HoTen"
-                      aria-describedby="HoTen"
-                      value={DoanVien.HoTen}
-                      disabled
-                    />
-                  )}
-                  <div className="error-message">{errors.HoTen}</div>
-                </div>
-
-                <div className="form-group col col-4">
-                  <Form.Label htmlFor="Email">Email</Form.Label>
-                  {isEditing ? (
-                    <Form.Control
-                      className="form-control"
-                      type="text"
-                      id="Email"
-                      aria-describedby="Email"
-                      value={editedDoanVien.Email}
-                      onChange={handleChange}
-                    />
-                  ) : (
-                    <Form.Control
-                      className="form-control"
-                      type="text"
-                      id="Email"
-                      aria-describedby="Email"
-                      value={DoanVien.Email}
-                      disabled
-                    />
-                  )}
-                  <div className="error-message">{errors.Email}</div>
-                </div>
-                <div className="form-group col col-4">
-                  <Form.Label htmlFor="SoDT">Số điện thoại</Form.Label>
-                  {isEditing ? (
-                    <Form.Control
-                      className="form-control"
-                      type="text"
-                      id="SoDT"
-                      aria-describedby="SoDT"
-                      value={editedDoanVien.SoDT}
-                      onChange={handleChange}
-                    />
-                  ) : (
-                    <Form.Control
-                      className="form-control"
-                      type="text"
-                      id="SoDT"
-                      aria-describedby="SoDT"
-                      value={DoanVien.SoDT}
-                      disabled
-                    />
-                  )}
-                  <div className="error-message">{errors.SoDT}</div>
-                </div>
-                <div className="form-group col col-4">
-                  <Form.Label htmlFor="QueQuan">Quê quán</Form.Label>
-                  {isEditing ? (
-                    <Form.Control
-                      className="form-control"
-                      type="text"
-                      id="QueQuan"
-                      aria-describedby="QueQuan"
-                      value={editedDoanVien.QueQuan}
-                      onChange={handleChange}
-                    />
-                  ) : (
-                    <Form.Control
-                      className="form-control"
-                      type="text"
-                      id="QueQuan"
-                      aria-describedby="QueQuan"
-                      value={DoanVien.QueQuan}
-                      disabled
-                    />
-                  )}
-                  <div className="error-message">{errors.QueQuan}</div>
-                </div>
-                <div className="form-group col col-4">
-                  <Form.Label htmlFor="GioiTinh">Giới tính</Form.Label>
-
-                  {isEditing ? (
-                    <Form.Select
-                      className="form-control"
-                      type="text"
-                      id="GioiTinh"
-                      aria-describedby="GioiTinh"
-                      value={editedDoanVien.GioiTinh}
-                      onChange={handleChange}
-                    >
-                      <option value={0}>Nữ</option>
-                      <option value={1}>Nam</option>
-                      <option value={2}>Khác</option>
-                    </Form.Select>
-                  ) : (
-                    <Form.Control
-                      className="form-control"
-                      type="text"
-                      id="GioiTinh"
-                      aria-describedby="GioiTinh"
-                      value={
-                        DoanVien.GioiTinh === 0
-                          ? "Nữ"
-                          : DoanVien.GioiTinh === 1
-                          ? "Nam"
-                          : "Khác"
-                      }
-                      disabled
-                    />
-                  )}
-                  <div className="error-message">{errors.GioiTinh}</div>
-                </div>
-                <div className="form-group col col-4">
-                  <Form.Label htmlFor="NgaySinh">
-                    Ngày sinh
-                  </Form.Label>
-                  {isEditing ? (
-                    <Form.Control
-                      className="form-control"
-                      type="text"
-                      id="NgaySinh"
-                      aria-describedby="NgaySinh"
-                      value={editedDoanVien.NgaySinh}
-                      onChange={handleChange}
-                    />
-                  ) : (
-                    <Form.Control
-                      className="form-control"
-                      type="text"
-                      id="NgaySinh"
-                      aria-describedby="NgaySinh"
-                      value={DoanVien.NgaySinh}
-                      disabled
-                    />
-                  )}
-                  <div className="error-message">{errors.NgaySinh}</div>
-                </div>
-                <div className="form-group col col-4">
-                  <Form.Label htmlFor="NgayVaoDoan">
-                    Ngày vào đoàn
-                  </Form.Label>
-                  {isEditing ? (
-                    <Form.Control
-                      className="form-control"
-                      type="text"
-                      id="NgayVaoDoan"
-                      aria-describedby="NgayVaoDoan"
-                      value={editedDoanVien.NgayVaoDoan}
-                      onChange={handleChange}
-                    />
-                  ) : (
-                    <Form.Control
-                      className="form-control"
-                      type="text"
-                      id="NgayVaoDoan"
-                      aria-describedby="NgayVaoDoan"
-                      value={DoanVien.NgayVaoDoan}
-                      disabled
-                    />
-                  )}
-                  <div className="error-message">{errors.NgayVaoDoan}</div>
-                </div>
-                <div className="form-group col col-4">
-                  <Form.Label htmlFor="IDDanToc">Dân tộc</Form.Label>
-                  {isEditing ? (
-                    <Form.Select
-                      className="form-control"
-                      type="text"
-                      id="IDDanToc"
-                      aria-describedby="IDDanToc"
-                      value={editedDoanVien.IDDanToc}
-                      onChange={handleChange}
-                    >
-                      <option value="" disabled selected>
-                        {/* {DoanVien.TenDanToc} */} Chọn dân tộc
-                      </option>
-                      {DanToc.map((dantoc, index) => {
-                        return (
-                          <option key={index} value={dantoc.IDDanToc}>
-                            {dantoc.TenDanToc}
-                          </option>
-                        );
-                      })}
-                    </Form.Select>
-                  ) : (
-                    <Form.Control
-                      className="form-control"
-                      type="text"
-                      id="TenDanToc"
-                      aria-describedby="TenDanToc"
-                      value={DoanVien.TenDanToc}
-                      disabled
-                    />
-                  )}
-                  <div className="error-message">{errors.IDDanToc}</div>
-                </div>
-                <div className="form-group col col-4">
-                  <Form.Label htmlFor="IDTonGiao">Tôn giáo</Form.Label>
-                  {isEditing ? (
-                    <Form.Select
-                      className="form-control"
-                      type="text"
-                      id="IDTonGiao"
-                      aria-describedby="IDTonGiao"
-                      value={editedDoanVien.IDTonGiao}
-                      onChange={handleChange}
-                    >
-                      <option value="" disabled selected>
-                        Chọn tôn giáo
-                      </option>
-                      {TonGiao.map((tongiao, index) => {
-                        return (
-                          <option key={index} value={tongiao.IDTonGiao}>
-                            {tongiao.TenTonGiao}
-                          </option>
-                        );
-                      })}
-                    </Form.Select>
-                  ) : (
-                    <Form.Control
-                      className="form-control"
-                      type="text"
-                      id="TenTonGiao"
-                      aria-describedby="TenTonGiao"
-                      value={DoanVien.TenTonGiao}
-                      disabled
-                    />
-                  )}
-                  <div className="error-message">{errors.IDTonGiao}</div>
-                </div>
-                <div className="form-group col col-4">
-                  <Form.Label htmlFor="IDChucVu">Chức vụ</Form.Label>
-                  {isEditing ? (
-                    <Form.Select
-                      className="form-control"
-                      type="text"
-                      id="IDChucVu"
-                      aria-describedby="IDChucVu"
-                      value={editedDoanVien.IDChucVu}
-                      onChange={handleChange}
-                    >
-                      <option value="" disabled selected>
-                        Chọn chức vụ
-                      </option>
-                      {ChucVu.map((chucvu, index) => {
-                        return (
-                          <option key={index} value={chucvu.IDChucVu}>
-                            {chucvu.TenCV}
-                          </option>
-                        );
-                      })}
-                    </Form.Select>
-                  ) : (
-                    <Form.Control
-                      className="form-control"
-                      type="text"
-                      id="IDChucVu"
-                      aria-describedby="IDChucVu"
-                      value={DoanVien.TenCV}
-                      disabled
-                    />
-                  )}
-                  <div className="error-message">{errors.IDChucVu}</div>
-                </div>
-                <div className="form-group col col-4">
-                  <Form.Label htmlFor="TenNamHoc">Năm học</Form.Label>
-                  {isEditing ? (
-                    <Form.Select
-                      className="form-control"
-                      type="text"
-                      id="IDNamHoc"
-                      aria-describedby="IDNamHoc"
-                      value={editedDoanVien.IDNamHoc}
-                      onChange={handleChange}
-                    >
-                      <option value="" disabled selected>
-                        Chọn năm học
-                      </option>
-                      {NamHoc.map((namhoc, index) => {
-                        return (
-                          <option key={index} value={namhoc.IDNamHoc}>
-                            {namhoc.TenNamHoc}
-                          </option>
-                        );
-                      })}
-                    </Form.Select>
-                  ) : (
-                    <Form.Control
-                      className="form-control"
-                      type="text"
-                      id="TenNamHoc TenNamHoc1"
-                      aria-describedby="TenNamHoc"
-                      value={DoanVien.TenNamHoc}
-                      disabled
-                    />
-                  )}
-                  <div className="error-message">{errors.IDNamHoc}</div>
-                </div>
-              </div>
+              </label>
             </div>
           </div>
-          <div className="update row">
-            <div className="btns">
-              <button className="allcus-button" type="submit">
-                <NavLink
-                  to={`/BCH-DoanTruong/ChiTietChiDoan/${DoanVien.IDLop}`}
-                  className="navlink"
-                >
-                  <FontAwesomeIcon icon={faBackward} />
-                </NavLink>
-              </button>
+          <div className="col-12 col-md-9 col-lg-10 margin-top1">
+            <div className="row">
+              <div className="form-group col-12 col-md-6 col-lg-4">
+                <Form.Label htmlFor="MaLop">Mã chi đoàn</Form.Label>
+                <Form.Control
+                  className="form-control"
+                  type="text"
+                  id="MaLop"
+                  aria-describedby="MaLop"
+                  value={DoanVien.MaLop}
+                  disabled
+                />
+              </div>
+              <div className="form-group col-12 col-md-6 col-lg-4">
+                <Form.Label htmlFor="TenLop">Tên chi đoàn</Form.Label>
+                <Form.Control
+                  className="form-control"
+                  type="text"
+                  id="TenLop"
+                  aria-describedby="TenLop"
+                  value={DoanVien.TenLop}
+                  disabled
+                />
+              </div>
+              <div className="form-group col-12 col-md-6 col-lg-4">
+                <Form.Label htmlFor="Khoa">Khóa</Form.Label>
+                <Form.Control
+                  className="form-control"
+                  type="text"
+                  id="Khoa"
+                  aria-describedby="Khoa"
+                  value={DoanVien.Khoa}
+                  disabled
+                />
+              </div>
+              <div className="form-group col-12 col-md-6 col-lg-4">
+                <Form.Label htmlFor="MSSV">Mã số sinh viên</Form.Label>
+                {isEditing ? (
+                  <Form.Control
+                    className="form-control"
+                    type="text"
+                    id="MSSV"
+                    aria-describedby="MSSV"
+                    value={editedDoanVien.MSSV}
+                    onChange={handleChange}
+                  />
+                ) : (
+                  <Form.Control
+                    className="form-control"
+                    type="text"
+                    id="MSSV"
+                    aria-describedby="MSSV"
+                    value={DoanVien.MSSV}
+                    disabled
+                  />
+                )}
+                <div className="error-message">{errors.MSSV}</div>
+              </div>
+              <div className="form-group col-12 col-md-6 col-lg-4">
+                <Form.Label htmlFor="HoTen">Họ tên đoàn viên</Form.Label>
+                {isEditing ? (
+                  <Form.Control
+                    className="form-control"
+                    type="text"
+                    id="HoTen"
+                    aria-describedby="HoTen"
+                    value={editedDoanVien.HoTen}
+                    onChange={handleChange}
+                  />
+                ) : (
+                  <Form.Control
+                    className="form-control"
+                    type="text"
+                    id="HoTen"
+                    aria-describedby="HoTen"
+                    value={DoanVien.HoTen}
+                    disabled
+                  />
+                )}
+                <div className="error-message">{errors.HoTen}</div>
+              </div>
+              <div className="form-group col-12 col-md-6 col-lg-4">
+                <Form.Label htmlFor="SoDT">Số điện thoại</Form.Label>
+                {isEditing ? (
+                  <Form.Control
+                    className="form-control"
+                    type="text"
+                    id="SoDT"
+                    aria-describedby="SoDT"
+                    value={editedDoanVien.SoDT}
+                    onChange={handleChange}
+                  />
+                ) : (
+                  <Form.Control
+                    className="form-control"
+                    type="text"
+                    id="SoDT"
+                    aria-describedby="SoDT"
+                    value={DoanVien.SoDT}
+                    disabled
+                  />
+                )}
+                <div className="error-message">{errors.SoDT}</div>
+              </div>
+              <div className="form-group col-12 col-md-12 col-lg-4">
+                <Form.Label htmlFor="Email">Email</Form.Label>
+                {isEditing ? (
+                  <Form.Control
+                    className="form-control"
+                    type="text"
+                    id="Email"
+                    aria-describedby="Email"
+                    value={editedDoanVien.Email}
+                    onChange={handleChange}
+                  />
+                ) : (
+                  <Form.Control
+                    className="form-control"
+                    type="text"
+                    id="Email"
+                    aria-describedby="Email"
+                    value={DoanVien.Email}
+                    disabled
+                  />
+                )}
+                <div className="error-message">{errors.Email}</div>
+              </div>
+              <div className="form-group col-12 col-md-6 col-lg-4">
+                <Form.Label htmlFor="GioiTinh">Giới tính</Form.Label>
 
-              {isEditing ? (
-                <>
+                {isEditing ? (
+                  <Form.Select
+                    className="form-control"
+                    type="text"
+                    id="GioiTinh"
+                    aria-describedby="GioiTinh"
+                    value={editedDoanVien.GioiTinh}
+                    onChange={handleChange}
+                  >
+                    <option value={0}>Nữ</option>
+                    <option value={1}>Nam</option>
+                    <option value={2}>Khác</option>
+                  </Form.Select>
+                ) : (
+                  <Form.Control
+                    className="form-control"
+                    type="text"
+                    id="GioiTinh"
+                    aria-describedby="GioiTinh"
+                    value={
+                      DoanVien.GioiTinh === 0
+                        ? "Nữ"
+                        : DoanVien.GioiTinh === 1
+                        ? "Nam"
+                        : "Khác"
+                    }
+                    disabled
+                  />
+                )}
+                <div className="error-message">{errors.GioiTinh}</div>
+              </div>
+              <div className="form-group col-12 col-md-6 col-lg-4">
+                <Form.Label htmlFor="IDChucVu">Chức vụ</Form.Label>
+                {isEditing ? (
+                  <Form.Select
+                    className="form-control"
+                    type="text"
+                    id="IDChucVu"
+                    aria-describedby="IDChucVu"
+                    value={editedDoanVien.IDChucVu}
+                    onChange={handleChange}
+                  >
+                    <option value="" disabled selected>
+                      Chọn chức vụ
+                    </option>
+                    {ChucVu.map((chucvu, index) => {
+                      return (
+                        <option key={index} value={chucvu.IDChucVu}>
+                          {chucvu.TenCV}
+                        </option>
+                      );
+                    })}
+                  </Form.Select>
+                ) : (
+                  <Form.Control
+                    className="form-control"
+                    type="text"
+                    id="IDChucVu"
+                    aria-describedby="IDChucVu"
+                    value={DoanVien.TenCV}
+                    disabled
+                  />
+                )}
+                <div className="error-message">{errors.IDChucVu}</div>
+              </div>
+              <div className="form-group col-12 col-md-12 col-lg-8">
+                <Form.Label htmlFor="QueQuan">Quê quán</Form.Label>
+                {isEditing ? (
+                  <Form.Control
+                    className="form-control"
+                    type="text"
+                    id="QueQuan"
+                    aria-describedby="QueQuan"
+                    value={editedDoanVien.QueQuan}
+                    onChange={handleChange}
+                  />
+                ) : (
+                  <Form.Control
+                    className="form-control"
+                    type="text"
+                    id="QueQuan"
+                    aria-describedby="QueQuan"
+                    value={DoanVien.QueQuan}
+                    disabled
+                  />
+                )}
+                <div className="error-message">{errors.QueQuan}</div>
+              </div>
+              <div className="form-group col-12 col-md-6 col-lg-4">
+                <Form.Label htmlFor="NgaySinh">Ngày sinh</Form.Label>
+                {isEditing ? (
+                  <Form.Control
+                    className="form-control"
+                    type="text"
+                    id="NgaySinh"
+                    aria-describedby="NgaySinh"
+                    value={editedDoanVien.NgaySinh}
+                    onChange={handleChange}
+                  />
+                ) : (
+                  <Form.Control
+                    className="form-control"
+                    type="text"
+                    id="NgaySinh"
+                    aria-describedby="NgaySinh"
+                    value={DoanVien.NgaySinh}
+                    disabled
+                  />
+                )}
+                <div className="error-message">{errors.NgaySinh}</div>
+              </div>
+              <div className="form-group col-12 col-md-6 col-lg-4">
+                <Form.Label htmlFor="NgayVaoDoan">Ngày vào đoàn</Form.Label>
+                {isEditing ? (
+                  <Form.Control
+                    className="form-control"
+                    type="text"
+                    id="NgayVaoDoan"
+                    aria-describedby="NgayVaoDoan"
+                    value={editedDoanVien.NgayVaoDoan}
+                    onChange={handleChange}
+                  />
+                ) : (
+                  <Form.Control
+                    className="form-control"
+                    type="text"
+                    id="NgayVaoDoan"
+                    aria-describedby="NgayVaoDoan"
+                    value={DoanVien.NgayVaoDoan}
+                    disabled
+                  />
+                )}
+                <div className="error-message">{errors.NgayVaoDoan}</div>
+              </div>
+              <div className="form-group col-12 col-md-6 col-lg-4">
+                <Form.Label htmlFor="IDDanToc">Dân tộc</Form.Label>
+                {isEditing ? (
+                  <Form.Select
+                    className="form-control"
+                    type="text"
+                    id="IDDanToc"
+                    aria-describedby="IDDanToc"
+                    value={editedDoanVien.IDDanToc}
+                    onChange={handleChange}
+                  >
+                    <option value="" disabled selected>
+                      {/* {DoanVien.TenDanToc} */} Chọn dân tộc
+                    </option>
+                    {DanToc.map((dantoc, index) => {
+                      return (
+                        <option key={index} value={dantoc.IDDanToc}>
+                          {dantoc.TenDanToc}
+                        </option>
+                      );
+                    })}
+                  </Form.Select>
+                ) : (
+                  <Form.Control
+                    className="form-control"
+                    type="text"
+                    id="TenDanToc"
+                    aria-describedby="TenDanToc"
+                    value={DoanVien.TenDanToc}
+                    disabled
+                  />
+                )}
+                <div className="error-message">{errors.IDDanToc}</div>
+              </div>
+              <div className="form-group col-12 col-md-6 col-lg-4">
+                <Form.Label htmlFor="IDTonGiao">Tôn giáo</Form.Label>
+                {isEditing ? (
+                  <Form.Select
+                    className="form-control"
+                    type="text"
+                    id="IDTonGiao"
+                    aria-describedby="IDTonGiao"
+                    value={editedDoanVien.IDTonGiao}
+                    onChange={handleChange}
+                  >
+                    <option value="" disabled selected>
+                      Chọn tôn giáo
+                    </option>
+                    {TonGiao.map((tongiao, index) => {
+                      return (
+                        <option key={index} value={tongiao.IDTonGiao}>
+                          {tongiao.TenTonGiao}
+                        </option>
+                      );
+                    })}
+                  </Form.Select>
+                ) : (
+                  <Form.Control
+                    className="form-control"
+                    type="text"
+                    id="TenTonGiao"
+                    aria-describedby="TenTonGiao"
+                    value={DoanVien.TenTonGiao}
+                    disabled
+                  />
+                )}
+                <div className="error-message">{errors.IDTonGiao}</div>
+              </div>
+            </div>
+            <div className="update row">
+              <div className="btns">
+                <button className="allcus-button" type="submit">
+                  <NavLink to={`/DoanVien`} className="navlink">
+                    <FontAwesomeIcon icon={faBackward} />
+                  </NavLink>
+                </button>
+
+                {isEditing ? (
+                  <>
+                    <button
+                      className="allcus-button bgcapnhat"
+                      onClick={handleSaveChanges}
+                    >
+                      <FontAwesomeIcon icon={faSave} /> Lưu
+                    </button>
+                  </>
+                ) : (
                   <button
                     className="allcus-button bgcapnhat"
-                    onClick={handleSaveChanges}
+                    onClick={handleToggleEdit}
                   >
-                    <FontAwesomeIcon icon={faSave} /> Lưu
+                    <FontAwesomeIcon icon={faEdit} /> Cập nhật
                   </button>
-                </>
-              ) : (
-                <button
-                  className="allcus-button bgcapnhat"
-                  onClick={handleToggleEdit}
-                >
-                  <FontAwesomeIcon icon={faEdit} /> Cập nhật
-                </button>
-              )}
-
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
-     
-        <ModalSuccess
-          show={showModalUpdate}
-          onHide={() => setShowModalUpdate(false)}
-        />
+
+      <ModalSuccess
+        show={showModalUpdate}
+        onHide={() => setShowModalUpdate(false)}
+      />
     </>
   );
 };

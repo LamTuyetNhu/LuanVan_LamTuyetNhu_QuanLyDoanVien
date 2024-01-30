@@ -188,7 +188,7 @@ const DanhSachHoatDong = (props) => {
         <div className="namhoc-center">
           <h2 className="text-center">Danh Sách Hoạt Động</h2>
 
-          <div className="searchDV-input">
+          <div className="searchDV-input">Năm học:
             <select
               type="text"
               className="search_name"
@@ -443,66 +443,7 @@ const DanhSachHoatDong = (props) => {
           {/* You can add some message or content indicating that pagination is not shown */}
         </div>
       )}
-{/* 
-        <div className="pagination pagination1">
-          <button
-            className="btn-footer"
-            onClick={handlePrevPage}
-            disabled={currentPage <= 1}
-          >
-            <FontAwesomeIcon icon={faChevronLeft} />
-          </button>
 
-          {totalPages > 4 && currentPage > 3 && (
-            <div className="footer">
-              <span className="ellipsis"></span>
-            </div>
-          )}
-
-          {Array.from(
-            { length: totalPages > 4 ? 3 : totalPages },
-            (_, index) => {
-              let pageToShow;
-              if (totalPages <= 4) {
-                pageToShow = index + 1;
-              } else if (currentPage <= 3) {
-                pageToShow = index + 1;
-              } else if (currentPage >= totalPages - 2) {
-                pageToShow = totalPages - 2 + index;
-              } else {
-                pageToShow = currentPage - 1 + index;
-              }
-
-              return (
-                <div className="footer" key={index}>
-                  <button
-                    className={`btn-footer ${
-                      currentPage === pageToShow ? "active" : ""
-                    }`}
-                    onClick={() => changePage(pageToShow)}
-                    disabled={currentPage === pageToShow}
-                  >
-                    {pageToShow}
-                  </button>
-                </div>
-              );
-            }
-          )}
-
-          {totalPages > 4 && currentPage < totalPages - 2 && (
-            <div className="footer">
-              <span className="ellipsis"></span>
-            </div>
-          )}
-
-          <button
-            className="btn-footer"
-            onClick={handleNextPage}
-            disabled={currentPage >= totalPages}
-          >
-            <FontAwesomeIcon icon={faChevronRight} />
-          </button>
-        </div> */}
       </div>
     </>
   );

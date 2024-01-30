@@ -84,14 +84,14 @@ const DoanVien = (props) => {
         <h2 className="text-center">Thêm Chi Đoàn</h2>
         <form onSubmit={handleSubmit}>
           <div className="row formAdd">
-            <div className="col col-2">
+            <div className="col col-lg-2 col-md-2 col-none">
               <div className="avatar">
                 <img className="avatar_img" src={logo} alt="" />
               </div>
             </div>
-            <div className="col col-10">
+            <div className="col col-lg-10 col-md-10 ">
               <div className="row">
-                <div className="form-group col col-6">
+                <div className="form-group col-lg-6 col-md-6 col-sm-12 mb-4 mx-auto">
                   <Form.Label htmlFor="MaLop">Mã chi đoàn</Form.Label>
                   <Form.Control
                     className="form-control"
@@ -103,7 +103,7 @@ const DoanVien = (props) => {
                   />
                   <div className="error-message">{errors.MaLop}</div>
                 </div>
-                <div className="form-group col col-6">
+                <div className="form-group col-lg-6 col-md-6 col-sm-12 mb-4 mx-auto">
                   <Form.Label htmlFor="TenLop">Tên chi đoàn</Form.Label>
                   <Form.Control
                     className="form-control"
@@ -115,7 +115,7 @@ const DoanVien = (props) => {
                   />
                   <div className="error-message">{errors.TenLop}</div>
                 </div>
-                <div className="form-group col col-6">
+                <div className="form-group col-lg-6 col-md-6 col-sm-12 mb-4 mx-auto">
                   <Form.Label htmlFor="Khoa">Khóa</Form.Label>
                   <Form.Control
                     className="form-control"
@@ -127,7 +127,7 @@ const DoanVien = (props) => {
                   />
                   <div className="error-message">{errors.Khoa}</div>
                 </div>
-                <div className="form-group col col-6">
+                <div className="form-group col-lg-6 col-md-6 col-sm-12 mb-4 mx-auto">
                   <Form.Label htmlFor="Email">Email</Form.Label>
                   <Form.Control
                     className="form-control"
@@ -155,6 +155,8 @@ const DoanVien = (props) => {
             </button>
           </div>
         </form>
+        <div className="margin-bottom"></div>
+
       </div>
       <NavLink to={`/BCH-DoanTruong`} className="navlink">
         <div>

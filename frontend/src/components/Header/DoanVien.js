@@ -48,7 +48,6 @@ function Header() {
             <img className="logo-img" src={huyhieu} alt="Huy hieu" />
           </NavLink>
           <NavLink to={`/DoanVien`} className="logo-content">
-            {/* Đoàn Thanh Niên */}
             <span className="d-none d-sm-none d-md-inline">
               Đoàn Thanh Niên
             </span>

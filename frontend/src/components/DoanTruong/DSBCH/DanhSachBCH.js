@@ -29,16 +29,12 @@ const DanhSachBCH = (props) => {
   const [DSChucVu, setListChucVu] = useState([]);
 
   const [idnamhoc, setNamHoc] = useState(1);
+  const [khoa, setChoiceKhoa] = useState(46);
+
   const [DSNamHoc, setDSNamHoc] = useState([]);
   const [DSKhoa, setKhoa] = useState([]);
 
-  const [searchData, setSearchData] = useState({
-    IDNamHoc: idnamhoc,
-    MSSV: "",
-    HoTen: "",
-    IDChucVu: "",
-    Khoa: "",
-  });
+
 
   const changePage = (newPage) => {
     setCurrentPage(newPage);
@@ -50,11 +46,16 @@ const DanhSachBCH = (props) => {
     fetchDSNamHoc();
     fetchAllData();
     fetchDSKhoa()
-  }, [currentPage, idnamhoc]);
+    setSearchData((prevSearchData) => ({
+      ...prevSearchData,
+      IDNamHoc: idnamhoc,
+      Khoa: khoa,
+    }));
+  }, [currentPage, idnamhoc, khoa]);
 
   const fetchDoanVien = async () => {
     try {
-      let res = await laydsBCH(currentPage, idnamhoc);
+      let res = await laydsBCH(currentPage, idnamhoc, khoa);
       console.log(res);
       if (res.status === 200) {
         setDoanVien(res.data.dataCD);
@@ -136,6 +137,24 @@ const DanhSachBCH = (props) => {
     }
   };
 
+  const handleNamHocChange = (e) => {
+    const selectedIDNamHoc = e.target.value;
+    setNamHoc(selectedIDNamHoc);
+  };
+
+  const handleKhoaChange = (e) => {
+    const selectedKhoa = e.target.value;
+    setChoiceKhoa(selectedKhoa);
+  };
+
+  const [searchData, setSearchData] = useState({
+    IDNamHoc: idnamhoc,
+    MSSV: "",
+    HoTen: "",
+    IDChucVu: "",
+    Khoa: khoa,
+  });
+
   const handleSearch = async () => {
     try {
       const trimmedMSSV = searchData.MSSV.trim().toLowerCase();
@@ -212,17 +231,28 @@ const DanhSachBCH = (props) => {
     XLSX.writeFile(wb, "DanhSachDoanVien.xlsx");
   };
 
-  const handleNamHocChange = (e) => {
-    const selectedIDNamHoc = e.target.value;
-    setNamHoc(selectedIDNamHoc);
-  };
-
   return (
     <>
       <div className="container-fluid app__content">
         <div className="namhoc-center">
           <h2 className="text-center">Danh Sách Ban Chấp Hành</h2>
-          <div className="searchDV-input">
+          <div className="searchDV-input">Khóa: 
+          <select
+                type="text"
+                className="search_name"
+                value={khoa}
+                onChange={handleKhoaChange}
+              >
+                {DSKhoa.map((khoa, index) => {
+                  return (
+                    <option key={index} value={khoa.khoa}>
+                      {khoa.khoa}
+                    </option>
+                  );
+                })}
+              </select>
+          </div>
+          <div className="searchDV-input">Năm học: 
             <select
               type="text"
               className="search_name"
@@ -283,26 +313,6 @@ const DanhSachBCH = (props) => {
                     );
                   })}
                 </select>
-              </div>
-              <div className="searchDV-input">
-              <select
-                className="search_name"
-                value={searchData.Khoa}
-                onChange={(e) =>
-                  setSearchData({ ...searchData, Khoa: e.target.value })
-                }
-              >
-                <option value="" disabled selected>
-                  Chọn khóa
-                </option>
-                {DSKhoa.map((khoa, index) => {
-                  return (
-                    <option key={index} value={khoa.khoa}>
-                      {khoa.khoa}
-                    </option>
-                  );
-                })}
-              </select>
               </div>
               {/* <div className="searchDV-input">
                 <select

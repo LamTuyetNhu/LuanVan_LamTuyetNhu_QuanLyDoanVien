@@ -10,7 +10,7 @@ const Modal1 = ({ show, onHide, message, isError }) => {
       <Modal.Body className="custom-modal-body">
         <p>{message}</p>
       </Modal.Body>
-      <Modal.Footer  className="border-none">
+      <Modal.Footer className="border-none">
         <button className="allcus-button" variant={isError ? "danger" : "success"} onClick={onHide}>
           Đóng
         </button>

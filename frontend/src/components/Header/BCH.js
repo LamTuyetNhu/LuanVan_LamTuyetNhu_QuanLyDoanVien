@@ -77,7 +77,7 @@ function Header() {
                 </NavLink>
               </li>
               <li>
-              <NavLink to={`/ChiDoan/${IDLop}/DanhSachSVNamTot`}>Sinh viên 5 tốt</NavLink>
+              <NavLink to={`/ChiDoan/${IDLop}/DanhSachSinhVienNamTot`}>Sinh viên năm tốt</NavLink>
               </li>
             </ul>
           </li>

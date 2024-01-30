@@ -3,15 +3,11 @@ import { useEffect, useState } from "react";
 
 import Form from "react-bootstrap/Form";
 import { useParams } from "react-router-dom";
-import { format } from "date-fns";
 import { NavLink } from "react-router-dom";
-import Modal from "react-bootstrap/Modal";
 import ModalSuccess from "../../Modal/ModalSuccess";
 
 import {
-  faPlus,
   faBackward,
-  faTrash,
   faEdit,
   faSave,
 } from "@fortawesome/free-solid-svg-icons";
@@ -114,14 +110,14 @@ const ChiTietChiDoan = (props) => {
         <h2 className="text-center">{ChiDoan.TenLop}</h2>
         <form>
           <div className="row formAdd">
-            <div className="col col-2">
+            <div className="col col-lg-2 col-md-2 col-none">
               <div className="avatar">
                 <img className="avatar_img" src={logo} alt="" />
               </div>
             </div>
-            <div className="col col-10">
+            <div className="col col-lg-10 col-md-10">
               <div className="row">
-                <div className="form-group col col-6">
+                <div className="form-group col-lg-6 col-md-6 col-sm-12 mb-4 mx-auto">
                   <Form.Label htmlFor="MaLop">Mã chi đoàn</Form.Label>
                   {isEditing ? (
                     <Form.Control
@@ -144,7 +140,7 @@ const ChiTietChiDoan = (props) => {
                   )}
                   <div className="error-message">{errors.MaLop}</div>
                 </div>
-                <div className="form-group col col-6">
+                <div className="form-group col-lg-6 col-md-6 col-sm-12 mb-4 mx-auto">
                   <Form.Label htmlFor="TenLop">Tên chi đoàn</Form.Label>
 
                   {isEditing ? (
@@ -168,7 +164,7 @@ const ChiTietChiDoan = (props) => {
                   )}
                   <div className="error-message">{errors.TenLop}</div>
                 </div>
-                <div className="form-group col col-6">
+                <div className="form-group col-lg-6 col-md-6 col-sm-12 mb-4 mx-auto">
                   <Form.Label htmlFor="EmailLop">Email</Form.Label>
                   {isEditing ? (
                     <Form.Control
@@ -191,7 +187,7 @@ const ChiTietChiDoan = (props) => {
                   )}
                   <div className="error-message">{errors.EmailLop}</div>
                 </div>
-                <div className="form-group col col-6">
+                <div className="form-group col-lg-6 col-md-6 col-sm-12 mb-4 mx-auto">
                   <div className="flex row">
                     <div className="col col-6">
                       <Form.Label htmlFor="Khoa">Khóa</Form.Label>
@@ -274,6 +270,8 @@ const ChiTietChiDoan = (props) => {
 
           </div>
         </form>
+
+        <div className="margin-bottom"></div>
       </div>
 
       <ModalSuccess show={showModal} onHide={() => setShowModal(false)} />

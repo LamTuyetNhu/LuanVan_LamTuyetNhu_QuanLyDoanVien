@@ -32,6 +32,8 @@ import ThemMoiHoatDong from "./components/DoanTruong/HoatDong/ThemMoiHD";
 import ChiTietHoatDong from "./components/DoanTruong/HoatDong/ChiTietHoatDong";
 import DiemDanhChiDoan from "./components/DoanTruong/HoatDong/DSDiemDanh"
 
+import SinhVienNamTot from "./components/DoanTruong/SinhVienNamTot/DanhSachDoanVien"
+
 /* Chi đoàn */
 import CDDanhSachDoanVien from "./components/ChiDoan/DSDoanVien/CD-DanhSachDoanVien"
 import CDDoanVien from "./components/ChiDoan/DSDoanVien/CD-DoanVien"
@@ -39,7 +41,7 @@ import CDThemMoiDoanVien from "./components/ChiDoan/DSDoanVien/CD-ThemMoiDoanVie
 import CDDanhSachBCH from "./components/ChiDoan/DSBCH/CD-DanhSachBCH"
 import CDBanChapHanh from "./components/ChiDoan/DSBCH/CD-BCH"
 
-// import CDSinhVienNamTot from "./components/ChiDoan/DSBCH/CD-BCH"
+import CDSinhVienNamTot from "./components/ChiDoan/SinhVienNamTot/CD-SinhVienNamTot"
 
 import CDDoanPhi from "./components/ChiDoan/DoanPhi/CD-DoanPhi"
 import CDDSNopDoanPhi from "./components/ChiDoan/DoanPhi/CD-DSNopDoanPhi"
@@ -51,6 +53,8 @@ import CDChiTietHoatDong from "./components/ChiDoan/HoatDong/CD-ChiTietHoatDong"
 /* Doàn viên */
 import DVDoanVienTrangChu from "./components/DoanVien/DV-DoanVienTrangChu"
 import DVThongTinCaNhan from "./components/DoanVien/DV-DoanVien"
+import DVHoatDong from "./components/DoanVien/DV-DanhSachHD"
+import DVSinhVienNamTot from "./components/DoanVien/DV-SinhVienNamTot"
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -83,6 +87,8 @@ root.render(
           <Route path="ChiTietHoatDong/:IDHoatDong" element={<ChiTietHoatDong />} />
           <Route path="ChiTietHoatDong/DiemDanhChiDoan/:IDHoatDong/:IDNamHoc" element={<DiemDanhChiDoan />} />
 
+          <Route path="SinhVienNamTot" element={<SinhVienNamTot />} />
+          
         </Route>
 
         <Route path="/ChiDoan/:IDLop" element={<BCH />}>
@@ -99,7 +105,7 @@ root.render(
           <Route path="ChiTietDiemDanh/:IDHoatDong/:IDNamHoc" element={<CDDSDiemDanhHD />} />
           <Route path="ChiTietHoatDong/:IDHoatDong" element={<CDChiTietHoatDong />} />
 
-          {/* <Route path="DanhSachSVNamTot" element={<CDSinhVienNamTot />} /> */}
+          <Route path="DanhSachSinhVienNamTot" element={<CDSinhVienNamTot />} />
 
           
 
@@ -108,6 +114,8 @@ root.render(
         <Route path="/DoanVien" element={<DVDoanVien />}>
           <Route index element={<DVDoanVienTrangChu />} />
           <Route path="ThongTinCaNhan" element={<DVThongTinCaNhan />} />
+          <Route path="HoatDong" element={<DVHoatDong />} />
+          <Route path="SinhVienNamTot" element={<DVSinhVienNamTot />} />
         </Route>
       </Routes>
     </BrowserRouter>

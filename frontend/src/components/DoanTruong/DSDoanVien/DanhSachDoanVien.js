@@ -19,6 +19,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import {
   searchDoanVien,
+  searchManyDoanVien,
   laymotlop,
   namhoc,
   namhoccuachidoan,
@@ -50,6 +51,11 @@ const DanhSachDoanVien = (props) => {
     HoTen: "",
     IDChucVu: "",
     GioiTinh: "",
+  });
+
+  const [searchMany, setsearchMany] = useState({
+    
+    info: ""
   });
 
   useEffect(() => {
@@ -151,6 +157,21 @@ const DanhSachDoanVien = (props) => {
         currentPage: currentPage,
       }); // Assuming you have implemented the search API
 
+      console.log(res);
+      if (res.status === 200) {
+        setListDoanVien(res.data.dataCD);
+      } else {
+        console.error("Lỗi khi tìm kiếm:", res.statusText);
+      }
+    } catch (error) {
+      console.error("Lỗi khi tìm kiếm:", error.message);
+    }
+  };
+
+  const handleManySearch = async () => {
+    try {
+      const trimmedInfo = searchMany.info.trim().toLowerCase();
+      let res = await searchManyDoanVien({IDLop: IDLop, trimmedInfo, IDNamHoc: idnamhoc,}); // Assuming you have implemented the search API
       console.log(res);
       if (res.status === 200) {
         setListDoanVien(res.data.dataCD);
@@ -265,7 +286,7 @@ const DanhSachDoanVien = (props) => {
 
       setSelectedFile(selectedFile);
       const displayedData = excelData.slice(0, 10);
-
+      
       // Lưu trữ dữ liệu Excel để thực hiện thêm vào cơ sở dữ liệu
       setExcelData(displayedData);
       setShowExcelModal(true);
@@ -346,7 +367,7 @@ const DanhSachDoanVien = (props) => {
           </div>
         </div>
         <div className="search">
-          <div className="searchDV">
+          <div className="searchDV laptop">
             <div className="">
               <div className="searchDV-input">
                 <input
@@ -391,6 +412,50 @@ const DanhSachDoanVien = (props) => {
               </div>
 
               <button className="formatButton" onClick={handleSearch}>
+                <FontAwesomeIcon icon={faMagnifyingGlass} />
+              </button>
+            </div>
+            <div className="buttonSearch">
+              <NavLink to={`/BCH-DoanTruong/ThemMoi-DoanVien/${IDLop}`}>
+                <button className="formatButton">
+                  <FontAwesomeIcon icon={faPlus} />
+                </button>
+              </NavLink>
+              <div>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  style={{ display: "none" }}
+                  onChange={handleFileChange}
+                />
+                <button className="formatButton" onClick={handleButtonClick}>
+                  <FontAwesomeIcon icon={faCloudArrowUp} />
+                </button>
+              </div>
+
+              <div>
+                <button className="formatButton" onClick={exportToExcel}>
+                  <FontAwesomeIcon icon={faCloudArrowDown} />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="searchDV tablet-mobile">
+            <div className="">
+              <div className="searchDV-input">
+                <input
+                  type="text"
+                  className="search_name"
+                  placeholder="Tìm theo mã, tên, chức vụ"
+                  value={searchData.info}
+                  onChange={(e) => {
+                    setsearchMany({ info: e.target.value });
+                  }}
+                />
+              </div>
+
+              <button className="formatButton" onClick={handleManySearch}>
                 <FontAwesomeIcon icon={faMagnifyingGlass} />
               </button>
             </div>

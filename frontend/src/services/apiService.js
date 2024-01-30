@@ -2,9 +2,6 @@ import axios from "../utils/axiosUser";
 
 const getAllChiDoan = (page) => {
   return axios.get(`api/dschidoan/${page}`, {
-    // headers: {
-    //   'Authorization': `Bearer ${token}`
-    // }
   });
 };
 
@@ -28,6 +25,11 @@ const searchChiDoan = (formData) => {
   return axios.post("api/searchChiDoan", formData);
 };
 
+const searchManyInfo = (formData) => {
+  console.log(formData)
+  return axios.post("api/searchManyChiDoan", formData);
+};
+
 const laymotlop = (IDLop, page, idnamhoc) => {
   return axios.get(`api/detailChiDoan/${IDLop}/${page}/${idnamhoc}`);
 };
@@ -38,6 +40,11 @@ const chucvu = () => {
 
 const searchDoanVien = (formData) => {
   return axios.post("api/searchDoanVien", formData);
+};
+
+const searchManyDoanVien = (formData) => {
+  console.log(formData)
+  return axios.post("api/searchManyDoanVien", formData);
 };
 
 const CapNhatDoanVien = (formData) => {
@@ -89,8 +96,8 @@ const XoaDoanVien = (IDChiTietNamHoc) => {
   return axios.post(`api/XoaDoanVien/${IDChiTietNamHoc}`);
 };
 
-const laydsBCH = (page, idnamhoc) => {
-  return axios.get(`api/dsBCH/${page}/${idnamhoc}`);
+const laydsBCH = (page, idnamhoc, khoa) => {
+  return axios.get(`api/dsBCH/${page}/${idnamhoc}/${khoa}`);
 };
 
 const laydsBCHMotLop = (IDLop, idnamhoc) => {
@@ -201,15 +208,39 @@ const laytendoanvien = (IDDoanVien) => {
   return axios.get(`api/laytendoanvien/${IDDoanVien}`);
 };
 
+const DVLayMotDoanVien = (IDDoanVien, IDNamHoc) => {
+  return axios.get(
+    `api/DVlaymotdoanvien/${IDDoanVien}/${IDNamHoc}`
+  );
+};
+
+const laydshoatdongcuadoanvien = (IDDoanVien, idnamhoc) => {
+  return axios.get(`api/laydshoatdongcuadoanvien/${IDDoanVien}/${idnamhoc}`);
+};
+
+const DanhSachUngTuyen = (IDNamHoc) => {
+  return axios.get(`api/DanhSachUngTuyen/${IDNamHoc}`);
+};
+
+const DanhSachUngTuyenCuaDV = (IDDoanVien) => {
+  return axios.get(`api/DanhSachUngTuyenCuaDV/${IDDoanVien}`);
+};
+
+const mauUngTuyen = () => {
+  return axios.get(`api/MauUngTuyen`);
+};
+
 export {
   getAllChiDoan,
   searchChiDoan,
+  searchManyInfo,
   laymotchidoan,
   CapNhatChiDoan,
   getKhoa,
   laymotlop,
   chucvu,
   searchDoanVien,
+  searchManyDoanVien,
   laydshoatdong,
   searchHoatDong,
   themHoatDong,
@@ -247,4 +278,9 @@ export {
   LayDSDiemDanhCuaLop,
   SaveCheckboxStatesDiemDanhCuaLop,
   laytendoanvien,
+  DVLayMotDoanVien,
+  laydshoatdongcuadoanvien,
+  DanhSachUngTuyen,
+  DanhSachUngTuyenCuaDV,
+  mauUngTuyen,
 };

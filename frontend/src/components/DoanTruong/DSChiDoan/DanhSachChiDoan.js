@@ -17,6 +17,7 @@ import {
 import {
   getAllChiDoan,
   searchChiDoan,
+  searchManyDoanVien,
   getKhoa,
   XoaChiDoan,
 } from "../../../services/apiService";
@@ -36,6 +37,10 @@ const DanhSachChiDoan = (props) => {
     TenLop: "",
     Khoa: "",
     ttLop: "",
+  });
+
+  const [searchMany, setsearchMany] = useState({
+    info: ""
   });
 
   const changePage = (newPage) => {
@@ -94,6 +99,21 @@ const DanhSachChiDoan = (props) => {
         MaLop: trimmedMaLop,
         TenLop: trimmedTenLop,
       }); // Assuming you have implemented the search API
+      console.log(res);
+      if (res.status === 200) {
+        setListChiDoan(res.data.dataCD);
+      } else {
+        console.error("Lỗi khi tìm kiếm:", res.statusText);
+      }
+    } catch (error) {
+      console.error("Lỗi khi tìm kiếm:", error.message);
+    }
+  };
+
+  const handleManySearch = async () => {
+    try {
+      const trimmedInfo = searchMany.info.trim().toLowerCase();
+      let res = await searchManyDoanVien({trimmedInfo}); // Assuming you have implemented the search API
       console.log(res);
       if (res.status === 200) {
         setListChiDoan(res.data.dataCD);
@@ -189,7 +209,7 @@ const DanhSachChiDoan = (props) => {
     <>
       <div className="container-fluid app__content">
         <h5 className="text-center">Danh Sách Chi Đoàn</h5>
-        <div className="searchDV">
+        <div className="searchDV laptop">
           <div className="">
             <div className="searchDV-input">
               <input
@@ -269,12 +289,46 @@ const DanhSachChiDoan = (props) => {
           </div>
         </div>
 
+        <div className="searchDV tablet-mobile">
+          <div className="">
+            <div className="searchDV-input">
+              <input
+                type="text"
+                className="search_name"
+                placeholder="Tìm theo mã, tên, khóa"
+                value={searchMany.info}
+                onChange={(e) => {
+                  setsearchMany({info: e.target.value });
+                }}
+              />
+            </div>
+            <button className="formatButton" onClick={handleManySearch}>
+              <FontAwesomeIcon icon={faMagnifyingGlass} />
+            </button>
+          </div>
+          <div className="buttonSearch">
+            <NavLink to="/BCH-DoanTruong/ThemMoi-ChiDoan">
+              <button className="formatButton">
+                {" "}
+                <FontAwesomeIcon icon={faPlus} />
+              </button>
+            </NavLink>
+            <div>
+
+            <button className="formatButton" onClick={exportToExcel}>
+              <FontAwesomeIcon icon={faCloudArrowDown} />
+            </button>
+
+            </div>
+          </div>
+        </div>
+
         <div className="table-container">
-          <table className="table table-striped">
+          <table className="table table-striped mb-table">
             <thead>
               <tr>
                 <th className="table-item1">STT</th>
-                <th>Mã chi đoàn</th>
+                <th className="mb-tableItem">Mã chi đoàn</th>
                 <th>Tên chi đoàn</th>
                 <th>Email</th>
                 <th className="table-item">Khóa</th>
@@ -292,7 +346,7 @@ const DanhSachChiDoan = (props) => {
                   return (
                     <tr key={`table-chidoan-${index}`} className="tableRow">
                       <td className=" col-center">{stt}</td>
-                      <td className="">{item.MaLop}</td>
+                      <td className="mb-tableItem mb-tableItem1">{item.MaLop}</td>
                       <td className="">{item.TenLop}</td>
                       <td className="">{item.EmailLop}</td>
 
