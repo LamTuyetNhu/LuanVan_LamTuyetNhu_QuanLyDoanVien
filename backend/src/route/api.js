@@ -5,7 +5,6 @@ const XLSX = require("xlsx");
 const multer = require("multer");
 import pool from "../configs/connectDB";
 const { parse, format } = require("date-fns");
-// import { path } from "path";
 const path = require('path');
 
 var appRoot = require("app-root-path");
@@ -232,6 +231,7 @@ const initAPIRoute = (app) => {
       IDDoanVien,
     } = req.body;
 
+    console.log("abc===================")
     console.log(req.body);
     const { file } = req; // Lấy thông tin về file từ request
     let filename = file ? file.filename : undefined;
@@ -431,21 +431,6 @@ const initAPIRoute = (app) => {
                 [existingRows1[0].IDDoanVien, idnamhoc]
               );
 
-              // try {
-
-              //   if (existedNamHoc.length == 0) {
-              //     await pool.execute(
-              //       "INSERT INTO chitietnamhoc (IDDoanVien, IDChucVu, IDNamHoc) VALUES (?, ?, ?)",
-              //       [existingRows1[0].IDDoanVien, chucvu[0].IDChucVu, idnamhoc]
-              //     );
-
-              //   }
-              // } catch (error) {
-              //   console.error(error);
-              //   res.status(500).json({ message: "Có lỗi xảy ra" });
-              //   return;
-              // }
-
               if (existedNamHoc.length > 0) {
                 console.log("Nam Hoc va MSSV da ton tai");
                 res.status(500).json({ message: "Nam Hoc va MSSV da ton tai" });
@@ -559,10 +544,12 @@ const initAPIRoute = (app) => {
   );
 
   router.get("/laytendoanvien/:IDDoanVien", APIController.laytendoanvien);
-  router.get(
-    "/DVlaymotdoanvien/:IDDoanVien/:IDNamHoc",
-    APIController.dvlaymotdoanvien
-  );
+  router.get("/layDSChucVuDoanVien/:IDDoanVien", APIController.layDSChucVuDoanVien);
+
+  // router.get(
+  //   "/DVlaymotdoanvien/:IDDoanVien/:IDNamHoc",
+  //   APIController.dvlaymotdoanvien
+  // );
   router.get(
     "/laydshoatdongcuadoanvien/:IDDoanVien/:IDNamHoc",
     APIController.layDSHoatDongCuaDoanVien
@@ -608,17 +595,30 @@ const initAPIRoute = (app) => {
     "/DanhSachUngTuyen/:IDNamHoc",
     APIController.DanhSachUngTuyen
   );
-  
   router.get(
     "/DanhSachUngTuyenCuaDV/:IDDoanVien",
     APIController.DanhSachUngTuyenCuaDV
   );
-
+  router.post(
+    "/CapNhatUngTuyenCuaDV/:IDUngTuyen/:TTUngTuyen",
+    APIController.CapNhatUngTuyenCuaDV
+  );
   router.get(
     "/MauUngTuyen",
     APIController.MauUngTuyen
   );
+  router.post("/searchManySVNT", APIController.getSearchSVNT);
 
+  router.post("/DiemCuaMotDoanVien", APIController.DiemCuaMotDoanVien);
+  router.get("/KetQuaCuaMotDoanVien/:IDDoanVien", APIController.KetQuaCuaMotDoanVien);
+  router.get(
+    "/laydsdoanphicuadoanvien/:IDDoanVien/:IDNamHoc",
+    APIController.layDSDoanPhiCuaDoanVien
+  );
+  router.post(
+    "/doimatkhaudoanvien/:IDDoanVien",
+    APIController.DoiMatKhauDoanVien
+  );
   return app.use("/api", router);
 };
 

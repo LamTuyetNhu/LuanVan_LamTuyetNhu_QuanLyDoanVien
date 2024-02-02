@@ -532,7 +532,7 @@ const DanhSachDoanVien = (props) => {
 
                       <td className="btnOnTable1">
                         <NavLink
-                          to={`/BCH-DoanTruong/ChiTietChiDoan/${item.IDLop}/${item.IDDoanVien}/${item.IDChiTietNamHoc}`}
+                          to={`/BCH-DoanTruong/ChiTietChiDoan/${item.IDDoanVien}/${item.IDNamHoc}/${item.IDChiTietNamHoc}`}
                         >
                           <button className="btnOnTable">
                             <FontAwesomeIcon icon={faEye} />

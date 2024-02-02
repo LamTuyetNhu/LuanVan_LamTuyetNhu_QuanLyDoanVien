@@ -5,7 +5,8 @@ import * as XLSX from "xlsx";
 import { format } from "date-fns";
 import { NavLink } from "react-router-dom";
 import Modal from "../../Modal/Modal";
-import ExcelDataModal from "../../Modal/ExcelDataModal1";
+import ModalUpdateStatus from "../../Modal/UpdateStatus";
+import ModalSuccess from "../../Modal/ModalSuccess";
 
 import axios from "axios";
 import {
@@ -15,7 +16,7 @@ import {
   faMagnifyingGlass,
 } from "@fortawesome/free-solid-svg-icons";
 import {
-  searchDoanVien,
+  searchManySVNT,
   namhoc,
   DanhSachUngTuyen,
 } from "../../../services/apiService";
@@ -25,18 +26,28 @@ const DanhSachDoanVien = (props) => {
 
   const [idnamhoc, setNamHoc] = useState(1);
   const [DSNamHoc, setDSNamHoc] = useState([]);
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [selectedIDUngTuyen, setSelectedIDUngTuyen] = useState(null);
+  const [showModalUpdate, setShowModalUpdate] = useState(false);
+
+  const handleIconClick = (IDUngTuyen) => {
+    setSelectedIDUngTuyen(IDUngTuyen);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+  };
 
   const [searchData, setSearchData] = useState({
-    MSSV: "",
-    HoTen: "",
-    IDChucVu: "",
-    GioiTinh: "",
+    info: ""
   });
 
   useEffect(() => {
     fetchDSDoanVien();
     fetchAllData();
     fetchDSNamHoc();
+    setShowModalUpdate(true)
   }, [idnamhoc]);
 
   const fetchDSDoanVien = async () => {
@@ -46,8 +57,6 @@ const DanhSachDoanVien = (props) => {
 
       if (res.status === 200) {
         console.log("Data from API:", res.data.dataUT);
-        console.log("Total Pages from API:", res.data.totalPages);
-
         setListDoanVien(res.data.dataUT);
       } else {
         console.error("Lỗi khi gọi API:", res.statusText);
@@ -77,15 +86,10 @@ const DanhSachDoanVien = (props) => {
 
   const handleSearch = async () => {
     try {
-      const trimmedMaLop = searchData.MaLop.trim().toLowerCase();
-      const trimmedMSSV = searchData.MSSV.trim().toLowerCase();
-      const trimmedHoTen = searchData.HoTen.trim().toLowerCase();
+      const trimmedInfo = searchData.info.trim().toLowerCase();
 
-      let res = await searchDoanVien({
-        ...searchData,
-        MaLop: trimmedMaLop,
-        MSSV: trimmedMSSV,
-        HoTen: trimmedHoTen,
+      let res = await searchManySVNT({
+        trimmedInfo: trimmedInfo,
         IDNamHoc: idnamhoc,
       });
 
@@ -143,7 +147,10 @@ const DanhSachDoanVien = (props) => {
       XLSX.utils.book_append_sheet(wb, ws, "DanhSachSinhVienNamTot");
 
       // Xuất file Excel
-      XLSX.writeFile(wb, `DanhSachSinhVienNamTot - ${allData[0].TenNamHoc}.xlsx`);
+      XLSX.writeFile(
+        wb,
+        `DanhSachSinhVienNamTot - ${allData[0].TenNamHoc}.xlsx`
+      );
     } catch (error) {
       console.error("Lỗi khi tải dữ liệu:", error.message);
       // Xử lý lỗi nếu có
@@ -178,59 +185,21 @@ const DanhSachDoanVien = (props) => {
             </select>
           </div>
         </div>
-        {/* <div className="search">
+        <div className="search">
           <div className="searchDV">
             <div className="">
               <div className="searchDV-input">
                 <input
                   type="text"
                   className="search_name"
-                  placeholder="Mã Lớp"
-                  value={searchData.MaLop}
+                  placeholder="Tìm lớp, mssv, họ tên"
+                  value={searchData.info}
                   onChange={(e) => {
-                    setSearchData({ ...searchData, MaLop: e.target.value });
+                    setSearchData({info: e.target.value });
                   }}
                 />
               </div>
-              <div className="searchDV-input">
-                <input
-                  type="text"
-                  className="search_name"
-                  placeholder="Mã đoàn viên"
-                  value={searchData.MSSV}
-                  onChange={(e) => {
-                    setSearchData({ ...searchData, MSSV: e.target.value });
-                  }}
-                />
-              </div>
-              <div className="searchDV-input">
-                <input
-                  type="text"
-                  className="search_name"
-                  placeholder="Tên đoàn viên"
-                  value={searchData.HoTen}
-                  onChange={(e) => {
-                    setSearchData({ ...searchData, HoTen: e.target.value });
-                  }}
-                />
-              </div>
-              <div className="searchDV-input">
-              <select
-                className="search_name"
-                value={searchData.ttLop}
-                onChange={(e) => {
-                  setSearchData({ ...searchData, ttLop: e.target.value });
-                }}
-              >
-                <option value="" disabled selected>
-                  Trạng thái
-                </option>
-                <option value="1">Đã xét duyệt</option>
-                <option value="0">Chưa xét duyệt</option>
-                <option value="2">Không đủ điều kiện</option>
-
-              </select>
-            </div>
+             
               <button className="formatButton" onClick={handleSearch}>
                 <FontAwesomeIcon icon={faMagnifyingGlass} />
               </button>
@@ -243,7 +212,7 @@ const DanhSachDoanVien = (props) => {
               </div>
             </div>
           </div>
-        </div> */}
+        </div>
       </div>
 
       <div className="listDV">
@@ -289,8 +258,13 @@ const DanhSachDoanVien = (props) => {
                           ? "Đã xét duyệt"
                           : "Không đủ điều kiện"}
                       </td>
-                      <td className="col-center col-cusor">
-                          <FontAwesomeIcon icon={faEdit} className="clcapnhat"/>
+                      <td
+                        className="col-center col-cusor"
+                        onClick={() =>
+                          handleIconClick(item.IDUngTuyen, item.TTUngTuyen)
+                        }
+                      >
+                        <FontAwesomeIcon icon={faEdit} className="clcapnhat" />
                       </td>
                     </tr>
                   );
@@ -304,6 +278,13 @@ const DanhSachDoanVien = (props) => {
           </table>
         </div>
       </div>
+
+      {isModalOpen && (
+        <ModalUpdateStatus
+          onClose={closeModal}
+          selectedIDUngTuyen={selectedIDUngTuyen}
+        />
+      )}
     </>
   );
 };

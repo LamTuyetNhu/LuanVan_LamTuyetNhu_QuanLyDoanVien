@@ -55,6 +55,10 @@ import DVDoanVienTrangChu from "./components/DoanVien/DV-DoanVienTrangChu"
 import DVThongTinCaNhan from "./components/DoanVien/DV-DoanVien"
 import DVHoatDong from "./components/DoanVien/DV-DanhSachHD"
 import DVSinhVienNamTot from "./components/DoanVien/DV-SinhVienNamTot"
+import DVDanhGiaDoanVien from "./components/DoanVien/DV-DanhGiaDoanVien"
+import DVDoanPhi from "./components/DoanVien/DV-DanhSachDP"
+import DVDoiMatKhau from "./components/DoanVien/DV-DoiMatKhau"
+
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -72,10 +76,10 @@ root.render(
           <Route path="ChiTietChiDoan/:IDLop" element={<DanhSachDoanVien />} />
           <Route path="ThemMoi-DoanVien/:IDLop" element={<ThemMoiDoanVien />} />
 
-          <Route path="ChiTietChiDoan/:IDLop/:IDDoanVien/:IDChiTietNamHoc" element={<DoanVien />} />
+          <Route path="ChiTietChiDoan/:IDDoanVien/:IDNamHoc/:IDChiTietNamHoc" element={<DoanVien />} />
 
           <Route path="DanhSachBCH" element={<DanhSachBCH />} />
-          <Route path="DanhSachBCH/:IDLop/:IDDoanVien/:IDChiTietNamHoc" element={<BanChapHanh />} />
+          <Route path="DanhSachBCH/:idnamhoc/:IDDoanVien" element={<BanChapHanh />} />
 
           <Route path="DoanPhi" element={<DoanPhi />} />
           <Route path="ThemMoi-DoanPhi" element={<ThemMoiDoanPhi />} />
@@ -115,7 +119,11 @@ root.render(
           <Route index element={<DVDoanVienTrangChu />} />
           <Route path="ThongTinCaNhan" element={<DVThongTinCaNhan />} />
           <Route path="HoatDong" element={<DVHoatDong />} />
+          <Route path="DoanPhi" element={<DVDoanPhi />} />
           <Route path="SinhVienNamTot" element={<DVSinhVienNamTot />} />
+          <Route path="DanhGiaDoanVien" element={<DVDanhGiaDoanVien />} />
+          <Route path="DoiMatKhau" element={<DVDoiMatKhau />} />
+
         </Route>
       </Routes>
     </BrowserRouter>

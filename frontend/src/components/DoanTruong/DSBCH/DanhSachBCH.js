@@ -5,6 +5,7 @@ import * as XLSX from "xlsx";
 import { format } from "date-fns";
 import { NavLink } from "react-router-dom";
 import axios from "axios";
+import logo from "../../../assets/logo.jpg"
 
 import {
   faCloudArrowDown,
@@ -314,21 +315,6 @@ const DanhSachBCH = (props) => {
                   })}
                 </select>
               </div>
-              {/* <div className="searchDV-input">
-                <select
-                  type="text"
-                  className="search_name"
-                  value={searchData.GioiTinh}
-                  onChange={(e) => {
-                    setSearchData({ ...searchData, GioiTinh: e.target.value });
-                  }}
-                >
-                  <option value="Giới tính">Chọn giới tính</option>
-                  <option value="1">Nam</option>
-                  <option value="0">Nữ</option>
-                  <option value="2">Khác</option>
-                </select>
-              </div> */}
               <button className="formatButton" onClick={handleSearch}>
                 <FontAwesomeIcon icon={faMagnifyingGlass} />
               </button>
@@ -352,7 +338,7 @@ const DanhSachBCH = (props) => {
                       return (
                         <div className="col-lg-3 col-md-6 col-sm-6 giang-vien-col lazy">
                           <NavLink
-                            to={`/BCH-DoanTruong/DanhSachBCH/${item.IDLop}/${item.IDDoanVien}/${item.IDChiTietNamHoc}`}
+                            to={`/BCH-DoanTruong/DanhSachBCH/${idnamhoc}/${item.IDDoanVien}`}
                             className="NavLink-item"
                           >
                             <div className="giang-vien-item">

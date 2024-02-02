@@ -8,6 +8,11 @@ import nam from "../../assets/nam.png";
 import nu from "../../assets/Nu.png";
 import hoatdong from "../../assets/hoatdong.png";
 import svnamtot from "../../assets/sv5tot.jpg";
+import diem from "../../assets/diem.jpg";
+import tienquy from "../../assets/tienquy.png";
+import matkhau from "../../assets/matkhau.png";
+
+
 import { laytendoanvien } from "../../services/apiService";
 
 const DoanVienTrangChu = (props) => {
@@ -66,13 +71,45 @@ const DoanVienTrangChu = (props) => {
             </NavLink>
           </div>
 
-          {/* Cột 3: Sinh viên 5 tốt */}
+          <div className="col-lg-4 col-md-6 col-sm-12 mb-4 mx-auto">
+            <NavLink to={`/DoanVien/DoanPhi`} className="NavLink-item">
+              <div className="card card-opacity6">
+                <div className="card-body">
+                  <h5 className="card-title card-title6">Đoàn phí</h5>
+                  <img src={tienquy} className="img-fluid" />
+                </div>
+              </div>
+            </NavLink>
+          </div>
+          
           <div className="col-lg-4 col-md-6 col-sm-12 mb-4 mx-auto">
             <NavLink to={`/DoanVien/SinhVienNamTot`} className="NavLink-item">
               <div className="card card-opacity3">
                 <div className="card-body">
                   <h5 className="card-title card-title3">Sinh viên năm tốt</h5>
                   <img src={svnamtot} className="img-fluid" />
+                </div>
+              </div>
+            </NavLink>
+          </div>
+
+          <div className="col-lg-4 col-md-6 col-sm-12 mb-4 mx-auto">
+            <NavLink to={`/DoanVien/DanhGiaDoanVien`} className="NavLink-item">
+              <div className="card card-opacity4">
+                <div className="card-body">
+                  <h5 className="card-title card-title4">Đánh giá đoàn viên</h5>
+                  <img src={diem} className="img-fluid img-heigh" />
+                </div>
+              </div>
+            </NavLink>
+          </div>
+
+          <div className="col-lg-4 col-md-6 col-sm-12 mb-4 mx-auto">
+            <NavLink to={`/DoanVien/DoiMatKhau`} className="NavLink-item">
+              <div className="card card-opacity5">
+                <div className="card-body">
+                  <h5 className="card-title card-title5">Đổi mật khẩu</h5>
+                  <img src={matkhau} className="img-fluid" />
                 </div>
               </div>
             </NavLink>

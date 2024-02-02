@@ -1,8 +1,11 @@
 import React from "react";
 import Modal from "react-bootstrap/Modal";
-import { NavLink } from "react-router-dom";
 
 const ModalSuccess = (props) => {
+  const handleClose = () => {
+    props.onHide();
+    window.location.reload();
+  };
   return (
     <Modal
     show={props.show} onHide={props.onHide}
@@ -15,7 +18,7 @@ const ModalSuccess = (props) => {
         Cập nhật thành công!
       </Modal.Body>
       <Modal.Footer className="border-none">
-        <button className="allcus-button" onClick={props.onHide}>
+        <button className="allcus-button" onClick={handleClose}>
           Đóng
         </button>
       </Modal.Footer>

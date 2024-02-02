@@ -1,6 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import { NavLink } from "react-router-dom";
 import Form from "react-bootstrap/Form";
 import ModalSuccess from "../Modal/ModalSuccess";
@@ -16,16 +15,19 @@ import {
   chucvu,
   LayTonGiao,
   LayDanToc,
-  DVLayMotDoanVien,
-  namhoc,
+  // DVLayMotDoanVien,
+  layDSChucVuDoanVien,
+  laytendoanvien,
+  // namhoc,
 } from "../../services/apiService";
 
 const DoanVien = (props) => {
   const IDDoanVien = localStorage.getItem("IDDoanVien");
 
   const [DoanVien, setDoanVien] = useState([]);
+  const [CVDoanVien, setCVDoanVien] = useState([]);
 
-  const [NamHoc, setNamHoc] = useState([]);
+  // const [NamHoc, setNamHoc] = useState([]);
   const [DanToc, setDanToc] = useState([]);
   const [TonGiao, setTonGiao] = useState([]);
   const [ChucVu, setChucVu] = useState([]);
@@ -36,32 +38,21 @@ const DoanVien = (props) => {
   const [logo, setLogo] = useState("http://localhost:8080/images/logo.jpg");
   const [image, setImage] = useState("");
   const [previewImage, setPreviewImage] = useState("");
-  const [selectedImage, setSelectedImage] = useState("");
 
-  const [MSSV, setMSSV] = useState("");
-  const [HoTen, setHoTen] = useState("");
-  const [Email, setEmail] = useState("");
-  const [SoDT, setSoDT] = useState("");
-  const [GioiTinh, setGioiTinh] = useState("");
-  const [NgaySinh, setNgaySinh] = useState("");
-  const [QueQuan, setQueQuan] = useState("");
-  const [NgayVaoDoan, setNgayVaoDoan] = useState("");
-  const [IDDanToc, setIDDanToc] = useState("");
-  const [IDTonGiao, setIDTonGiao] = useState("");
-  const [IDChucVu, setIDChucVu] = useState("");
   const [IDNamHoc, setIDNamHoc] = useState(1);
 
   useEffect(() => {
     layMotDoanVien();
-    fetchDSNamHoc();
+    // fetchDSNamHoc();
     fetchChucVu();
     fetchTonGiao();
     fetchDanToc();
+    DSChucVuDoanVien();
   }, [IDDoanVien, IDNamHoc]);
 
   const layMotDoanVien = async () => {
     try {
-      let res = await DVLayMotDoanVien(IDDoanVien, IDNamHoc);
+      let res = await laytendoanvien(IDDoanVien);
       if (res.status === 200) {
         setDoanVien(res.data.dataDV);
         seteditedDoanVien(res.data.dataDV);
@@ -74,25 +65,40 @@ const DoanVien = (props) => {
     }
   };
 
-  const fetchDSNamHoc = async () => {
+  const DSChucVuDoanVien = async () => {
     try {
-      let res = await namhoc();
+      let res = await layDSChucVuDoanVien(IDDoanVien);
       if (res.status === 200) {
-        const NamHocdata = res.data.dataNH;
-
-        // Kiểm tra nếu khoaData là mảng trước khi cập nhật state
-        if (Array.isArray(NamHocdata)) {
-          setNamHoc(NamHocdata);
-        } else {
-          console.error("Dữ liệu khóa không hợp lệ:", NamHocdata);
-        }
+        setCVDoanVien(res.data.dataDV);
+        seteditedDoanVien(res.data.dataDV);
       } else {
+        // Xử lý trường hợp lỗi
         console.error("Lỗi khi gọi API:", res.statusText);
       }
     } catch (error) {
       console.error("Lỗi khi gọi API:", error.message);
     }
   };
+
+  // const fetchDSNamHoc = async () => {
+  //   try {
+  //     let res = await namhoc();
+  //     if (res.status === 200) {
+  //       const NamHocdata = res.data.dataNH;
+
+  //       // Kiểm tra nếu khoaData là mảng trước khi cập nhật state
+  //       if (Array.isArray(NamHocdata)) {
+  //         setNamHoc(NamHocdata);
+  //       } else {
+  //         console.error("Dữ liệu khóa không hợp lệ:", NamHocdata);
+  //       }
+  //     } else {
+  //       console.error("Lỗi khi gọi API:", res.statusText);
+  //     }
+  //   } catch (error) {
+  //     console.error("Lỗi khi gọi API:", error.message);
+  //   }
+  // };
 
   const fetchChucVu = async () => {
     try {
@@ -259,7 +265,7 @@ const DoanVien = (props) => {
       IDDanToc: !editedDoanVien.IDDanToc ? "Vui lòng nhập tên dân tộc" : "",
       IDTonGiao: !editedDoanVien.IDTonGiao ? "Vui lòng nhập tên tôn giáo" : "",
       IDChucVu: !editedDoanVien.IDChucVu ? "Vui lòng chọn tên chức vụ" : "",
-      IDNamHoc: !editedDoanVien.IDNamHoc ? "Vui lòng chọn năm học" : "",
+      // IDNamHoc: !editedDoanVien.IDNamHoc ? "Vui lòng chọn năm học" : "",
     };
 
     setErrors(newErrors);
@@ -305,17 +311,18 @@ const DoanVien = (props) => {
       console.error("Lỗi khi cập nhật dữ liệu:", error);
     }
   };
-  const handleNamHocChange = (e) => {
-    const selectedIDNamHoc = e.target.value;
-    setIDNamHoc(selectedIDNamHoc);
-  };
+  
+  // const handleNamHocChange = (e) => {
+  //   const selectedIDNamHoc = e.target.value;
+  //   setIDNamHoc(selectedIDNamHoc);
+  // };
 
   return (
     <>
       <div className="container-fluid app__content">
-        <div className="namhoc-center mg-bt">
+        {/* <div className="namhoc-center mg-bt"> */}
           <h2 className="text-center">Đoàn Viên</h2>
-          <div className="searchDV-input">
+          {/* <div className="searchDV-input">
             {" "}
             Năm học
             <select
@@ -332,8 +339,8 @@ const DoanVien = (props) => {
                 );
               })}
             </select>
-          </div>
-        </div>
+          </div> */}
+        {/* </div> */}
         <div className="row formAdd">
           <div className="col-12 col-md-3 col-lg-2">
             <div className="avatar">
@@ -439,52 +446,6 @@ const DoanVien = (props) => {
                 <div className="error-message">{errors.HoTen}</div>
               </div>
               <div className="form-group col-12 col-md-6 col-lg-4">
-                <Form.Label htmlFor="SoDT">Số điện thoại</Form.Label>
-                {isEditing ? (
-                  <Form.Control
-                    className="form-control"
-                    type="text"
-                    id="SoDT"
-                    aria-describedby="SoDT"
-                    value={editedDoanVien.SoDT}
-                    onChange={handleChange}
-                  />
-                ) : (
-                  <Form.Control
-                    className="form-control"
-                    type="text"
-                    id="SoDT"
-                    aria-describedby="SoDT"
-                    value={DoanVien.SoDT}
-                    disabled
-                  />
-                )}
-                <div className="error-message">{errors.SoDT}</div>
-              </div>
-              <div className="form-group col-12 col-md-12 col-lg-4">
-                <Form.Label htmlFor="Email">Email</Form.Label>
-                {isEditing ? (
-                  <Form.Control
-                    className="form-control"
-                    type="text"
-                    id="Email"
-                    aria-describedby="Email"
-                    value={editedDoanVien.Email}
-                    onChange={handleChange}
-                  />
-                ) : (
-                  <Form.Control
-                    className="form-control"
-                    type="text"
-                    id="Email"
-                    aria-describedby="Email"
-                    value={DoanVien.Email}
-                    disabled
-                  />
-                )}
-                <div className="error-message">{errors.Email}</div>
-              </div>
-              <div className="form-group col-12 col-md-6 col-lg-4">
                 <Form.Label htmlFor="GioiTinh">Giới tính</Form.Label>
 
                 {isEditing ? (
@@ -518,39 +479,51 @@ const DoanVien = (props) => {
                 )}
                 <div className="error-message">{errors.GioiTinh}</div>
               </div>
-              <div className="form-group col-12 col-md-6 col-lg-4">
-                <Form.Label htmlFor="IDChucVu">Chức vụ</Form.Label>
+              <div className="form-group col-12 col-md-12 col-lg-8">
+                <Form.Label htmlFor="Email">Email</Form.Label>
                 {isEditing ? (
-                  <Form.Select
+                  <Form.Control
                     className="form-control"
                     type="text"
-                    id="IDChucVu"
-                    aria-describedby="IDChucVu"
-                    value={editedDoanVien.IDChucVu}
+                    id="Email"
+                    aria-describedby="Email"
+                    value={editedDoanVien.Email}
                     onChange={handleChange}
-                  >
-                    <option value="" disabled selected>
-                      Chọn chức vụ
-                    </option>
-                    {ChucVu.map((chucvu, index) => {
-                      return (
-                        <option key={index} value={chucvu.IDChucVu}>
-                          {chucvu.TenCV}
-                        </option>
-                      );
-                    })}
-                  </Form.Select>
+                  />
                 ) : (
                   <Form.Control
                     className="form-control"
                     type="text"
-                    id="IDChucVu"
-                    aria-describedby="IDChucVu"
-                    value={DoanVien.TenCV}
+                    id="Email"
+                    aria-describedby="Email"
+                    value={DoanVien.Email}
                     disabled
                   />
                 )}
-                <div className="error-message">{errors.IDChucVu}</div>
+                <div className="error-message">{errors.Email}</div>
+              </div>
+              <div className="form-group col-12 col-md-6 col-lg-4">
+                <Form.Label htmlFor="SoDT">Số điện thoại</Form.Label>
+                {isEditing ? (
+                  <Form.Control
+                    className="form-control"
+                    type="text"
+                    id="SoDT"
+                    aria-describedby="SoDT"
+                    value={editedDoanVien.SoDT}
+                    onChange={handleChange}
+                  />
+                ) : (
+                  <Form.Control
+                    className="form-control"
+                    type="text"
+                    id="SoDT"
+                    aria-describedby="SoDT"
+                    value={DoanVien.SoDT}
+                    disabled
+                  />
+                )}
+                <div className="error-message">{errors.SoDT}</div>
               </div>
               <div className="form-group col-12 col-md-12 col-lg-8">
                 <Form.Label htmlFor="QueQuan">Quê quán</Form.Label>
@@ -689,6 +662,32 @@ const DoanVien = (props) => {
                 )}
                 <div className="error-message">{errors.IDTonGiao}</div>
               </div>
+              <div className="listDV">
+          <div className="table-container">
+            <table className="table table-striped">
+              <thead>
+                <tr>
+                  <th className="table-item">STT</th>
+                  <th className="table-item">Tên năm học</th>
+                  <th>Chức vụ</th>
+                </tr>
+              </thead>
+              <tbody id="myTable">
+                {CVDoanVien &&
+                  CVDoanVien.length > 0 &&
+                  CVDoanVien.map((item, index) => {
+                    return (
+                      <tr key={`table-hoatdong-${index}`} className="tableRow">
+                        <td className="col-center">{index + 1}</td>
+                        <td className="col-center">{item.TenNamHoc}</td>
+                        <td className="">{item.TenCV}</td>
+                      </tr>
+                    );
+                  })}
+              </tbody>
+            </table>
+          </div>
+        </div>
             </div>
             <div className="update row">
               <div className="btns">

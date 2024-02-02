@@ -23,19 +23,20 @@ import {
   LayDanToc,
   LayMotDoanVien,
   XoaDoanVien,
+  DVLayMotDoanVien,
   CapNhatDoanVien,
   namhoc,
   laymotlop,
 } from "../../../services/apiService";
 
 const DoanVien = (props) => {
-  const { IDLop, IDDoanVien, IDChiTietNamHoc } = useParams();
+  const {IDLop, IDDoanVien, IDNamHoc, IDChiTietNamHoc } = useParams();
   const [DoanVien, setDoanVien] = useState([]);
   const [DSDoanVien, setListDoanVien] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-
+  const [selectedIDNamHoc, setIDNamHoc] = useState(IDNamHoc);
   const [NamHoc, setNamHoc] = useState([]);
   const [DanToc, setDanToc] = useState([]);
   const [TonGiao, setTonGiao] = useState([]);
@@ -63,7 +64,6 @@ const DoanVien = (props) => {
   const [IDDanToc, setIDDanToc] = useState("");
   const [IDTonGiao, setIDTonGiao] = useState("");
   const [IDChucVu, setIDChucVu] = useState("");
-  const [IDNamHoc, setIDNamHoc] = useState("");
 
   const handleDelete = async () => {
     try {
@@ -84,7 +84,7 @@ const DoanVien = (props) => {
     fetchChucVu();
     fetchTonGiao();
     fetchDanToc();
-  }, [IDLop, IDDoanVien]);
+  }, [IDLop, IDDoanVien, selectedIDNamHoc]);
 
   const fetchDSDoanVien = async () => {
     try {
@@ -105,7 +105,7 @@ const DoanVien = (props) => {
 
   const layMotDoanVien = async () => {
     try {
-      let res = await LayMotDoanVien(IDLop, IDDoanVien, IDChiTietNamHoc);
+      let res = await DVLayMotDoanVien(IDDoanVien, selectedIDNamHoc);
       if (res.status === 200) {
         setDoanVien(res.data.dataDV);
         seteditedDoanVien(res.data.dataDV);
@@ -217,7 +217,6 @@ const DoanVien = (props) => {
     IDDanToc: "",
     IDTonGiao: "",
     IDChucVu: "",
-    IDNamHoc: "",
   });
 
   const [showModalUpdate, setShowModalUpdate] = useState(false);
@@ -297,7 +296,7 @@ const DoanVien = (props) => {
       IDDanToc: !editedDoanVien.IDDanToc ? "Vui lòng nhập tên dân tộc" : "",
       IDTonGiao: !editedDoanVien.IDTonGiao ? "Vui lòng nhập tên tôn giáo" : "",
       IDChucVu: !editedDoanVien.IDChucVu ? "Vui lòng chọn tên chức vụ" : "",
-      IDNamHoc: !editedDoanVien.IDNamHoc ? "Vui lòng chọn năm học" : "",
+      // IDNamHoc: !editedDoanVien.selectedIDNamHoc ? "Vui lòng chọn năm học" : "",
     };
 
     setErrors(newErrors);
@@ -319,12 +318,9 @@ const DoanVien = (props) => {
       formData.append("IDDanToc", editedDoanVien.IDDanToc);
       formData.append("IDTonGiao", editedDoanVien.IDTonGiao);
       formData.append("IDChucVu", editedDoanVien.IDChucVu);
-      formData.append("IDNamHoc", editedDoanVien.IDNamHoc);
+      formData.append("IDNamHoc", selectedIDNamHoc);
       formData.append("QueQuan", editedDoanVien.QueQuan);
       formData.append("IDDoanVien", IDDoanVien);
-      formData.append("IDChiTietNamHoc", IDChiTietNamHoc);
-
-      // formData.append("file", image, image.name);
 
       if (image instanceof Blob) {
         formData.append("file", image, image.name);
@@ -346,10 +342,35 @@ const DoanVien = (props) => {
     }
   };
 
+  const handleNamHocChange = (e) => {
+    const selectedIDNamHoc = e.target.value;
+    setIDNamHoc(selectedIDNamHoc);
+  };
+
   return (
     <>
       <div className="container-fluid app__content">
-        <h2 className="text-center">Đoàn Viên</h2>
+        <div className="namhoc-center mg-bt">
+          <h2 className="text-center">Đoàn Viên</h2>
+          <div className="searchDV-input">
+            {" "}
+            Năm học
+            <select
+              type="text"
+              className="search_name"
+              value={selectedIDNamHoc}
+              onChange={handleNamHocChange}
+            >
+              {NamHoc.map((item, index) => {
+                return (
+                  <option key={index} value={item.IDNamHoc}>
+                    {item.TenNamHoc}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+        </div>
         <div className="margin-top">
           <div className="row formAdd">
             <div className="col col-2">
@@ -713,27 +734,6 @@ const DoanVien = (props) => {
                 </div>
                 <div className="form-group col col-4">
                   <Form.Label htmlFor="TenNamHoc">Năm học</Form.Label>
-                  {isEditing ? (
-                    <Form.Select
-                      className="form-control"
-                      type="text"
-                      id="IDNamHoc"
-                      aria-describedby="IDNamHoc"
-                      value={editedDoanVien.IDNamHoc}
-                      onChange={handleChange}
-                    >
-                      <option value="" disabled selected>
-                        Chọn năm học
-                      </option>
-                      {NamHoc.map((namhoc, index) => {
-                        return (
-                          <option key={index} value={namhoc.IDNamHoc}>
-                            {namhoc.TenNamHoc}
-                          </option>
-                        );
-                      })}
-                    </Form.Select>
-                  ) : (
                     <Form.Control
                       className="form-control"
                       type="text"
@@ -742,7 +742,6 @@ const DoanVien = (props) => {
                       value={DoanVien.TenNamHoc}
                       disabled
                     />
-                  )}
                   <div className="error-message">{errors.IDNamHoc}</div>
                 </div>
               </div>

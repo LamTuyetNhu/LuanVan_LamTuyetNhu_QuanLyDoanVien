@@ -1,29 +1,33 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import { Modal, Button, Table } from "react-bootstrap";
-import { DanhSachUngTuyenCuaDV } from "../../services/apiService";
-import { format } from "date-fns";
+import { Modal } from "react-bootstrap";
+import { CapNhatTrangThai } from "../../services/apiService";
 
-const ExcelDataModal = ({ onClose  }) => {
-    const IDDoanVien = localStorage.getItem("IDDoanVien");
-    const [DSUngTuyen, setDSUngTuyen] = useState([]);
+const ModalUpdateStatus = ({ onClose, selectedIDUngTuyen }) => {
+  const [newTrangThai, setNewTrangThai] = useState("");
+  const [updateSuccess, setUpdateSuccess] = useState(false);
+  const [showModalUpdate, setShowModalUpdate] = useState(false);
 
-  useEffect(() => {
-    fetchDoanVienSVNT();
-  }, [IDDoanVien]);
+  useEffect(() => {}, []);
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return format(date, "dd/MM/yyyy");
+  const handleTrangThaiChange = (e) => {
+    setNewTrangThai(e.target.value);
   };
 
-  const fetchDoanVienSVNT = async () => {
+  const handleCapNhatTrangThai = async () => {
     try {
-      let res = await DanhSachUngTuyenCuaDV(IDDoanVien);
+      let res = await CapNhatTrangThai(selectedIDUngTuyen, newTrangThai);
       if (res.status === 200) {
-        const UngTuyenData = res.data.dataUT;
-          setDSUngTuyen(UngTuyenData);
+        setUpdateSuccess(true);
+        setShowModalUpdate(true);
+        alert("Cập nhâp thành công!");
+
+        onClose();
+        // setTimeout(() => {
+          window.location.reload();
+        // }, 1000);
       } else {
+        alert("Cập nhâp thất bại!");
         console.error("Lỗi khi gọi API:", res.statusText);
       }
     } catch (error) {
@@ -31,67 +35,44 @@ const ExcelDataModal = ({ onClose  }) => {
     }
   };
 
-  const renderTableHeader = () => {
-    return (
-      <thead>
-        <tr>
-          <th>MSSV</th>
-          <th>Họ Tên</th>
-          <th>Ngày ứng tuyển</th>
-          <th>Năm học</th>
-          <th>Trạng thái</th>
-        </tr>
-      </thead>
-    );
-  };
-
-  const renderTableBody = () => {
-    return (
-      <tbody>
-        {DSUngTuyen.map((data, index) => (
-          <tr key={index}>
-            <td>{data.MSSV}</td>
-            <td>{data.HoTen}</td>
-            <td className="col-center">{formatDate(data.NgayUngTuyen)}</td>
-            <td className="col-center">{data.TenNamHoc}</td>
-            <td>{data.TTUngTuyen === 0 ? "Chưa xét duyệt" : data.TTUngTuyen === 1 ? "Đã xét duyệt" : "Không đủ điều kiện"}</td>
-          </tr>
-        ))}
-      </tbody>
-    );
-  };
-
   return (
-    <Modal show={true} onHide={onClose} size="lg" className="custom-modal">
-      <Modal.Header closeButton  className="border-none">
-        <Modal.Title className="custom-modal-title">Cập nhật trạng thái</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-      <div className="searchDV-input">
-              <select
-                className="search_name"
-                value={searchData.ttLop}
-                onChange={(e) => {
-                  setSearchData({ ...searchData, ttLop: e.target.value });
-                }}
-              >
-                <option value="" disabled selected>
-                  Trạng thái
-                </option>
-                <option value="1">Đã xét duyệt</option>
-                <option value="0">Chưa xét duyệt</option>
-                <option value="2">Không đủ điều kiện</option>
-
-              </select>
-            </div>
-      </Modal.Body>
-      <Modal.Footer>
-        <button className="allcus-button" onClick={onClose}>
-        Đóng
-        </button>
-      </Modal.Footer>
-    </Modal>
+    <>
+      <Modal show={true} onHide={onClose} className="custom-modal">
+        <Modal.Header closeButton className="border-none">
+          <Modal.Title className="custom-modal-title">
+            Cập nhật trạng thái
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body
+          className="custom-modal-body custom-modal-body-trangthai"
+          bsPrefix="custom-modal-body"
+        >
+          <div className="searchDV-input">
+            <select
+              className="search_name"
+              value={newTrangThai}
+              onChange={handleTrangThaiChange}
+            >
+              <option value="" disabled selected>
+                Trạng thái
+              </option>
+              <option value="1">Đã xét duyệt</option>
+              <option value="0">Chưa xét duyệt</option>
+              <option value="2">Không đủ điều kiện</option>
+            </select>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <button className="allcus-button" onClick={handleCapNhatTrangThai}>
+            Cập nhật
+          </button>
+          <button className="allcus-button" onClick={onClose}>
+            Đóng
+          </button>
+        </Modal.Footer>
+      </Modal>
+    </>
   );
 };
 
-export default ExcelDataModal;
+export default ModalUpdateStatus;

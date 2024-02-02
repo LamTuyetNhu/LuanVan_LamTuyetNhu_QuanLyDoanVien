@@ -48,13 +48,11 @@ function Header() {
             <img className="logo-img" src={huyhieu} alt="Huy hieu" />
           </NavLink>
           <NavLink to={`/DoanVien`} className="logo-content">
-            <span className="d-none d-sm-none d-md-inline">
               Đoàn Thanh Niên
-            </span>
           </NavLink>
         </div>
 
-        <div className="flex">
+        <div className="flex flex-mobile">
           {loadingImage ? (
             <img className="logo-img1" src={logo} alt="logo-dtn" />
           ) : (
@@ -69,6 +67,7 @@ function Header() {
 
             <div className="header__cart-list">
               <ul className="header__cart-list-item">
+                
                 <li className="header__cart-item">
                   <a href="/" className="header__cart-item-info" onClick={handleLogout}>
                     Đăng xuất

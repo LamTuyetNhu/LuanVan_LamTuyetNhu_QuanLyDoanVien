@@ -76,6 +76,10 @@ header {
   text-decoration: none;
 }
 
+.img-heigh {
+  height: 100%;
+}
+
 .flex {
   display: flex;
   margin-right: 32px;
@@ -571,6 +575,7 @@ header {
 .avatar {
   position: relative;
   display: inline-block;
+  margin-bottom: 12px;
 }
 
 .avatar-container {
@@ -590,7 +595,8 @@ header {
   position: absolute;
   bottom: 0;
   right: 0;
-  background-color: #fff;
+  // background-color: #fff;
+  color: var(--white);
   padding: 4px;
   border-radius: 50%;
   cursor: pointer;
@@ -877,6 +883,10 @@ header {
   padding: 16px;
 }
 
+.custom-modal-body-trangthai {
+  height: 150px;
+}
+
 .border-none {
   border: none;
 }
@@ -1025,7 +1035,10 @@ header {
 
 .card-title1,
 .card-title2,
-.card-title3 {
+.card-title3,
+.card-title4,
+.card-title5,
+.card-title6 {
   text-align: center;
   font-size: 1.5em;
   padding: 12px;
@@ -1043,6 +1056,18 @@ header {
   background-color: #c1cdc1;
 }
 
+.card-title4 {
+  background-color: #f0ba87;
+}
+
+.card-title5 {
+  background-color: #f1adaa;
+}
+
+.card-title6 {
+  background-color: #b9c38e;
+}
+
 .card-opacity1 {
   cursor: pointer;
   box-shadow: 0 0 1px var(--rgba), 0 0 6px var(--rgba), 0 0 18px var(--rgba);
@@ -1056,6 +1081,21 @@ header {
 .card-opacity3 {
   cursor: pointer;
   box-shadow: 0 0 1px #c1cdc1, 0 0 6px #c1cdc1, 0 0 18px #c1cdc1;
+}
+
+.card-opacity4 {
+  cursor: pointer;
+  box-shadow: 0 0 1px #f0ba87, 0 0 6px #f0ba87, 0 0 18px #f0ba87;
+}
+
+.card-opacity5 {
+  cursor: pointer;
+  box-shadow: 0 0 1px #f1adaa, 0 0 6px #f1adaa, 0 0 18px #f1adaa;
+}
+
+.card-opacity6 {
+  cursor: pointer;
+  box-shadow: 0 0 1px #b9c38e, 0 0 6px #b9c38e, 0 0 18px #b9c38e;
 }
 
 .mg-bt {
@@ -1160,4 +1200,130 @@ header {
 .tab-pane h2 {
   font-size: 24px;
   margin-bottom: 8px;
+}
+
+.col-score {
+  display: flex;
+}
+
+.col-score .card {
+  width: 100%;
+}
+
+.col-score .card-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.col-score .score {
+  font-size: 24px;
+    color: #28a745; 
+    display: inline-block; 
+    border: 2px solid #dc3545;
+    border-radius: 50%;
+    width: 80px; 
+    height: 80px; 
+    text-align: center; 
+    line-height: 80px;
+    margin: 12px auto;
+}
+
+/* CSS cho định dạng điểm học tập và điểm rèn luyện */
+.col-score .row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.lableFont {
+  font-size: 24px;
+}
+.circle {
+  text-align: center;
+  font-size: 32px;
+}
+
+.circle.excellent { color: rgba(255, 0, 0, 1); }
+.circle.good { color: rgba(0, 128, 0, 1); }
+.circle.average { color: rgba(0, 0, 255, 1); }
+.circle.weak { color: rgba(238, 130, 238, 1); }
+
+.card-opacity1 {
+  position: relative;
+}
+
+.card-opacity1::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.6) 100%);
+  pointer-events: none;
+}
+
+.formHD1 {
+  position: relative;
+  width: 250px;
+  height: 250px;
+  margin: 0 auto;
+  background-color: #fff !important;
+}
+
+.img-mandel {
+  margin: 0 auto;
+    display: flex;
+    width: 200px;
+    height: 200px;
+}
+
+.img-mandel1 {
+  margin: 0 auto;
+  padding: 24px;
+    display: flex;
+    width: 200px;
+    height: 200px;
+}
+
+.password-strength {
+  margin-top: 5px;
+}
+
+.strength-meter {
+  display: flex;
+  margin-top: 5px;
+}
+
+.strength {
+  position: relative;
+  width: 100px ;
+}
+
+.strength-bar {
+  height: 10px;
+  // width: 25%;
+  margin: 0 2px;
+  border-radius: 30px;
+  transition: background-color 0.3s;
+  background-color: #d8d8d8; /* Màu mặc định */
+}
+
+.strength-bar.active {
+  background-color: green; /* Màu sẽ thay đổi tùy thuộc vào độ mạnh/yếu */
+}
+
+.password-input-container {
+  position: relative;
+}
+
+.password-input-container .fa-eye, .password-input-container .fa-eye-slash {
+  position: absolute;
+  right: 10px; /* Có thể điều chỉnh khoảng cách từ icon đến mép phải */
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.password-input-container input {
+  padding-right: 30px; /* Đảm bảo khoảng trắng đủ để hiển thị icon */
 }

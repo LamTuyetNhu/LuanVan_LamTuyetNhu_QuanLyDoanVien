@@ -19,17 +19,14 @@ function Header() {
   };
 
   useEffect(() => {
-    // Thêm sự kiện click cho document khi component mount
     document.addEventListener("click", closeMenu);
 
-    // Cleanup sự kiện khi component unmount
     return () => {
       document.removeEventListener("click", closeMenu);
     };
-  }, []); // [] đảm bảo useEffect chỉ chạy một lần khi component mount
+  }, []); 
 
   const handleHeaderClick = (e) => {
-    // Ngăn chặn sự kiện click từ việc lan truyền đến document
     e.stopPropagation();
   };
 
