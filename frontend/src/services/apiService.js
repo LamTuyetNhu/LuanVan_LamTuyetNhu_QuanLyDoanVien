@@ -255,9 +255,14 @@ const laydsdoanphicuadoanvien = (IDDoanVien, idnamhoc) => {
   return axios.get(`api/laydsdoanphicuadoanvien/${IDDoanVien}/${idnamhoc}`);
 };
 
+const DSDanhGiaDoanVienCuaLop = (IDLop, page, idnamhoc) => {
+  return axios.get(`api/DanhSachDanhGiaDoanVienCuaLop/${page}/${IDLop}/${idnamhoc}`);
+};
+
 const DoiMatKhauDoanVien = (IDDoanVien) => {
   return axios.get(`api/doimatkhaudoanvien/${IDDoanVien}`);
 };
+
 export {
   getAllChiDoan,
   searchChiDoan,
@@ -316,5 +321,6 @@ export {
   KetQuaCuaMotDoanVien,
   laydsdoanphicuadoanvien,
   DoiMatKhauDoanVien,
-  layDSChucVuDoanVien
+  layDSChucVuDoanVien,
+  DSDanhGiaDoanVienCuaLop
 };

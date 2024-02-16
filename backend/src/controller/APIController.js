@@ -2275,7 +2275,7 @@ let layDSChucVuDoanVien = async (req, res) => {
   console.log(IDDoanVien);
   try {
     const [rows, fields1] = await pool.execute(
-      "SELECT TenNamHoc, TenCV FROM chitietnamhoc, namhoc, chucvu where chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDDoanVien = ?",
+      "SELECT * FROM chitietnamhoc, namhoc, chucvu where chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDDoanVien = ?",
       [IDDoanVien]
     );
 
@@ -2609,6 +2609,49 @@ let KetQuaCuaMotDoanVien = async (req, res) => {
   }
 };
 
+let DanhSachDanhGiaDoanVienCuaLop = async (req, res) => {
+  let IDLop = req.params.IDLop;
+  let IDNamHoc = req.params.idnamhoc;
+
+  const page = parseInt(req.params.page) || 1;
+  const pageSize = parseInt(req.query.pageSize) || 5; // Lấy số lượng mục trên mỗi trang, mặc định là 5
+
+  const offset = (page - 1) * pageSize;
+
+  const [sotrang, fields1] = await pool.execute(
+    "SELECT * from lop, doanvien, danhgiadoanvien, namhoc where lop.IDLop = doanvien.IDLop and danhgiadoanvien.IDNamHoc = namhoc.IDNamHoc and doanvien.IDLop = ? and doanvien.IDDoanVien = danhgiadoanvien.IDDoanVien and danhgiadoanvien.IDNamHoc = ?",
+    [IDLop, IDNamHoc]
+  );
+
+  console.log(sotrang)
+  try {
+    let [rows, fields] = await pool.execute(
+      "SELECT * from lop, doanvien, danhgiadoanvien, namhoc where lop.IDLop = doanvien.IDLop and danhgiadoanvien.IDNamHoc = namhoc.IDNamHoc and doanvien.IDLop = ? and doanvien.IDDoanVien = danhgiadoanvien.IDDoanVien and danhgiadoanvien.IDNamHoc = ? LIMIT ? OFFSET ?",
+      [IDLop, IDNamHoc, pageSize, offset]
+    );
+
+    if (rows && rows.length > 0) {
+      return res.status(200).json({
+        dataDG: rows,
+        totalPages: Math.ceil(sotrang.length / pageSize),
+        currentPage: page,
+      });
+    } else {
+      console.log("Không tìm thấy kết quả");
+      return res.status(200).json({
+        dataDG: [],
+        totalPages: 0,
+        currentPage: 1,
+      });
+    }
+  } catch (error) {
+    console.error("Lỗi truy vấn:", error);
+    return res
+      .status(500)
+      .json({ error: "Có lỗi xảy ra trong quá trình tìm kiếm." });
+  }
+};
+
 let layDSDoanPhiCuaDoanVien = async (req, res) => {
   try {
     const IDNamHoc = req.params.IDNamHoc;
@@ -2778,4 +2821,6 @@ module.exports = {
   KetQuaCuaMotDoanVien,
   layDSDoanPhiCuaDoanVien,
   DoiMatKhauDoanVien,
+
+  DanhSachDanhGiaDoanVienCuaLop,
 };

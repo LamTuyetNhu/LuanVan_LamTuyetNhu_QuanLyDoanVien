@@ -27,7 +27,9 @@ import {
 } from "../../../services/apiService";
 
 const BanChapHanh = (props) => {
-  const { IDLop, IDDoanVien, IDChiTietNamHoc } = useParams();
+  const { IDDoanVien, IDChiTietNamHoc } = useParams();
+  const IDLop = localStorage.getItem("IDLop");
+
   const [DoanVien, setDoanVien] = useState([]);
 
   const [select, setSelect] = useState([]);
@@ -737,7 +739,7 @@ const BanChapHanh = (props) => {
           <div className="update row">
             <div className="btns">
               <button className="allcus-button" type="submit">
-                <NavLink to={`/ChiDoan/${IDLop}/DanhSachBCH`} className="navlink">
+                <NavLink to={`/ChiDoan/DanhSachBCH`} className="navlink">
                   <FontAwesomeIcon icon={faBackward} />
                 </NavLink>
               </button>

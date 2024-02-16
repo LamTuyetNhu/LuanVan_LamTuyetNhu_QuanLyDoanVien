@@ -17,7 +17,9 @@ import {
 } from "../../../services/apiService";
 
 const DanhSachHoatDong = (props) => {
-  const { IDLop } = useParams();
+  // const { IDLop } = useParams()
+  const IDLop = localStorage.getItem("IDLop");
+
 
   const [DSHoatDong, setDSHoatDong] = useState([]);
 
@@ -102,7 +104,7 @@ const DanhSachHoatDong = (props) => {
         <div className="namhoc-center">
           <h2 className="text-center">Danh Sách Hoạt Động</h2>
 
-          <div className="searchDV-input">
+          <div className="searchDV-input">Năm học:
             <select
               type="text"
               className="search_name"
@@ -244,7 +246,7 @@ const DanhSachHoatDong = (props) => {
 
                         <td className="btnOnTable1">
                           <NavLink
-                            to={`/ChiDoan/${IDLop}/ChiTietDiemDanh/${item.IDHoatDong}/${item.IDNamHoc}`}
+                            to={`/ChiDoan/ChiTietDiemDanh/${item.IDHoatDong}/${item.IDNamHoc}`}
                           >
                             <button className="btnOnTable clcapnhat ">
                               <FontAwesomeIcon icon={faEdit} />
@@ -254,7 +256,7 @@ const DanhSachHoatDong = (props) => {
 
                         <td className="btnOnTable1 thButton">
                           <NavLink
-                            to={`/ChiDoan/${IDLop}/ChiTietHoatDong/${item.IDHoatDong}`}
+                            to={`/ChiDoan/ChiTietHoatDong/${item.IDHoatDong}`}
                           >
                             <button className="btnOnTable">
                               <FontAwesomeIcon icon={faEye} />

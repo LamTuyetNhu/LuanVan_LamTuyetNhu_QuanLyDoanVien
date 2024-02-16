@@ -25,7 +25,8 @@ import {
 import logo from "../../../assets/logo.jpg";
 
 const DoanVien = (props) => {
-  const { IDLop } = useParams();
+  const IDLop = localStorage.getItem("IDLop");
+
   const [ChiDoan, setChiDoan] = useState([]);
   const [NamHoc, setNamHoc] = useState([]);
   const [DanToc, setDanToc] = useState([]);
@@ -33,7 +34,7 @@ const DoanVien = (props) => {
   const [ChucVu, setChucVu] = useState([]);
 
   const [apiMessage, setApiMessage] = useState("");
-const [apiError, setApiError] = useState(false);
+  const [apiError, setApiError] = useState(false);
 
   const [vietnamBoundaryData, setVietnamBoundaryData] = useState(null);
 
@@ -297,15 +298,10 @@ const [apiError, setApiError] = useState(false);
         GioiTinh === undefined || GioiTinh === ""
           ? "Vui lòng nhập giới tính"
           : "",
-      NgaySinh:
-        !NgaySinh.trim() === ""
-          ? "Vui lòng nhập ngày sinh"
-          : "",
+      NgaySinh: !NgaySinh.trim() === "" ? "Vui lòng nhập ngày sinh" : "",
 
       NgayVaoDoan:
-        !NgayVaoDoan.trim() === ""
-          ? "Vui lòng nhập ngày vào đoàn"
-          : "",
+        !NgayVaoDoan.trim() === "" ? "Vui lòng nhập ngày vào đoàn" : "",
       IDDanToc: !IDDanToc ? "Vui lòng nhập tên dân tộc" : "",
       IDTonGiao: !IDTonGiao ? "Vui lòng nhập tên tôn giáo" : "",
       IDChucVu: !IDChucVu ? "Vui lòng chọn tên chức vụ" : "",
@@ -351,12 +347,16 @@ const [apiError, setApiError] = useState(false);
         "http://localhost:8080/api/ThemMoiDoanVien",
         formData
       );
-      // setApiMessage(res.data.message);
       setShowModal(true);
       // setIsEditing(false);
     } catch (error) {
-      // setApiMessage(res.data.message);
-      console.error("Lỗi khi cập nhật dữ liệu:", error);
+      if (error.response && error.response.status === 500) {
+        alert(error.response.data.message);
+        // Hiển thị thông báo lỗi cho người dùng hoặc thực hiện các xử lý khác tùy thuộc vào yêu cầu của bạn
+      } else {
+        console.error("Lỗi khi cập nhật dữ liệu:", error);
+      }
+      // console.error("Lỗi khi cập nhật dữ liệu:", error);
     }
   };
 
@@ -430,6 +430,7 @@ const [apiError, setApiError] = useState(false);
                     onChange={(e) => setMSSV(e.target.value)}
                   />
                   <div className="error-message">{errors.MSSV}</div>
+
                 </div>
                 <div className="form-group col col-4">
                   <Form.Label htmlFor="HoTen">Họ tên đoàn viên</Form.Label>
@@ -441,7 +442,6 @@ const [apiError, setApiError] = useState(false);
                     aria-describedby="HoTen"
                     value={HoTen}
                     onChange={(e) => setHoTen(e.target.value)}
-                    // onChange={(e) => setHoTen(e.target.value)}
                   />
                   <div className="error-message">{errors.HoTen}</div>
                 </div>
@@ -697,7 +697,7 @@ const [apiError, setApiError] = useState(false);
             <div className="btns">
               <button className="allcus-button" type="submit">
                 <NavLink
-                  to={`/BCH-DoanTruong/ChiTietChiDoan/${IDLop}`}
+                  to={`/BCH-DoanTruong/ChiTietChiDoan`}
                   className="navlink"
                 >
                   <FontAwesomeIcon icon={faBackward} />

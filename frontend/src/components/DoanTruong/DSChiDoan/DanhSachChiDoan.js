@@ -2,6 +2,9 @@ import { NavLink, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
+import { useNavigate } from "react-router-dom";
+
+
 import DeleteSuccess from "../../Modal/DeleteSuccess";
 import DeleteConfirmationModal from "../../Modal/DeleteConfirmationModal";
 import {
@@ -46,6 +49,8 @@ const DanhSachChiDoan = (props) => {
   const changePage = (newPage) => {
     setCurrentPage(newPage);
   };
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchDSChiDoan();
@@ -205,6 +210,21 @@ const DanhSachChiDoan = (props) => {
     return (pageIndex - 1) * pageSize + itemIndex + 1;
   };
 
+  const handleViewButtonClick = (itemID) => {
+    // Lưu thông tin vào localStorage
+    localStorage.setItem("IDLop", itemID);
+    navigate(`/BCH-DoanTruong/ChiTietChiDoan`);
+  };
+
+  const handleEditButtonClick = (itemID) => {
+    // Lưu thông tin vào localStorage
+    localStorage.setItem("IDLop", itemID);
+
+    // Chuyển hướng đến trang chỉnh sửa
+    navigate(`/BCH-DoanTruong/ChiTiet`);
+  };
+
+
   return (
     <>
       <div className="container-fluid app__content">
@@ -361,20 +381,14 @@ const DanhSachChiDoan = (props) => {
                           : "Ngừng hoạt động"}
                       </td>
                       <td className="btnOnTable1">
-                        <NavLink
-                          to={`/BCH-DoanTruong/ChiTietChiDoan/${item.IDLop}`}
-                        >
-                          <button className="btnOnTable ">
+                          <button className="btnOnTable" onClick={() => handleViewButtonClick(item.IDLop)}>
                             <FontAwesomeIcon icon={faEye} />
                           </button>
-                        </NavLink>
                       </td>
                       <td className="btnOnTable1">
-                        <NavLink to={`/BCH-DoanTruong/ChiTiet/${item.IDLop}`}>
-                          <button className="btnOnTable ">
+                          <button className="btnOnTable" onClick={() => handleEditButtonClick(item.IDLop)}>
                             <FontAwesomeIcon icon={faPenToSquare} />
                           </button>
-                        </NavLink>
                       </td>
                       <td className="btnOnTable1">
                         <button

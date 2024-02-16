@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import * as XLSX from "xlsx";
 import { format } from "date-fns";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate} from "react-router-dom";
 import axios from "axios";
 import logo from "../../../assets/logo.jpg"
 
@@ -22,7 +22,8 @@ import {
 } from "../../../services/apiService";
 
 const DanhSachBCH = (props) => {
-  const { IDLop } = useParams();
+  const navigate = useNavigate();
+
   const [DoanVien, setDoanVien] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -232,6 +233,11 @@ const DanhSachBCH = (props) => {
     XLSX.writeFile(wb, "DanhSachDoanVien.xlsx");
   };
 
+  const handleViewButtonClick = (itemID) => {
+    localStorage.setItem("IDDoanVien", itemID);
+    navigate(`/BCH-DoanTruong/DanhSachBCH/DoanVien`);
+  };
+
   return (
     <>
       <div className="container-fluid app__content">
@@ -337,11 +343,11 @@ const DanhSachBCH = (props) => {
                     DoanVien.map((item, index) => {
                       return (
                         <div className="col-lg-3 col-md-6 col-sm-6 giang-vien-col lazy">
-                          <NavLink
+                          {/* <NavLink
                             to={`/BCH-DoanTruong/DanhSachBCH/${idnamhoc}/${item.IDDoanVien}`}
                             className="NavLink-item"
-                          >
-                            <div className="giang-vien-item">
+                          > */}
+                            <div className="giang-vien-item" onClick={() => handleViewButtonClick(item.IDDoanVien)}>
                               <div className="gv-image img-hover-zoom gv1">
                                 <a>
                                   <img
@@ -362,7 +368,6 @@ const DanhSachBCH = (props) => {
                                 <p>{item.TenCV}</p>
                               </div>
                             </div>
-                          </NavLink>
                         </div>
                       );
                     })}

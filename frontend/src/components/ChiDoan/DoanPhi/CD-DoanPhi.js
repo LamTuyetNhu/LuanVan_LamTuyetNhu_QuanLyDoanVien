@@ -18,7 +18,9 @@ import {
 } from "../../../services/apiService";
 
 const DanhSachDoanPhi = (props) => {
-  const { IDLop } = useParams();
+  // const { IDLop } = useParams();
+  const IDLop = localStorage.getItem("IDLop");
+
   const [DSDoanPhi, setDSDoanPhi] = useState([]);
 
   const [selectedIDDoanPhi, setSelectedIDDoanPhi] = useState(null);
@@ -158,7 +160,7 @@ const DanhSachDoanPhi = (props) => {
 
                       <td className="btnOnTable1 ">
                         <NavLink
-                          to={`/ChiDoan/${IDLop}/ChiTietDoanPhi/${item.IDDoanPhi}/${item.IDNamHoc}`}
+                          to={`/ChiDoan/ChiTietDoanPhi/${item.IDDoanPhi}/${item.IDNamHoc}`}
                         >
                           <button className="btnOnTable clcapnhat">
                             <FontAwesomeIcon icon={faEye} />

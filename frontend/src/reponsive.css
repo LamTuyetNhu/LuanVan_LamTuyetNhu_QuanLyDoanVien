@@ -111,7 +111,18 @@
   }
 
   .tablet-mobile {
+    display: block;
+  }
+
+  .buttonSearch {
     display: flex;
+    justify-content: center;
+  }
+
+  .btnSearchText {
+
+  width: 100%;
+    text-align: center;
   }
 
   .table-container {
@@ -119,7 +130,7 @@
     overflow-x: auto; /* Thêm thanh cuộn ngang khi bảng vượt quá kích thước của phần tử bao bọc */
   }
 
-  .table {
+  .table1 {
     width: 100%;
     min-width: 800px; /* Đặt chiều rộng tối thiểu cho bảng */
     overflow: auto; /* Thêm thanh trượt khi bảng vượt quá màn hình */

@@ -21,7 +21,9 @@ import {
 } from "../../../services/apiService";
 
 const DanhSachBCH = (props) => {
-  const { IDLop } = useParams();
+  // const { IDLop } = useParams();
+  const IDLop = localStorage.getItem("IDLop");
+
   const [DoanVien, setDoanVien] = useState([]);
 
   const [DSChucVu, setListChucVu] = useState([]);
@@ -121,7 +123,7 @@ const DanhSachBCH = (props) => {
       <div className="container-fluid app__content">
         <div className="namhoc-center">
           <h2 className="text-center">Danh Sách Ban Chấp Hành</h2>
-          <div className="searchDV-input">
+          <div className="searchDV-input">Năm học: 
             <select
               type="text"
               className="search_name"
@@ -139,13 +141,7 @@ const DanhSachBCH = (props) => {
           </div>
         </div>
 
-          <div className="searchDV-Right">
-            <div className="">
-              <button className="formatButton" onClick={exportToExcel}>
-                <FontAwesomeIcon icon={faCloudArrowDown} /> 
-              </button>
-            </div>
-          </div>
+
 
         <div className="listDV">
           <div className="table-container">
@@ -158,7 +154,7 @@ const DanhSachBCH = (props) => {
                       return (
                         <div className="col-lg-4 col-md-6 col-sm-6 giang-vien-col lazy">
                           <NavLink
-                            to={`/ChiDoan/${IDLop}/DanhSachBCH/${item.IDDoanVien}/${item.IDChiTietNamHoc}`}
+                            to={`/ChiDoan/DanhSachBCH/${item.IDDoanVien}/${item.IDChiTietNamHoc}`}
                             className="NavLink-item"
                           >
                             <div className="giang-vien-item">
@@ -195,7 +191,16 @@ const DanhSachBCH = (props) => {
                 </div>
               </div>
             </div>
+
+        <div className="searchDV-Right">
+            <div className="">
+              <button className="formatButton" onClick={exportToExcel}>
+                <FontAwesomeIcon icon={faCloudArrowDown} /> 
+              </button>
+            </div>
           </div>
+          </div>
+        
         </div>
       </div>
 

@@ -25,7 +25,9 @@ import {
 import logo from "../../../assets/logo.jpg";
 
 const DoanVien = (props) => {
-  const { IDLop } = useParams();
+  // const { IDLop } = useParams();
+  const IDLop = localStorage.getItem("IDLop");
+
   const [ChiDoan, setChiDoan] = useState([]);
   const [NamHoc, setNamHoc] = useState([]);
   const [DanToc, setDanToc] = useState([]);
@@ -697,7 +699,7 @@ const [apiError, setApiError] = useState(false);
             <div className="btns">
               <button className="allcus-button" type="submit">
                 <NavLink
-                  to={`/ChiDoan/${IDLop}`}
+                  to={`/ChiDoan`}
                   className="navlink"
                 >
                   <FontAwesomeIcon icon={faBackward} />

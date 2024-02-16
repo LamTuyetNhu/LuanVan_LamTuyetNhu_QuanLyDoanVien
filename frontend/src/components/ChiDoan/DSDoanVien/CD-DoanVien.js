@@ -29,7 +29,9 @@ import {
 } from "../../../services/apiService";
 
 const DoanVien = (props) => {
-  const { IDLop, IDDoanVien, IDChiTietNamHoc } = useParams();
+  const {  IDDoanVien, IDChiTietNamHoc } = useParams();
+  const IDLop = localStorage.getItem("IDLop");
+
   const [DoanVien, setDoanVien] = useState([]);
   const [DSDoanVien, setListDoanVien] = useState([]);
 
@@ -752,7 +754,7 @@ const DoanVien = (props) => {
             <div className="btns">
               <button className="allcus-button" type="submit">
                 <NavLink
-                  to={`/ChiDoan/${IDLop}`}
+                  to={`/ChiDoan`}
                   className="navlink"
                 >
                   <FontAwesomeIcon icon={faBackward} />
@@ -795,7 +797,7 @@ const DoanVien = (props) => {
       />
 
       <NavLink
-        to={`/ChiDoan/${IDLop}`}
+        to={`/ChiDoan`}
         className="navlink"
       >
         <DeleteSuccess show={showModal1} onHide={() => setShowModal1(false)} />

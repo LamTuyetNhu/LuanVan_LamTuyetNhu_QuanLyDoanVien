@@ -262,6 +262,7 @@ header {
   position: relative;
   top: 18px;
   // max-height: 500px;
+  margin: 0 12px;
 }
 
 .main-container {
@@ -1193,6 +1194,7 @@ header {
 .tab-pane {
   color: #333;
   display: none;
+  text-align: justify;
 }
 .tab-pane.active {
   display: block;

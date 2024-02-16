@@ -80,7 +80,7 @@ const DangNhap = (props) => {
           if (decodedToken.role === "Admin") {
             navigate("/BCH-DoanTruong");
           } else if (decodedToken.role === "BCHChiDoan") {
-            navigate(`/ChiDoan/${response.data.IDLop}`);
+            navigate(`/ChiDoan`);
           } else if (decodedToken.role === "DoanVien") {
             navigate("/DoanVien");
           }

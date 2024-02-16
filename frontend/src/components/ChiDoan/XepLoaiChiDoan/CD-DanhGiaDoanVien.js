@@ -5,7 +5,7 @@ import * as XLSX from "xlsx";
 import { format } from "date-fns";
 import { NavLink, useNavigate } from "react-router-dom";
 import Modal from "../../Modal/Modal";
-import ExcelDataModal from "../../Modal/ExcelDataModal1";
+import ExcelDataModal from "../../Modal/FileDanhGia";
 
 import axios from "axios";
 import {
@@ -20,10 +20,9 @@ import {
 import {
   searchDoanVien,
   searchManyDoanVien,
-  laymotlop,
   namhoc,
-  namhoccuachidoan,
   chucvu,
+  DSDanhGiaDoanVienCuaLop,
 } from "../../../services/apiService";
 
 const DanhSachDoanVien = (props) => {
@@ -56,7 +55,6 @@ const DanhSachDoanVien = (props) => {
   });
 
   const [searchMany, setsearchMany] = useState({
-    
     info: ""
   });
 
@@ -69,14 +67,14 @@ const DanhSachDoanVien = (props) => {
 
   const fetchDSDoanVien = async () => {
     try {
-      let res = await laymotlop(IDLop, currentPage, idnamhoc);
+      let res = await DSDanhGiaDoanVienCuaLop(IDLop, currentPage, idnamhoc);
       console.log(res);
 
       if (res.status === 200) {
-        console.log("Data from API:", res.data.dataCD);
+        console.log("Data from API:", res.data.dataDG);
         console.log("Total Pages from API:", res.data.totalPages);
 
-        setListDoanVien(res.data.dataCD)
+        setListDoanVien(res.data.dataDG)
         setTotalPages(res.data.totalPages);
 
       } else {
@@ -192,11 +190,11 @@ const DanhSachDoanVien = (props) => {
 
       // Lặp qua tất cả các trang
       for (let page = 1; page <= totalPages; page++) {
-        let res = await laymotlop(IDLop, page, idnamhoc);
+        let res = await DSDanhGiaDoanVienCuaLop(IDLop, page, idnamhoc);
 
         if (res.status === 200) {
           // Tích hợp dữ liệu từ trang hiện tại vào mảng
-          allDataArray = [...allDataArray, ...res.data.dataCD];
+          allDataArray = [...allDataArray, ...res.data.dataDG];
         } else {
           // Xử lý trường hợp lỗi
           console.error("Lỗi khi gọi API:", res.statusText);
@@ -217,28 +215,20 @@ const DanhSachDoanVien = (props) => {
 
       const dataToExport = allData.map((item) => {
         return {
-          "Mã Chi Đoàn": item.MaLop,
-          "Tên Chi Đoàn": item.TenLop,
-          Khóa: item.Khoa,
           MSSV: item.MSSV,
           "Họ tên": item.HoTen,
-          Email: item.Email,
-          "Số điện thoại": item.SoDT,
-          "Giới tính":
-            item.GioiTinh === 0 ? "Nữ" : item.GioiTinh === 1 ? "Nam" : "Khác",
-          "Quê quán": item.QueQuan,
-          "Dân tộc": item.TenDanToc,
-          "Tôn giáo": item.TenTonGiao,
-          "Ngày sinh": format(new Date(item.NgaySinh), "dd/MM/yyyy"),
-          "Ngày vào đoàn": format(new Date(item.NgayVaoDoan), "dd/MM/yyyy"),
-          "Chức vụ": item.TenCV,
+          "Điểm hk1": item.hk1.toFixed(2),
+          "Điểm hk1": item.hk2.toFixed(2),
+          "Điểm rl hk1": item.rl1,
+          "Điểm rl hk2": item.rl2,
+          "Phân loại": item.PhanLoai === 1 ? "Xuất sắc" : item.PhanLoai === 2 ? "Khá" : item.PhanLoai === 3 ? "Trung bình" : item.PhanLoai === 4 ? "Yếu kém" : "Chưa phân loại"
         };
       });
 
       // Tạo một đối tượng Workbook từ mảng dữ liệu
       const ws = XLSX.utils.json_to_sheet(dataToExport);
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "DanhSachDoanVien");
+      XLSX.utils.book_append_sheet(wb, ws, "CD-DanhGiaDoanVien");
 
       // Xuất file Excel
       XLSX.writeFile(wb, `${allData[0].MaLop} - ${allData[0].TenNamHoc}.xlsx`);
@@ -280,7 +270,7 @@ const DanhSachDoanVien = (props) => {
     }
   };
 
-  const handleConfirmExcelData = async (idnamhoc) => {
+  const handleConfirmExcelData = async () => {
     console.log("Updated Excel Data:", excelData);
     console.log("Selected Nam Hoc:", idnamhoc);
 
@@ -289,11 +279,10 @@ const DanhSachDoanVien = (props) => {
       const formData = new FormData();
       formData.append("IDLop", IDLop);
       formData.append("idnamhoc", idnamhoc);
-
       formData.append("file", selectedFile);
 
       let res = await axios.post(
-        "http://localhost:8080/api/ThemDoanVienExcel",
+        "http://localhost:8080/api/DanhGiaDoanVienExcel",
         formData
       );
 
@@ -335,7 +324,7 @@ const DanhSachDoanVien = (props) => {
     <>
       <div className="container-fluid app__content">
         <div className="namhoc-center">
-          <h2 className="text-center">Danh Sách Đoàn Viên</h2>
+          <h2 className="text-center">Danh Sách Đánh Giá Đoàn Viên</h2>
           <div className="searchDV-input">
             Năm học: <select
               type="text"
@@ -387,14 +376,22 @@ const DanhSachDoanVien = (props) => {
                     setSearchData({ ...searchData, IDChucVu: e.target.value });
                   }}
                 >
-                  <option value="Chức vụ">Chọn chức vụ</option>
-                  {DSChucVu.map((item, index) => {
-                    return (
-                      <option key={index} value={item.IDChucVu}>
-                        {item.TenCV}
+                  <option value="" disabled selected>Chọn phân loại</option>
+                      <option value="1">
+                        Xuất sắc
                       </option>
-                    );
-                  })}
+                      <option value="2">
+                        Khá
+                      </option>
+                      <option value="3">
+                        Trung bình
+                      </option>
+                      <option value="4">
+                        Yếu kém
+                      </option>
+                      <option value="0">
+                        Chưa phân loại
+                      </option>
                 </select>
               </div>
 
@@ -403,11 +400,6 @@ const DanhSachDoanVien = (props) => {
               </button>
             </div>
             <div className="buttonSearch">
-              <NavLink to={`/BCH-DoanTruong/ThemMoi-DoanVien`}>
-                <button className="formatButton">
-                  <FontAwesomeIcon icon={faPlus} />
-                </button>
-              </NavLink>
               <div>
                 <input
                   type="file"
@@ -434,7 +426,7 @@ const DanhSachDoanVien = (props) => {
                 <input
                   type="text"
                   className="search_name"
-                  placeholder="Tìm theo mã, tên, chức vụ"
+                  placeholder="Tìm theo mã, tên, phân loại"
                   value={searchData.info}
                   onChange={(e) => {
                     setsearchMany({ info: e.target.value });
@@ -482,13 +474,12 @@ const DanhSachDoanVien = (props) => {
                 <th className="">STT</th>
                 <th className="mb-tableItem">Mã Đoàn Viên</th>
                 <th >Tên Đoàn Viên</th>
-                <th className="">Ngày sinh</th>
-                <th className="">Giới tính</th>
-                <th>Chức vụ</th>
-                <th className="">Năm học</th>
-                <th>Email</th>
-                <th className="">Số điện thoại</th>
-                <th className="">Chi tiết</th>
+                <th>Điểm học kỳ 1</th>
+                <th>Điểm học kỳ 2</th>
+                <th>Điểm rèn luyện học kỳ 1</th>
+                <th>Điểm rèn luyện học kỳ 2</th>
+                <th className="">Đánh giá đoàn viên</th>
+                <th className="">Cập nhật</th>
               </tr>
             </thead>
             <tbody id="myTable">
@@ -501,22 +492,11 @@ const DanhSachDoanVien = (props) => {
                       <td className=" col-center">{stt}</td>
                       <td className="mb-tableItem mb-tableItem1">{item.MSSV}</td>
                       <td className="">{item.HoTen}</td>
-                      <td className="col-center">
-                        {format(new Date(item.NgaySinh), "dd/MM/yyyy")}
-                      </td>
-                      <td className="table-item1">
-                        {item.GioiTinh === 0
-                          ? "Nữ"
-                          : item.GioiTinh === 1
-                          ? "Nam"
-                          : "Khác"}
-                      </td>
-                      <td className="">{item.TenCV}</td>
-                      <td className="col-center">{item.TenNamHoc}</td>
-
-                      <td className="">{item.Email}</td>
-                      <td className="">{item.SoDT}</td>
-
+                      <td className="col-center">{item.hk1.toFixed(2)}</td>
+                      <td className="col-center">{item.hk2.toFixed(2)}</td>
+                      <td className="col-center">{item.rl1}</td>
+                      <td className="col-center">{item.rl2}</td>
+                      <td className="">{item.PhanLoai === 1 ? "Xuất sắc" : item.PhanLoai === 2 ? "Khá" : item.PhanLoai === 3 ? "Trung bình" : item.PhanLoai === 4 ? "Yếu kém" : "Chưa đánh giá"}</td>
                       <td className="btnOnTable1">
                           <button className="btnOnTable" onClick={() => handleViewButtonClick(item.IDDoanVien)}>
                             <FontAwesomeIcon icon={faEye} />
@@ -633,9 +613,11 @@ const DanhSachDoanVien = (props) => {
       {showExcelModal && (
         <ExcelDataModal
           excelData={excelData}
+          idnamhoc={idnamhoc}
           onClose={() => setShowExcelModal(false)}
           onConfirm={handleConfirmExcelData}
           selectedFile={selectedFile}
+          DSNamHoc={DSNamHoc}
         />
       )}
     </>

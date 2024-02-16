@@ -15,7 +15,7 @@ import { laymotchidoan, CapNhatChiDoan } from "../../../services/apiService";
 import logo from "../../../assets/logo.jpg";
 
 const ChiTietChiDoan = (props) => {
-  const { IDLop } = useParams();
+  const IDLop = localStorage.getItem("IDLop");
   const [ChiDoan, setChiDoan] = useState([]);
 
   const [editedChiDoan, setEditedChiDoan] = useState({});

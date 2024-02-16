@@ -25,7 +25,8 @@ import {
 } from "../../../services/apiService";
 
 const DanhSachDoanVien = (props) => {
-  const { IDLop } = useParams();
+  const IDLop = localStorage.getItem("IDLop");
+
   const [DSDoanVien, setListDoanVien] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -393,7 +394,7 @@ const DanhSachDoanVien = (props) => {
               </button>
             </div>
             <div className="buttonSearch">
-              <NavLink to={`/ChiDoan/${IDLop}/ThemMoi-DoanVien`}>
+              <NavLink to={`/ChiDoan/ThemMoi-DoanVien`}>
                 <button className="formatButton">
                   <FontAwesomeIcon icon={faPlus} />
                 </button>
@@ -465,7 +466,7 @@ const DanhSachDoanVien = (props) => {
 
                       <td className="btnOnTable1">
                         <NavLink
-                          to={`/ChiDoan/${item.IDLop}/${item.IDDoanVien}/${item.IDChiTietNamHoc}`}
+                          to={`/ChiDoan/${item.IDDoanVien}/${item.IDChiTietNamHoc}`}
                         >
                           <button className="btnOnTable">
                             <FontAwesomeIcon icon={faEye} />

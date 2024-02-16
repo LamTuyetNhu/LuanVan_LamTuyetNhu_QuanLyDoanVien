@@ -345,7 +345,8 @@ const SinhVienNamTot = (props) => {
                         </li>
                         <li>
                           Đạt chứng chỉ ngoại ngữ theo bảng quy đổi bên dưới
-                          <table className="table table-striped margin-top">
+                       <div className="table-container">
+                       <table className="table table-striped margin-top">
                             <thead>
                               <th>Đối tượng</th>
                               <th>Chứng chỉ</th>
@@ -374,6 +375,7 @@ const SinhVienNamTot = (props) => {
                               </tr>
                             </tbody>
                           </table>
+                       </div>
                         </li>
                         <p>
                           Lưu ý:
@@ -486,9 +488,9 @@ const SinhVienNamTot = (props) => {
             <h2>Ứng tuyển</h2>
             <div className="margin-top">
               <div className="table-container">
-                <table className="table table-svnt">
+                <table className="table table-striped table-svnt">
                   <tbody id="myTable">
-                    <tr>
+                    <tr className="tableRow">
                       <td>Tải mẫu ứng tuyển</td>
                       <td className="col-center">
                         <FontAwesomeIcon
@@ -498,7 +500,7 @@ const SinhVienNamTot = (props) => {
                         />
                       </td>
                     </tr>
-                    <tr>
+                    <tr className="tableRow">
                       <td>Xem kết quả ứng tuyển</td>
                       <td className="col-center">
                         <FontAwesomeIcon
@@ -507,8 +509,8 @@ const SinhVienNamTot = (props) => {
                           onClick={handleViewResultClick}
                         />
                       </td>
-                    </tr>
-                    <tr>
+                    </tr >
+                    <tr className="tableRow">
                       <td>Nộp file ứng tuyển</td>
                       <td className="col-center">
                         <div>

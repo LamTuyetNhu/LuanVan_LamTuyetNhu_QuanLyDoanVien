@@ -15,7 +15,8 @@ const NopDoanPhi = (props) => {
   const [TenNamHoc, setTenNamHoc] = useState([]);
 
   const [checkboxStates, setCheckboxStates] = useState([]);
-  const { IDLop, IDDoanPhi, IDNamHoc } = useParams();
+  const {  IDDoanPhi, IDNamHoc } = useParams();
+  const IDLop = localStorage.getItem("IDLop");
 
   useEffect(() => {
     fetchDSNopDoanPhi();

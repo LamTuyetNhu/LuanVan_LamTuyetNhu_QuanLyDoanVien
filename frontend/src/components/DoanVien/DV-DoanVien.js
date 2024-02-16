@@ -15,10 +15,8 @@ import {
   chucvu,
   LayTonGiao,
   LayDanToc,
-  // DVLayMotDoanVien,
   layDSChucVuDoanVien,
   laytendoanvien,
-  // namhoc,
 } from "../../services/apiService";
 
 const DoanVien = (props) => {
@@ -27,10 +25,10 @@ const DoanVien = (props) => {
   const [DoanVien, setDoanVien] = useState([]);
   const [CVDoanVien, setCVDoanVien] = useState([]);
 
-  // const [NamHoc, setNamHoc] = useState([]);
   const [DanToc, setDanToc] = useState([]);
   const [TonGiao, setTonGiao] = useState([]);
   const [ChucVu, setChucVu] = useState([]);
+  const [listIDChucVu, setListIDChucVu] = useState([]);
 
   const [editedDoanVien, seteditedDoanVien] = useState({});
   const [isEditing, setIsEditing] = useState(false);
@@ -39,66 +37,49 @@ const DoanVien = (props) => {
   const [image, setImage] = useState("");
   const [previewImage, setPreviewImage] = useState("");
 
-  const [IDNamHoc, setIDNamHoc] = useState(1);
-
   useEffect(() => {
     layMotDoanVien();
-    // fetchDSNamHoc();
     fetchChucVu();
     fetchTonGiao();
     fetchDanToc();
     DSChucVuDoanVien();
-  }, [IDDoanVien, IDNamHoc]);
+  }, [IDDoanVien]);
 
   const layMotDoanVien = async () => {
     try {
       let res = await laytendoanvien(IDDoanVien);
       if (res.status === 200) {
-        setDoanVien(res.data.dataDV);
-        seteditedDoanVien(res.data.dataDV);
+        const { dataDV, dataCV } = res.data;
+        // Assuming dataDV contains basic information and dataCV contains roles (ChucVu)
+        const mergedData = {
+          ...dataDV,
+          CVDoanVien: dataCV, // assuming dataCV is an array of ChucVu
+        };
+        setDoanVien(mergedData);
+        seteditedDoanVien(mergedData);
       } else {
-        // Xử lý trường hợp lỗi
         console.error("Lỗi khi gọi API:", res.statusText);
       }
     } catch (error) {
       console.error("Lỗi khi gọi API:", error.message);
     }
   };
-
+  
   const DSChucVuDoanVien = async () => {
     try {
       let res = await layDSChucVuDoanVien(IDDoanVien);
       if (res.status === 200) {
-        setCVDoanVien(res.data.dataDV);
-        seteditedDoanVien(res.data.dataDV);
+        const { dataDV } = res.data;
+        // Assuming dataDV contains roles (ChucVu)
+        setCVDoanVien(dataDV);
+        setListIDChucVu(dataDV.map((item) => item.IDChucVu));
       } else {
-        // Xử lý trường hợp lỗi
         console.error("Lỗi khi gọi API:", res.statusText);
       }
     } catch (error) {
       console.error("Lỗi khi gọi API:", error.message);
     }
   };
-
-  // const fetchDSNamHoc = async () => {
-  //   try {
-  //     let res = await namhoc();
-  //     if (res.status === 200) {
-  //       const NamHocdata = res.data.dataNH;
-
-  //       // Kiểm tra nếu khoaData là mảng trước khi cập nhật state
-  //       if (Array.isArray(NamHocdata)) {
-  //         setNamHoc(NamHocdata);
-  //       } else {
-  //         console.error("Dữ liệu khóa không hợp lệ:", NamHocdata);
-  //       }
-  //     } else {
-  //       console.error("Lỗi khi gọi API:", res.statusText);
-  //     }
-  //   } catch (error) {
-  //     console.error("Lỗi khi gọi API:", error.message);
-  //   }
-  // };
 
   const fetchChucVu = async () => {
     try {
@@ -185,11 +166,21 @@ const DoanVien = (props) => {
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    seteditedDoanVien((prevData) => ({
-      ...prevData,
-      [id]: value,
-    }));
+  
+    if (id.startsWith("CV_")) {
+      // Handle changes in the table (Chức Vụ)
+      const index = parseInt(id.split("_")[1]);
+      handleChangeChucVu(value, index);
+    } else {
+      // Handle changes for other inputs
+      seteditedDoanVien((prevData) => ({
+        ...prevData,
+        [id]: value,
+      }));
+    }
   };
+  
+
 
   const handleToggleEdit = () => {
     setIsEditing((prevIsEditing) => !prevIsEditing);
@@ -218,54 +209,86 @@ const DoanVien = (props) => {
     );
   };
 
+const handleChangeChucVu = (e, index) => {
+  const { value } = e.target;
+
+  // Update the Chức Vụ in the current row of CVDoanVien
+  setCVDoanVien((prevCV) =>
+    prevCV.map((item, i) =>
+      i === index ? { ...item, IDChucVu: value } : item
+    )
+  );
+
+  // Update the list of IDChucVu
+  setListIDChucVu((prevList) => {
+    const updatedList = [...prevList];
+    updatedList[index] = value;
+    return updatedList;
+  });
+
+  // Update editedDoanVien with the updated list of IDChucVu
+  seteditedDoanVien((prevData) => ({
+    ...prevData,
+    IDChucVu: [...listIDChucVu],
+  }));
+};
+
+  
   const handleSaveChanges = async (e) => {
     e.preventDefault();
 
+    console.log("editedDoanVien:", editedDoanVien);
     const newErrors = {
       Email:
-        !editedDoanVien.Email.trim() === ""
+        !editedDoanVien.Email
           ? "Vui lòng nhập Email"
           : !validateEmail(editedDoanVien.Email)
           ? "Email không hợp lệ!"
           : "",
       HoTen:
-        !editedDoanVien.HoTen || !editedDoanVien.HoTen.trim() === ""
+        !editedDoanVien.HoTen
           ? "Vui lòng nhập họ tên"
           : "",
       MSSV:
-        !editedDoanVien.MSSV || !editedDoanVien.MSSV.trim() === ""
+        !editedDoanVien.MSSV
           ? "Vui lòng nhập MSSV"
           : "",
       SoDT:
-        !editedDoanVien.SoDT.trim() === ""
+        !editedDoanVien.SoDT
           ? "Vui lòng nhập số điện thoại"
           : !validatePhoneNumber(editedDoanVien.SoDT)
           ? "Số điện thoại không hợp lệ!"
           : "",
       QueQuan:
-        !editedDoanVien.QueQuan.trim() === "" ? "Vui lòng nhập quê quán" : "",
+        !editedDoanVien.QueQuan
+          ? "Vui lòng nhập quê quán"
+          : "",
       GioiTinh:
         editedDoanVien.GioiTinh === undefined || editedDoanVien.GioiTinh === ""
           ? "Vui lòng nhập giới tính"
           : "",
       NgaySinh:
-        !editedDoanVien.NgaySinh.trim() === ""
+        !editedDoanVien.NgaySinh
           ? "Vui lòng nhập ngày sinh"
           : !validateNgay(editedDoanVien.NgaySinh)
           ? "Ngày định dạng là dd/mm/yyyy"
           : "",
 
       NgayVaoDoan:
-        !editedDoanVien.NgayVaoDoan.trim() === ""
+        !editedDoanVien.NgayVaoDoan
           ? "Vui lòng nhập ngày vào đoàn"
           : !validateNgay(editedDoanVien.NgayVaoDoan)
           ? "Ngày định dạng là dd/mm/yyyy"
           : "",
 
-      IDDanToc: !editedDoanVien.IDDanToc ? "Vui lòng nhập tên dân tộc" : "",
-      IDTonGiao: !editedDoanVien.IDTonGiao ? "Vui lòng nhập tên tôn giáo" : "",
-      IDChucVu: !editedDoanVien.IDChucVu ? "Vui lòng chọn tên chức vụ" : "",
-      // IDNamHoc: !editedDoanVien.IDNamHoc ? "Vui lòng chọn năm học" : "",
+      IDDanToc:
+        !editedDoanVien.IDDanToc 
+          ? "Vui lòng nhập tên dân tộc"
+          : "",
+      IDTonGiao:
+        !editedDoanVien.IDTonGiao 
+          ? "Vui lòng nhập tên tôn giáo"
+          : "",
     };
 
     setErrors(newErrors);
@@ -287,10 +310,9 @@ const DoanVien = (props) => {
       formData.append("IDDanToc", editedDoanVien.IDDanToc);
       formData.append("IDTonGiao", editedDoanVien.IDTonGiao);
       formData.append("IDChucVu", editedDoanVien.IDChucVu);
-      formData.append("IDNamHoc", editedDoanVien.IDNamHoc);
       formData.append("QueQuan", editedDoanVien.QueQuan);
       formData.append("IDDoanVien", IDDoanVien);
-      // formData.append("IDChiTietNamHoc", IDChiTietNamHoc);
+      formData.append("listIDChucVu", JSON.stringify(listIDChucVu));
 
       if (image instanceof Blob) {
         formData.append("file", image, image.name);
@@ -311,36 +333,12 @@ const DoanVien = (props) => {
       console.error("Lỗi khi cập nhật dữ liệu:", error);
     }
   };
-  
-  // const handleNamHocChange = (e) => {
-  //   const selectedIDNamHoc = e.target.value;
-  //   setIDNamHoc(selectedIDNamHoc);
-  // };
 
   return (
     <>
       <div className="container-fluid app__content">
-        {/* <div className="namhoc-center mg-bt"> */}
-          <h2 className="text-center">Đoàn Viên</h2>
-          {/* <div className="searchDV-input">
-            {" "}
-            Năm học
-            <select
-              type="text"
-              className="search_name"
-              value={IDNamHoc}
-              onChange={handleNamHocChange}
-            >
-              {NamHoc.map((item, index) => {
-                return (
-                  <option key={index} value={item.IDNamHoc}>
-                    {item.TenNamHoc}
-                  </option>
-                );
-              })}
-            </select>
-          </div> */}
-        {/* </div> */}
+        <h2 className="text-center">Đoàn Viên</h2>
+
         <div className="row formAdd">
           <div className="col-12 col-md-3 col-lg-2">
             <div className="avatar">
@@ -366,7 +364,7 @@ const DoanVien = (props) => {
           </div>
           <div className="col-12 col-md-9 col-lg-10 margin-top1">
             <div className="row">
-              <div className="form-group col-12 col-md-6 col-lg-4">
+              <div className="form-group col-12 col-md-6 col-lg-4 ">
                 <Form.Label htmlFor="MaLop">Mã chi đoàn</Form.Label>
                 <Form.Control
                   className="form-control"
@@ -432,6 +430,7 @@ const DoanVien = (props) => {
                     aria-describedby="HoTen"
                     value={editedDoanVien.HoTen}
                     onChange={handleChange}
+
                   />
                 ) : (
                   <Form.Control
@@ -606,7 +605,7 @@ const DoanVien = (props) => {
                     onChange={handleChange}
                   >
                     <option value="" disabled selected>
-                      {/* {DoanVien.TenDanToc} */} Chọn dân tộc
+                      {DoanVien.TenDanToc}
                     </option>
                     {DanToc.map((dantoc, index) => {
                       return (
@@ -640,7 +639,7 @@ const DoanVien = (props) => {
                     onChange={handleChange}
                   >
                     <option value="" disabled selected>
-                      Chọn tôn giáo
+                      {DoanVien.TenTonGiao}
                     </option>
                     {TonGiao.map((tongiao, index) => {
                       return (
@@ -663,31 +662,55 @@ const DoanVien = (props) => {
                 <div className="error-message">{errors.IDTonGiao}</div>
               </div>
               <div className="listDV">
-          <div className="table-container">
-            <table className="table table-striped">
-              <thead>
-                <tr>
-                  <th className="table-item">STT</th>
-                  <th className="table-item">Tên năm học</th>
-                  <th>Chức vụ</th>
-                </tr>
-              </thead>
-              <tbody id="myTable">
-                {CVDoanVien &&
-                  CVDoanVien.length > 0 &&
-                  CVDoanVien.map((item, index) => {
-                    return (
-                      <tr key={`table-hoatdong-${index}`} className="tableRow">
-                        <td className="col-center">{index + 1}</td>
-                        <td className="col-center">{item.TenNamHoc}</td>
-                        <td className="">{item.TenCV}</td>
+                <div className="table-container">
+                  <table className="table table-striped">
+                    <thead>
+                      <tr>
+                        <th className="table-item">STT</th>
+                        <th className="table-item">Tên năm học</th>
+                        <th>Chức vụ</th>
                       </tr>
-                    );
-                  })}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                    </thead>
+                    <tbody id="myTable">
+                      {CVDoanVien &&
+                        CVDoanVien.length > 0 &&
+                        CVDoanVien.map((item, index) => {
+                          return (
+                            <tr
+                              key={`table-hoatdong-${index}`}
+                              className="tableRow"
+                            >
+                              <td className="col-center">{index + 1}</td>
+                              <td className="col-center">{item.TenNamHoc}</td>
+                              <td>
+                                {isEditing ? (
+                                  <Form.Select
+                                  className="form-control"
+                                  value={listIDChucVu[index]}
+                                  onChange={(e) => handleChangeChucVu(e, index)}
+                                  id={`CV_${index}`}
+                                  >
+                                    {ChucVu.map((chucvu) => (
+                                      <option
+                                        key={chucvu.IDChucVu}
+                                        value={chucvu.IDChucVu}
+                                      >
+                                        {chucvu.TenCV}
+                                      </option>
+                                    ))}
+                                  </Form.Select>
+                                ) : (
+                                  // Display the current Chức Vụ
+                                  item.TenCV
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
             <div className="update row">
               <div className="btns">

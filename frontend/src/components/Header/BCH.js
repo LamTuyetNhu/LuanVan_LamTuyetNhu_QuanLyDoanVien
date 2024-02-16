@@ -11,7 +11,8 @@ import {
 import { useState, useEffect } from "react";
 
 function Header() {
-  const { IDLop } = useParams();
+  // const { IDLop } = useParams();
+  const IDLop = localStorage.getItem("IDLop");
   const [TenLop, setTenLop] = useState([])
   useEffect(() => {
     fetchTenLop()
@@ -37,10 +38,10 @@ function Header() {
     <header>
       <div className="header">
         <div className="logo">
-          <NavLink to={`/ChiDoan/${IDLop}`}>
+          <NavLink to={`/ChiDoan`}>
             <img className="logo-img" src={huyhieu} alt="Huy hieu" />
           </NavLink>
-          <NavLink to={`/ChiDoan/${IDLop}`} className="logo-content">
+          <NavLink to={`/ChiDoan`} className="logo-content">
             Đoàn Thanh Niên
           </NavLink>
         </div>
@@ -69,15 +70,15 @@ function Header() {
             </a>
             <ul className="subnav">
               <li>
-                <NavLink to={`/ChiDoan/${IDLop}`}>Danh sách đoàn viên</NavLink>
+                <NavLink to={`/ChiDoan`}>Danh sách đoàn viên</NavLink>
               </li>
               <li>
-                <NavLink to={`/ChiDoan/${IDLop}/DanhSachBCH`}>
+                <NavLink to={`/ChiDoan/DanhSachBCH`}>
                   Danh sách BCH
                 </NavLink>
               </li>
               <li>
-              <NavLink to={`/ChiDoan/${IDLop}/DanhSachSinhVienNamTot`}>Sinh viên năm tốt</NavLink>
+              <NavLink to={`/ChiDoan/DanhSachSinhVienNamTot`}>Sinh viên năm tốt</NavLink>
               </li>
             </ul>
           </li>
@@ -88,16 +89,16 @@ function Header() {
             </a>
             <ul className="subnav">
               <li>
-              <NavLink to={`/ChiDoan/${IDLop}/DoanPhi`}>Đoàn phí</NavLink>
+              <NavLink to={`/ChiDoan/DoanPhi`}>Đoàn phí</NavLink>
               </li>
               <li>
-                <a>Đánh giá và xếp loại đoàn viên</a>
+              <NavLink to={`/ChiDoan/DanhGiaDoanVien`}>Đánh giá và xếp loại đoàn viên</NavLink>
               </li>
             </ul>
           </li>
           <li className="nav-item">
 
-            <NavLink to={`/ChiDoan/${IDLop}/HoatDong`}>HOẠT ĐỘNG</NavLink>
+            <NavLink to={`/ChiDoan/HoatDong`}>HOẠT ĐỘNG</NavLink>
 
           </li>
         </ul>

@@ -14,7 +14,9 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const ChiTietHoatDong = (props) => {
-  const { IDLop, IDHoatDong } = useParams();
+  const {  IDHoatDong } = useParams();
+  const IDLop = localStorage.getItem("IDLop");
+
   const [HoatDong, setHoatDong] = useState([]);
 
   useEffect(() => {
@@ -106,7 +108,7 @@ const ChiTietHoatDong = (props) => {
           <br />
           <div className="btns">
             <button className="allcus-button" type="submit">
-              <NavLink to={`/ChiDoan/${IDLop}/HoatDong`} className="navlink">
+              <NavLink to={`/ChiDoan/HoatDong`} className="navlink">
                 <FontAwesomeIcon icon={faBackward} />
               </NavLink>
             </button>

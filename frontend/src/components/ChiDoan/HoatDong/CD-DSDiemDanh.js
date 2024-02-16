@@ -10,7 +10,9 @@ import {
 } from "../../../services/apiService";
 
 const DiemDanh = (props) => {
-  const { IDLop } = useParams();
+  // const { IDLop } = useParams();
+  const IDLop = localStorage.getItem("IDLop");
+
 
   const [DSDiemDanh, setDSDiemDanh] = useState([]);
   const [TenHoatDong, setTenHoatDong] = useState([]);
