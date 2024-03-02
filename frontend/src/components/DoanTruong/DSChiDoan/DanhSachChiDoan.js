@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import { useNavigate } from "react-router-dom";
 
-
 import DeleteSuccess from "../../Modal/DeleteSuccess";
 import DeleteConfirmationModal from "../../Modal/DeleteConfirmationModal";
 import {
@@ -18,49 +17,52 @@ import {
   faChevronLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import {
-  getAllChiDoan,
+  getAllChiDoanCT,
   searchChiDoan,
-  searchManyDoanVien,
+  searchManyInfo,
   getKhoa,
   XoaChiDoan,
 } from "../../../services/apiService";
 
 const DanhSachChiDoan = (props) => {
+  const IDTruong = localStorage.getItem("IDTruong");
+
   const [DSChiDoan, setListChiDoan] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedIDLop, setSelectedIDLop] = useState(null);
   const [DSKhoa, setListKhoa] = useState([]);
+  const [khoa, setChoiceKhoa] = useState(46);
 
   const token = localStorage.getItem("token");
   const [pageSize, setPageSize] = useState(5);
-
-  const [searchData, setSearchData] = useState({
-    MaLop: "",
-    TenLop: "",
-    Khoa: "",
-    ttLop: "",
-  });
-
-  const [searchMany, setsearchMany] = useState({
-    info: ""
-  });
 
   const changePage = (newPage) => {
     setCurrentPage(newPage);
   };
 
   const navigate = useNavigate();
-
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
+  
   useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
     fetchDSChiDoan();
     fetchDSKhoa();
     fetchAllData();
-  }, [currentPage, totalPages]);
+  }, [currentPage, totalPages, khoa, IDTruong]);
 
   const fetchDSChiDoan = async () => {
     try {
-      let res = await getAllChiDoan(currentPage);
+      let res = await getAllChiDoanCT(IDTruong, currentPage, khoa);
 
       if (res.status === 200) {
         setListChiDoan(res.data.dataCD);
@@ -103,6 +105,8 @@ const DanhSachChiDoan = (props) => {
         ...searchData,
         MaLop: trimmedMaLop,
         TenLop: trimmedTenLop,
+        Khoa: khoa,
+        IDTruong: IDTruong,
       }); // Assuming you have implemented the search API
       console.log(res);
       if (res.status === 200) {
@@ -118,7 +122,7 @@ const DanhSachChiDoan = (props) => {
   const handleManySearch = async () => {
     try {
       const trimmedInfo = searchMany.info.trim().toLowerCase();
-      let res = await searchManyDoanVien({trimmedInfo}); // Assuming you have implemented the search API
+      let res = await searchManyInfo({ trimmedInfo, IDTruong }); // Assuming you have implemented the search API
       console.log(res);
       if (res.status === 200) {
         setListChiDoan(res.data.dataCD);
@@ -153,7 +157,7 @@ const DanhSachChiDoan = (props) => {
 
       // Lặp qua tất cả các trang
       for (let page = 1; page <= totalPages; page++) {
-        let res = await getAllChiDoan(page);
+        let res = await getAllChiDoanCT(IDTruong, page, khoa);
 
         if (res.status === 200) {
           // Tích hợp dữ liệu từ trang hiện tại vào mảng
@@ -170,6 +174,22 @@ const DanhSachChiDoan = (props) => {
       console.error("Lỗi khi gọi API:", error.message);
     }
   };
+
+  const handleKhoaChange = (e) => {
+    const selectedKhoa = e.target.value;
+    setChoiceKhoa(selectedKhoa);
+  };
+
+  const [searchData, setSearchData] = useState({
+    MaLop: "",
+    TenLop: "",
+    Khoa: khoa,
+    ttLop: "",
+  });
+
+  const [searchMany, setsearchMany] = useState({
+    info: "",
+  });
 
   const exportToExcel = () => {
     // Tạo một mảng chứa dữ liệu bạn muốn xuất
@@ -224,11 +244,29 @@ const DanhSachChiDoan = (props) => {
     navigate(`/BCH-DoanTruong/ChiTiet`);
   };
 
-
   return (
     <>
       <div className="container-fluid app__content">
-        <h5 className="text-center">Danh Sách Chi Đoàn</h5>
+        <div className="namhoc-center">
+          <h5 className="text-center">Danh Sách Chi Đoàn</h5>
+          <div className="searchDV-input">
+            Khóa:
+            <select
+              type="text"
+              className="search_name"
+              value={khoa}
+              onChange={handleKhoaChange}
+            >
+              {DSKhoa.map((khoa, index) => {
+                return (
+                  <option key={index} value={khoa.khoa}>
+                    {khoa.khoa}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+        </div>
         <div className="searchDV laptop">
           <div className="">
             <div className="searchDV-input">
@@ -252,26 +290,6 @@ const DanhSachChiDoan = (props) => {
                   setSearchData({ ...searchData, TenLop: e.target.value });
                 }}
               />
-            </div>
-            <div className="searchDV-input">
-              <select
-                className="search_name"
-                value={searchData.Khoa}
-                onChange={(e) =>
-                  setSearchData({ ...searchData, Khoa: e.target.value })
-                }
-              >
-                <option value="" disabled selected>
-                  Chọn khóa
-                </option>
-                {DSKhoa.map((khoa, index) => {
-                  return (
-                    <option key={index} value={khoa.khoa}>
-                      {khoa.khoa}
-                    </option>
-                  );
-                })}
-              </select>
             </div>
             <div className="searchDV-input">
               <select
@@ -300,16 +318,27 @@ const DanhSachChiDoan = (props) => {
               </button>
             </NavLink>
             <div>
-
-            <button className="formatButton" onClick={exportToExcel}>
-              <FontAwesomeIcon icon={faCloudArrowDown} />
-            </button>
-
+              <button className="formatButton" onClick={exportToExcel}>
+                <FontAwesomeIcon icon={faCloudArrowDown} />
+              </button>
             </div>
           </div>
         </div>
 
         <div className="searchDV tablet-mobile">
+          <div className="searchDV-Right">
+            <NavLink to="/BCH-DoanTruong/ThemMoi-ChiDoan">
+              <button className="formatButton">
+                {" "}
+                <FontAwesomeIcon icon={faPlus} />
+              </button>
+            </NavLink>
+            <div>
+              <button className="formatButton" onClick={exportToExcel}>
+                <FontAwesomeIcon icon={faCloudArrowDown} />
+              </button>
+            </div>
+          </div>
           <div className="">
             <div className="searchDV-input">
               <input
@@ -318,28 +347,13 @@ const DanhSachChiDoan = (props) => {
                 placeholder="Tìm theo mã, tên, khóa"
                 value={searchMany.info}
                 onChange={(e) => {
-                  setsearchMany({info: e.target.value });
+                  setsearchMany({ info: e.target.value });
                 }}
               />
             </div>
             <button className="formatButton" onClick={handleManySearch}>
               <FontAwesomeIcon icon={faMagnifyingGlass} />
             </button>
-          </div>
-          <div className="buttonSearch">
-            <NavLink to="/BCH-DoanTruong/ThemMoi-ChiDoan">
-              <button className="formatButton">
-                {" "}
-                <FontAwesomeIcon icon={faPlus} />
-              </button>
-            </NavLink>
-            <div>
-
-            <button className="formatButton" onClick={exportToExcel}>
-              <FontAwesomeIcon icon={faCloudArrowDown} />
-            </button>
-
-            </div>
           </div>
         </div>
 
@@ -366,7 +380,9 @@ const DanhSachChiDoan = (props) => {
                   return (
                     <tr key={`table-chidoan-${index}`} className="tableRow">
                       <td className=" col-center">{stt}</td>
-                      <td className="mb-tableItem mb-tableItem1">{item.MaLop}</td>
+                      <td className="mb-tableItem mb-tableItem1">
+                        {item.MaLop}
+                      </td>
                       <td className="">{item.TenLop}</td>
                       <td className="">{item.EmailLop}</td>
 
@@ -381,18 +397,24 @@ const DanhSachChiDoan = (props) => {
                           : "Ngừng hoạt động"}
                       </td>
                       <td className="btnOnTable1">
-                          <button className="btnOnTable" onClick={() => handleViewButtonClick(item.IDLop)}>
-                            <FontAwesomeIcon icon={faEye} />
-                          </button>
-                      </td>
-                      <td className="btnOnTable1">
-                          <button className="btnOnTable" onClick={() => handleEditButtonClick(item.IDLop)}>
-                            <FontAwesomeIcon icon={faPenToSquare} />
-                          </button>
+                        <button
+                          className="btnOnTable"
+                          onClick={() => handleViewButtonClick(item.IDLop)}
+                        >
+                          <FontAwesomeIcon icon={faEye} />
+                        </button>
                       </td>
                       <td className="btnOnTable1">
                         <button
-                          className="btnOnTable"
+                          className="btnOnTable clcapnhat"
+                          onClick={() => handleEditButtonClick(item.IDLop)}
+                        >
+                          <FontAwesomeIcon icon={faPenToSquare} />
+                        </button>
+                      </td>
+                      <td className="btnOnTable1">
+                        <button
+                          className="btnOnTable mauxoa"
                           onClick={() => {
                             setSelectedIDLop(item.IDLop);
                             setShowModal(true);
@@ -482,7 +504,6 @@ const DanhSachChiDoan = (props) => {
         </div>
       )}
 
-     
       <DeleteConfirmationModal
         show={showModal}
         onHide={() => setShowModal(false)}

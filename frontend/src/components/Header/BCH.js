@@ -1,6 +1,6 @@
 import { NavLink, useParams  } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import { faChevronDown, faBars } from "@fortawesome/free-solid-svg-icons";
 
 import huyhieu from "../../assets/huyhieu.png";
 import logo from "../../assets/logo.jpg";
@@ -11,7 +11,6 @@ import {
 import { useState, useEffect } from "react";
 
 function Header() {
-  // const { IDLop } = useParams();
   const IDLop = localStorage.getItem("IDLop");
   const [TenLop, setTenLop] = useState([])
   useEffect(() => {
@@ -24,7 +23,7 @@ function Header() {
       console.log(res);
 
       if (res.status === 200) {
-        setTenLop(res.data.dataCD.MaLop)
+        setTenLop(res.data.dataCD.TenLop)
 
       } else {
         console.error("Lỗi khi gọi API:", res.statusText);
@@ -34,9 +33,35 @@ function Header() {
     }
   };
 
+  const [isMenuOpen, setMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setMenuOpen(!isMenuOpen);
+  };
+
+  const closeMenu = () => {
+    setMenuOpen(false);
+  };
+
+  useEffect(() => {
+    document.addEventListener("click", closeMenu);
+
+    return () => {
+      document.removeEventListener("click", closeMenu);
+    };
+  }, []);
+
+  const handleHeaderClick = (e) => {
+    e.stopPropagation();
+  };
+
+  const handleLogout = () => {
+    localStorage.clear();
+  };
+
   return (
     <header>
-      <div className="header">
+      <div className={`header ${isMenuOpen ? "menu-open" : ""}`}>
         <div className="logo">
           <NavLink to={`/ChiDoan`}>
             <img className="logo-img" src={huyhieu} alt="Huy hieu" />
@@ -46,7 +71,7 @@ function Header() {
           </NavLink>
         </div>
 
-        <div className="flex">
+        <div className="flex flex-mobile">
           <img className="logo-img1" src={logo} alt="logo-dtn" />
 
           <div className="username">
@@ -54,7 +79,25 @@ function Header() {
             <div className="header__cart-list">
               <ul className="header__cart-list-item">
                 <li className="header__cart-item">
-                  <a href="/" className="header__cart-item-info">Đăng xuất</a>
+                  <NavLink
+                    to="/ChiDoan/ThongTinCaNhan"
+                    className="header__cart-item-info"
+                  >
+                    Trang cá nhân
+                  </NavLink>
+                </li>
+                <li className="header__cart-item">
+                  <NavLink
+                    to="/ChiDoan/DoiMatKhau"
+                    className="header__cart-item-info"
+                  >
+                    Đổi mật khẩu
+                  </NavLink>
+                </li>
+                <li className="header__cart-item">
+                  <NavLink to="/" className="header__cart-item-info "  onClick={handleLogout}>
+                    Đăng xuất 
+                  </NavLink>
                 </li>
               </ul>
             </div>
@@ -62,7 +105,15 @@ function Header() {
         </div>
       </div>
 
-      <div className="contentHeader">
+      <div className={`contentHeader contentHeaderMb ${
+          isMenuOpen ? "menu-open" : ""
+        }`}
+        onClick={handleHeaderClick}>
+          <FontAwesomeIcon
+          icon={faBars}
+          className="menu-icon"
+          onClick={toggleMenu}
+        />
         <ul className="nav">
           <li className="nav-item">
             <a>
@@ -70,15 +121,15 @@ function Header() {
             </a>
             <ul className="subnav">
               <li>
-                <NavLink to={`/ChiDoan`}>Danh sách đoàn viên</NavLink>
+                <NavLink to={`/ChiDoan`} onClick={closeMenu}>Danh sách đoàn viên</NavLink>
               </li>
               <li>
-                <NavLink to={`/ChiDoan/DanhSachBCH`}>
+                <NavLink to={`/ChiDoan/DanhSachBCH`} onClick={closeMenu}>
                   Danh sách BCH
                 </NavLink>
               </li>
               <li>
-              <NavLink to={`/ChiDoan/DanhSachSinhVienNamTot`}>Sinh viên năm tốt</NavLink>
+              <NavLink to={`/ChiDoan/DanhSachSinhVienNamTot`} onClick={closeMenu}>Sinh viên năm tốt</NavLink>
               </li>
             </ul>
           </li>
@@ -89,16 +140,16 @@ function Header() {
             </a>
             <ul className="subnav">
               <li>
-              <NavLink to={`/ChiDoan/DoanPhi`}>Đoàn phí</NavLink>
+              <NavLink to={`/ChiDoan/DoanPhi`} onClick={closeMenu}>Đoàn phí</NavLink>
               </li>
               <li>
-              <NavLink to={`/ChiDoan/DanhGiaDoanVien`}>Đánh giá và xếp loại đoàn viên</NavLink>
+              <NavLink to={`/ChiDoan/DanhGiaDoanVien`} onClick={closeMenu}>Đánh giá và xếp loại đoàn viên</NavLink>
               </li>
             </ul>
           </li>
           <li className="nav-item">
 
-            <NavLink to={`/ChiDoan/HoatDong`}>HOẠT ĐỘNG</NavLink>
+            <NavLink to={`/ChiDoan/HoatDong`} onClick={closeMenu}>HOẠT ĐỘNG</NavLink>
 
           </li>
         </ul>

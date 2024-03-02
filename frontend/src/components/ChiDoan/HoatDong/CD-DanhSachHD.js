@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import * as XLSX from "xlsx";
 import { format } from "date-fns";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 import {
   faEye,
@@ -14,9 +14,11 @@ import {
   namhoc,
   laydshoatdongcualop,
   searchHoatDong,
+  searchManyInfoHD
 } from "../../../services/apiService";
 
 const DanhSachHoatDong = (props) => {
+  const navigate = useNavigate();
   // const { IDLop } = useParams()
   const IDLop = localStorage.getItem("IDLop");
 
@@ -26,7 +28,19 @@ const DanhSachHoatDong = (props) => {
   const [idnamhoc, setIDNamHoc] = useState(1);
   const [NamHoc, setNamHoc] = useState([]);
 
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
+
   useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
     fetchDSHoatDong();
     fetchDSNamHoc();
   }, [IDLop, idnamhoc]);
@@ -98,6 +112,26 @@ const DanhSachHoatDong = (props) => {
     setIDNamHoc(selectedIDNamHoc);
   };
 
+  const [searchMany, setsearchMany] = useState({
+    info: "",
+  });
+
+  const handleManySearch = async () => {
+    try {
+      const trimmedInfo = searchMany.info.trim().toLowerCase();
+      let res = await searchManyInfoHD({ trimmedInfo, 
+        IDNamHoc: idnamhoc }); // Assuming you have implemented the search API
+      console.log(res);
+      if (res.status === 200) {
+        setDSHoatDong(res.data.dataHD);
+      } else {
+        console.error("Lỗi khi tìm kiếm:", res.statusText);
+      }
+    } catch (error) {
+      console.error("Lỗi khi tìm kiếm:", error.message);
+    }
+  };
+
   return (
     <>
       <div className="container-fluid app__content">
@@ -121,8 +155,9 @@ const DanhSachHoatDong = (props) => {
             </select>
           </div>
         </div>
+        
         <div className="search">
-          <div className="searchDV">
+          <div className="searchDV laptop">
             <div className="">
               <div className="searchDV-input">
                 <input
@@ -188,6 +223,27 @@ const DanhSachHoatDong = (props) => {
             </div>
 
           </div>
+
+          <div className="searchDV tablet-mobile">
+            <div className="">
+              <div className="searchDV-input">
+                <input
+                  type="text"
+                  className="search_name"
+                  placeholder="Tìm tên hoạt động"
+                  value={searchMany.info}
+                onChange={(e) => {
+                  setsearchMany({ info: e.target.value });
+                }}
+                />
+              </div>
+              <button className="formatButton" onClick={handleManySearch}>
+                {" "}
+                <FontAwesomeIcon icon={faMagnifyingGlass} />
+              </button>
+            </div>
+
+          </div>
         </div>
 
         <div className="listDV">
@@ -196,7 +252,7 @@ const DanhSachHoatDong = (props) => {
               <thead>
                 <tr>
                   <th className="table-item">STT</th>
-                  <th className="table-item">Tên hoạt động</th>
+                  <th className="table-item mb-tableItem">Tên hoạt động</th>
                   <th>Ngày ban hành</th>
                   <th>Ngày bắt đầu</th>
 
@@ -213,7 +269,7 @@ const DanhSachHoatDong = (props) => {
                     return (
                       <tr key={`table-hoatdong-${index}`} className="tableRow">
                         <td className="col-center">{index + 1}</td>
-                        <td className="">{item.TenHoatDong}</td>
+                        <td className="mb-tableItem mb-tableItem1">{item.TenHoatDong}</td>
                         <td className="col-center">
                           {format(new Date(item.NgayTao), "dd/MM/yyyy")}
                         </td>

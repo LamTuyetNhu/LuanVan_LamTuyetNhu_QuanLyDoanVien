@@ -1,8 +1,10 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import Form from "react-bootstrap/Form";
 import ModalSuccess from "../../Modal/ModalSuccess";
+import DeleteSuccess from "../../Modal/DeleteSuccess";
+import DeleteConfirmationModal from "../../Modal/DeleteConfirmationModal";
 import axios from "axios";
 
 import {
@@ -10,6 +12,8 @@ import {
   faSave,
   faEdit,
   faCamera,
+  faTrash,
+  faX,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   chucvu,
@@ -17,18 +21,24 @@ import {
   LayDanToc,
   layDSChucVuDoanVien,
   laytendoanvien,
+  XoaDoanVien,
+  XoaChiTietDoanVien,
+  layDSDanhGiaDoanVien,
 } from "../../../services/apiService";
 
 const DoanVien = (props) => {
   const IDDoanVien = localStorage.getItem("IDDoanVien");
+  const navigate = useNavigate();
 
   const [DoanVien, setDoanVien] = useState([]);
   const [CVDoanVien, setCVDoanVien] = useState([]);
+  const [DGDoanVien, setDGDoanVien] = useState([]);
 
   const [DanToc, setDanToc] = useState([]);
   const [TonGiao, setTonGiao] = useState([]);
   const [ChucVu, setChucVu] = useState([]);
   const [listIDChucVu, setListIDChucVu] = useState([]);
+  const [listIDDanhGia, setListIDDanhGia] = useState([]);
 
   const [editedDoanVien, seteditedDoanVien] = useState({});
   const [isEditing, setIsEditing] = useState(false);
@@ -37,13 +47,41 @@ const DoanVien = (props) => {
   const [image, setImage] = useState("");
   const [previewImage, setPreviewImage] = useState("");
 
+  const [showModal, setShowModal] = useState(false);
+  const [showModal1, setShowModal1] = useState(false);
+  const [showModal2, setShowModal2] = useState(false);
+
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
+
   useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
     layMotDoanVien();
     fetchChucVu();
     fetchTonGiao();
     fetchDanToc();
     DSChucVuDoanVien();
+    DSDanhGiaDoanVien();
   }, [IDDoanVien]);
+
+  const handleDelete = async () => {
+    try {
+      await XoaDoanVien(IDDoanVien);
+      setShowModal(false);
+      setShowModal1(true);
+      console.log("Hoạt động đã được xóa thành công!");
+    } catch (error) {
+      console.error("Lỗi khi xóa hoạt động:", error);
+    }
+  };
 
   const layMotDoanVien = async () => {
     try {
@@ -64,7 +102,7 @@ const DoanVien = (props) => {
       console.error("Lỗi khi gọi API:", error.message);
     }
   };
-  
+
   const DSChucVuDoanVien = async () => {
     try {
       let res = await layDSChucVuDoanVien(IDDoanVien);
@@ -73,6 +111,22 @@ const DoanVien = (props) => {
         // Assuming dataDV contains roles (ChucVu)
         setCVDoanVien(dataDV);
         setListIDChucVu(dataDV.map((item) => item.IDChucVu));
+      } else {
+        console.error("Lỗi khi gọi API:", res.statusText);
+      }
+    } catch (error) {
+      console.error("Lỗi khi gọi API:", error.message);
+    }
+  };
+
+  const DSDanhGiaDoanVien = async () => {
+    try {
+      let res = await layDSDanhGiaDoanVien(IDDoanVien);
+      if (res.status === 200) {
+        const { dataDV } = res.data;
+        // Assuming dataDV contains roles (ChucVu)
+        setDGDoanVien(dataDV);
+        setListIDDanhGia(dataDV.map((item) => item.IDDanhGia));
       } else {
         console.error("Lỗi khi gọi API:", res.statusText);
       }
@@ -166,7 +220,7 @@ const DoanVien = (props) => {
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-  
+
     if (id.startsWith("CV_")) {
       // Handle changes in the table (Chức Vụ)
       const index = parseInt(id.split("_")[1]);
@@ -179,7 +233,7 @@ const DoanVien = (props) => {
       }));
     }
   };
-  
+
   const handleToggleEdit = () => {
     setIsEditing((prevIsEditing) => !prevIsEditing);
   };
@@ -207,86 +261,66 @@ const DoanVien = (props) => {
     );
   };
 
-const handleChangeChucVu = (e, index) => {
-  const { value } = e.target;
+  const handleChangeChucVu = (e, index) => {
+    const { value } = e.target;
 
-  // Update the Chức Vụ in the current row of CVDoanVien
-  setCVDoanVien((prevCV) =>
-    prevCV.map((item, i) =>
-      i === index ? { ...item, IDChucVu: value } : item
-    )
-  );
+    // Update the Chức Vụ in the current row of CVDoanVien
+    setCVDoanVien((prevCV) =>
+      prevCV.map((item, i) =>
+        i === index ? { ...item, IDChucVu: value } : item
+      )
+    );
 
-  // Update the list of IDChucVu
-  setListIDChucVu((prevList) => {
-    const updatedList = [...prevList];
-    updatedList[index] = value;
-    return updatedList;
-  });
+    // Update the list of IDChucVu
+    setListIDChucVu((prevList) => {
+      const updatedList = [...prevList];
+      updatedList[index] = value;
+      return updatedList;
+    });
 
-  // Update editedDoanVien with the updated list of IDChucVu
-  seteditedDoanVien((prevData) => ({
-    ...prevData,
-    IDChucVu: [...listIDChucVu],
-  }));
-};
+    // Update editedDoanVien with the updated list of IDChucVu
+    seteditedDoanVien((prevData) => ({
+      ...prevData,
+      IDChucVu: [...listIDChucVu],
+    }));
+  };
 
-  
   const handleSaveChanges = async (e) => {
     e.preventDefault();
 
     console.log("editedDoanVien:", editedDoanVien);
     const newErrors = {
-      Email:
-        !editedDoanVien.Email
-          ? "Vui lòng nhập Email"
-          : !validateEmail(editedDoanVien.Email)
-          ? "Email không hợp lệ!"
-          : "",
-      HoTen:
-        !editedDoanVien.HoTen
-          ? "Vui lòng nhập họ tên"
-          : "",
-      MSSV:
-        !editedDoanVien.MSSV
-          ? "Vui lòng nhập MSSV"
-          : "",
-      SoDT:
-        !editedDoanVien.SoDT
-          ? "Vui lòng nhập số điện thoại"
-          : !validatePhoneNumber(editedDoanVien.SoDT)
-          ? "Số điện thoại không hợp lệ!"
-          : "",
-      QueQuan:
-        !editedDoanVien.QueQuan
-          ? "Vui lòng nhập quê quán"
-          : "",
+      Email: !editedDoanVien.Email
+        ? "Vui lòng nhập Email"
+        : !validateEmail(editedDoanVien.Email)
+        ? "Email không hợp lệ!"
+        : "",
+      HoTen: !editedDoanVien.HoTen ? "Vui lòng nhập họ tên" : "",
+      MSSV: !editedDoanVien.MSSV ? "Vui lòng nhập MSSV" : "",
+      SoDT: !editedDoanVien.SoDT
+        ? "Vui lòng nhập số điện thoại"
+        : !validatePhoneNumber(editedDoanVien.SoDT)
+        ? "Số điện thoại không hợp lệ!"
+        : "",
+      QueQuan: !editedDoanVien.QueQuan ? "Vui lòng nhập quê quán" : "",
       GioiTinh:
         editedDoanVien.GioiTinh === undefined || editedDoanVien.GioiTinh === ""
           ? "Vui lòng nhập giới tính"
           : "",
-      NgaySinh:
-        !editedDoanVien.NgaySinh
-          ? "Vui lòng nhập ngày sinh"
-          : !validateNgay(editedDoanVien.NgaySinh)
-          ? "Ngày định dạng là dd/mm/yyyy"
-          : "",
+      NgaySinh: !editedDoanVien.NgaySinh
+        ? "Vui lòng nhập ngày sinh"
+        : !validateNgay(editedDoanVien.NgaySinh)
+        ? "Ngày định dạng là dd/mm/yyyy"
+        : "",
 
-      NgayVaoDoan:
-        !editedDoanVien.NgayVaoDoan
-          ? "Vui lòng nhập ngày vào đoàn"
-          : !validateNgay(editedDoanVien.NgayVaoDoan)
-          ? "Ngày định dạng là dd/mm/yyyy"
-          : "",
+      NgayVaoDoan: !editedDoanVien.NgayVaoDoan
+        ? "Vui lòng nhập ngày vào đoàn"
+        : !validateNgay(editedDoanVien.NgayVaoDoan)
+        ? "Ngày định dạng là dd/mm/yyyy"
+        : "",
 
-      IDDanToc:
-        !editedDoanVien.IDDanToc 
-          ? "Vui lòng nhập tên dân tộc"
-          : "",
-      IDTonGiao:
-        !editedDoanVien.IDTonGiao 
-          ? "Vui lòng nhập tên tôn giáo"
-          : "",
+      IDDanToc: !editedDoanVien.IDDanToc ? "Vui lòng nhập tên dân tộc" : "",
+      IDTonGiao: !editedDoanVien.IDTonGiao ? "Vui lòng nhập tên tôn giáo" : "",
     };
 
     setErrors(newErrors);
@@ -329,6 +363,16 @@ const handleChangeChucVu = (e, index) => {
       setIsEditing(false);
     } catch (error) {
       console.error("Lỗi khi cập nhật dữ liệu:", error);
+    }
+  };
+
+  const handleDisplayButtonClick = async (itemID, IDDanhGia) => {
+    try {
+      await XoaChiTietDoanVien(itemID, IDDanhGia);
+      setCVDoanVien(prevCVDoanVien => prevCVDoanVien.filter(item => item.IDChiTietNamHoc !== itemID));
+      setShowModal2(true);
+    } catch (error) {
+      console.error("Lỗi khi xóa hoạt động:", error);
     }
   };
 
@@ -428,7 +472,6 @@ const handleChangeChucVu = (e, index) => {
                     aria-describedby="HoTen"
                     value={editedDoanVien.HoTen}
                     onChange={handleChange}
-
                   />
                 ) : (
                   <Form.Control
@@ -667,6 +710,8 @@ const handleChangeChucVu = (e, index) => {
                         <th className="table-item">STT</th>
                         <th className="table-item">Tên năm học</th>
                         <th>Chức vụ</th>
+                        <th>Phân loại</th>
+                        <th>Xóa năm học</th>
                       </tr>
                     </thead>
                     <tbody id="myTable">
@@ -683,10 +728,12 @@ const handleChangeChucVu = (e, index) => {
                               <td>
                                 {isEditing ? (
                                   <Form.Select
-                                  className="form-control"
-                                  value={listIDChucVu[index]}
-                                  onChange={(e) => handleChangeChucVu(e, index)}
-                                  id={`CV_${index}`}
+                                    className="form-control"
+                                    value={listIDChucVu[index]}
+                                    onChange={(e) =>
+                                      handleChangeChucVu(e, index)
+                                    }
+                                    id={`CV_${index}`}
                                   >
                                     {ChucVu.map((chucvu) => (
                                       <option
@@ -702,6 +749,32 @@ const handleChangeChucVu = (e, index) => {
                                   item.TenCV
                                 )}
                               </td>
+                              <td>
+                                {DGDoanVien[index]
+                                  ? DGDoanVien[index].PhanLoai === 1
+                                    ? "Xuất sắc"
+                                    : DGDoanVien[index].PhanLoai === 2
+                                    ? "Khá"
+                                    : DGDoanVien[index].PhanLoai === 3
+                                    ? "Trung bình"
+                                    : DGDoanVien[index].PhanLoai === 4
+                                    ? "Yếu kém"
+                                    : "Chưa phân loại"
+                                  : "Chưa có đánh giá"}
+                              </td>
+                              <td className="btnOnTable1">
+                                <button
+                                  className="btnOnTable mauxoa"
+                                  onClick={() =>
+                                    handleDisplayButtonClick(
+                                      item.IDChiTietNamHoc,
+                                      DGDoanVien[index].IDDanhGia
+                                    )
+                                  }
+                                >
+                                  <FontAwesomeIcon icon={faX} />
+                                </button>
+                              </td>
                             </tr>
                           );
                         })}
@@ -713,7 +786,10 @@ const handleChangeChucVu = (e, index) => {
             <div className="update row">
               <div className="btns">
                 <button className="allcus-button" type="submit">
-                  <NavLink to={`/BCH-DoanTruong/ChiTietChiDoan`} className="navlink">
+                  <NavLink
+                    to={`/BCH-DoanTruong/ChiTietChiDoan`}
+                    className="navlink"
+                  >
                     <FontAwesomeIcon icon={faBackward} />
                   </NavLink>
                 </button>
@@ -735,16 +811,34 @@ const handleChangeChucVu = (e, index) => {
                     <FontAwesomeIcon icon={faEdit} /> Cập nhật
                   </button>
                 )}
+                <button
+                  className="allcus-button button-error"
+                  type="button"
+                  onClick={() => setShowModal(true)}
+                >
+                  <FontAwesomeIcon icon={faTrash} />
+                </button>
               </div>
             </div>
           </div>
         </div>
       </div>
 
+      <DeleteConfirmationModal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        handleDelete={handleDelete}
+      />
+
+      <NavLink to={`/BCH-DoanTruong/ChiTietChiDoan`} className="navlink">
+        <DeleteSuccess show={showModal1} onHide={() => setShowModal1(false)} />
+      </NavLink>
+
       <ModalSuccess
         show={showModalUpdate}
         onHide={() => setShowModalUpdate(false)}
       />
+      <DeleteSuccess show={showModal2} onHide={() => setShowModal2(false)} />
     </>
   );
 };

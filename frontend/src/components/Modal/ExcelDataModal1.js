@@ -41,27 +41,9 @@ const ExcelDataModal = ({ excelData, onClose, onConfirm, selectedFile  }) => {
     return (
       <thead>
         <tr>
-          <div className="searchDV-input">
-            <select
-              type="text"
-              className="search_name"
-              value={idnamhoc}
-              onChange={handleNamHocChange}
-            >
-              {DSNamHoc.map((item, index) => {
-                return (
-                  <option key={index} value={item.IDNamHoc}>
-                    {item.TenNamHoc}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-        </tr>
-        <tr>
-          <th>MSSV</th>
+          <th className="mb-tableItem">MSSV</th>
           <th>Họ Tên</th>
-          <th>Email</th>
+          <th className="NoneMoblie">Email</th>
         </tr>
       </thead>
     );
@@ -72,12 +54,13 @@ const ExcelDataModal = ({ excelData, onClose, onConfirm, selectedFile  }) => {
       <tbody>
         {excelData.slice(0, 10).map((data, index) => (
           <tr key={index}>
-            <td>{data.MSSV}</td>
+            <td className="mb-tableItem mb-tableItem1">{data.MSSV}</td>
             <td>{data.HoTen}</td>
-            <td>{data.Email}</td>
+            <td className="NoneMoblie">{data.Email}</td>
           </tr>
         ))}
       </tbody>
+      
     );
   };
 
@@ -96,6 +79,22 @@ const ExcelDataModal = ({ excelData, onClose, onConfirm, selectedFile  }) => {
       <Modal.Header closeButton>
         <Modal.Title>Dữ Liệu từ File Excel</Modal.Title>
       </Modal.Header>
+      <div className="searchDV-input">
+            <select
+              type="text"
+              className="search_name"
+              value={idnamhoc}
+              onChange={handleNamHocChange}
+            >
+              {DSNamHoc.map((item, index) => {
+                return (
+                  <option key={index} value={item.IDNamHoc}>
+                    {item.TenNamHoc}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
       <Modal.Body>
         <Table striped bordered hover>
           {renderTableHeader()}

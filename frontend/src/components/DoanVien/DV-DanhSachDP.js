@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import Form from "react-bootstrap/Form";
 import {
   faBell,
@@ -13,15 +13,28 @@ import { namhoc, laydsdoanphicuadoanvien } from "../../services/apiService";
 
 const DanhSachDoanPhi = (props) => {
   const IDDoanVien = localStorage.getItem("IDDoanVien");
+  const navigate = useNavigate();
 
   const [DSDoanPhi, setDSDoanPhi] = useState([]);
 
   const [idnamhoc, setIDNamHoc] = useState(1);
   const [NamHoc, setNamHoc] = useState([]);
 
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
+
   useEffect(() => {
     fetchDSDoanPhi();
     fetchDSNamHoc();
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
   }, [IDDoanVien, idnamhoc]);
 
   const fetchDSDoanPhi = async () => {

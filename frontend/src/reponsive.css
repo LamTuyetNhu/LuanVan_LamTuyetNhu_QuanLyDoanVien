@@ -105,7 +105,8 @@
 }
 
 /* tablet and mobile */
-@media (max-width: 1023px) {
+@media (max-width: 1096px) {
+  .NoneMoblie,
   .laptop {
     display: none;
   }
@@ -145,4 +146,8 @@
     background-color: var(--white) !important; /* Màu nền cho cột cố định */
   }
 
+  .form-groupMK {
+    width: 100%;
+    margin: 0 auto;
+  }
 }

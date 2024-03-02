@@ -1,15 +1,10 @@
-import { NavLink, useParams } from "react-router-dom";
+import { NavLink, useParams, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import DeleteConfirmationModal from "../../Modal/DeleteConfirmationModal";
 import DeleteSuccess from "../../Modal/DeleteSuccess";
 import {
   faEye,
-  faPenToSquare,
-  faPlus,
-  faTrash,
-  faChevronRight,
-  faChevronLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   namhoc,
@@ -18,7 +13,7 @@ import {
 } from "../../../services/apiService";
 
 const DanhSachDoanPhi = (props) => {
-  // const { IDLop } = useParams();
+  const navigate = useNavigate();
   const IDLop = localStorage.getItem("IDLop");
 
   const [DSDoanPhi, setDSDoanPhi] = useState([]);
@@ -28,7 +23,19 @@ const DanhSachDoanPhi = (props) => {
   const [idnamhoc, setIDNamHoc] = useState(1);
   const [NamHoc, setNamHoc] = useState([]);
 
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
+
   useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
     fetchDSDoanPhi();
     fetchDSNamHoc();
   }, [IDLop, idnamhoc]);
@@ -53,11 +60,8 @@ const DanhSachDoanPhi = (props) => {
     try {
       let res = await namhoc();
       if (res.status === 200) {
-        // setListKhoa(res.data.dataNH); // Cập nhật state với danh sách khóa học
         const NamHocdata = res.data.dataNH;
-
-        // Kiểm tra nếu khoaData là mảng trước khi cập nhật state
-        if (Array.isArray(NamHocdata)) {
+if (Array.isArray(NamHocdata)) {
           setNamHoc(NamHocdata);
         } else {
           console.error("Dữ liệu khóa không hợp lệ:", NamHocdata);
@@ -104,7 +108,7 @@ const DanhSachDoanPhi = (props) => {
       <div className="container-fluid app__content">
         <div className="namhoc-center">
           <h5 className="text-center">Danh Sách Đoàn Phí</h5>
-          <div className="searchDV-input">
+          <div className="searchDV-input">Năm học:
             <select
               type="text"
               className="search_name"
@@ -121,28 +125,16 @@ const DanhSachDoanPhi = (props) => {
             </select>
           </div>
         </div>
-        {/* <div className="searchDV-Right">
-          <div className="buttonSearch">
-            <NavLink to={`/ChiDoan/${IDLop}/ThemMoiDoanPhi`}>
-              <button className="formatButton">
-                {" "}
-                <FontAwesomeIcon icon={faPlus} /> 
-              </button>
-            </NavLink>
-          </div>
-        </div> */}
 
         <div className="table-container">
           <table className="table table-striped">
             <thead>
               <tr>
                 <th className="table-item1">STT</th>
-                <th>Tên đoàn phí</th>
+                <th className="mb-tableItem">Tên đoàn phí</th>
                 <th>Năm học</th>
                 <th>Số tiền/Đoàn viên</th>
                 <th className="table-item2">Danh sách thu đoàn phí</th>
-                {/* <th className="table-item2">Cập nhật</th>
-                <th className="table-item2">Xóa</th> */}
               </tr>
             </thead>
             <tbody id="myTable">
@@ -152,7 +144,7 @@ const DanhSachDoanPhi = (props) => {
                   return (
                     <tr key={`table-chidoan-${index}`} className="tableRow">
                       <td className="col-center">{index + 1}</td>
-                      <td className="">{item.TenDoanPhi}</td>
+                      <td className="mb-tableItem mb-tableItem1" >{item.TenDoanPhi}</td>
                       <td className="col-center">{item.TenNamHoc}</td>
                       <td className="col-right">
                         {formatCurrency(item.SoTien)}

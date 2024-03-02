@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState, useRef } from "react";
 import { format } from "date-fns";
-import { NavLink } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Form from "react-bootstrap/Form";
 import { faSave } from "@fortawesome/free-solid-svg-icons";
 import { namhoc, KetQuaCuaMotDoanVien } from "../../services/apiService";
@@ -9,6 +9,7 @@ import axios from "axios";
 import ModalAddSuccess from "../Modal/ModalAddSuccess";
 
 const SinhVienNamTot = (props) => {
+  const navigate = useNavigate();
   const IDDoanVien = localStorage.getItem("IDDoanVien");
 
   const [idnamhoc, setNamHoc] = useState(1);
@@ -29,6 +30,16 @@ const SinhVienNamTot = (props) => {
     rl2,
     idnamhoc,
   });
+
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
+
   useEffect(() => {
     const $ = document.querySelector.bind(document);
     const $$ = document.querySelectorAll.bind(document);
@@ -57,6 +68,9 @@ const SinhVienNamTot = (props) => {
       };
     });
 
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
     fetchDSNamHoc();
     fetchDSKetQua();
   }, [IDDoanVien, idnamhoc]);
@@ -209,6 +223,12 @@ const SinhVienNamTot = (props) => {
     }
   }
 
+  const handleDSKetQuaClick = (namHoc) => {
+    localStorage.setItem("IDDoanVien", IDDoanVien);
+    localStorage.setItem("idnamhoc", namHoc);
+
+    navigate("/DoanVien/CapNhatDiem");
+  };
   return (
     <>
       <div className="container app__content">
@@ -218,10 +238,6 @@ const SinhVienNamTot = (props) => {
           <div className="tab-item active">
             <i className="tab-icon fas fa-code"></i>
             Tiêu chí đánh giá
-          </div>
-          <div className="tab-item active">
-            <i className="tab-icon fas fa-code"></i>
-            Nhập điểm năm học
           </div>
           <div className="tab-item">
             <i className="tab-icon fas fa-cog"></i>
@@ -419,108 +435,6 @@ const SinhVienNamTot = (props) => {
           </div>
           <div className="tab-pane">
             <div id="customerForm" className="formHD">
-              <div className="namhoc-center">
-                <div className="searchDV-input">
-                  {" "}
-                  Năm học:
-                  <select
-                    type="text"
-                    className="search_name"
-                    value={idnamhoc}
-                    onChange={handleNamHocChange}
-                  >
-                    {DSNamHoc.map((item, index) => {
-                      return (
-                        <option key={index} value={item.IDNamHoc}>
-                          {item.TenNamHoc}
-                        </option>
-                      );
-                    })}
-                  </select>
-                </div>
-              </div>
-              <div className="row formAdd margin-top">
-                <div className="form-group col-12 col-md-12 col-lg-6">
-                  <Form.Label htmlFor="hk1" className="lableFont">
-                    Điểm học kỳ 1
-                  </Form.Label>
-                  <Form.Control
-                    className="form-control"
-                    type="text"
-                    id="hk1"
-                    aria-describedby="hk1"
-                    value={hk1}
-                    onChange={(e) => setHK1(e.target.value)}
-                    // onChange={handleHK1Change}
-                  />
-                  <div className="error-message">{errors.hk1}</div>
-                </div>
-                <div className="form-group col-12 col-md-12 col-lg-6">
-                  <Form.Label htmlFor="hk2" className="lableFont">
-                    Điểm học kỳ 2
-                  </Form.Label>
-                  <Form.Control
-                    className="form-control"
-                    type="text"
-                    id="hk2"
-                    aria-describedby="hk2"
-                    value={hk2}
-                    onChange={(e) => setHK2(e.target.value)}
-
-                    // onChange={handleHK2Change}
-                  />
-                  <div className="error-message">{errors.hk2}</div>
-                </div>
-                <div className="form-group col-12 col-md-12 col-lg-6">
-                  <Form.Label htmlFor="rl1" className="lableFont">
-                    Điểm rèn luyện học kỳ 1
-                  </Form.Label>
-                  <Form.Control
-                    className="form-control"
-                    type="text"
-                    id="rl1"
-                    aria-describedby="rl1"
-                    value={rl1}
-                    onChange={(e) => setRL1(e.target.value)}
-
-                    // onChange={handleRL1Change}
-                  />
-                  <div className="error-message">{errors.rl1}</div>
-                </div>
-                <div className="form-group col-12 col-md-12 col-lg-6">
-                  <Form.Label htmlFor="rl2" className="lableFont">
-                    Điểm rèn luyện học kỳ 2
-                  </Form.Label>
-                  <Form.Control
-                    className="form-control"
-                    type="text"
-                    id="rl2"
-                    aria-describedby="rl2"
-                    value={rl2}
-                    onChange={(e) => setRL2(e.target.value)}
-
-                    // onChange={handleRL2Change}
-                  />
-                  <div className="error-message">{errors.rl2}</div>
-                </div>
-              </div>
-
-              <div className="update row">
-                <div className="btns">
-                  <>
-                    <button
-                      className="allcus-button"
-                      onClick={handleSaveChanges}
-                    >
-                      <FontAwesomeIcon icon={faSave} /> Lưu
-                    </button>
-                  </>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="tab-pane">
-            <div id="customerForm" className="formHD">
               <div className="row margin-top1">
                 {DSKetQua.length === 0 ? (
                   <div className=" ">
@@ -529,7 +443,7 @@ const SinhVienNamTot = (props) => {
                 ) : (
                   DSKetQua.map((ketqua, index) => (
                     <div className="col-lg-6 col-md-6 col-sm-12 mb-4 mx-auto">
-                      <div className="card card-opacity1 ">
+                      <div className="card card-opacity1 " onClick={() => handleDSKetQuaClick(ketqua.IDNamHoc)}>
                         <div className="card-body">
                           <div
                             className={`card-title card-title1 circle ${getClassForPhanLoai(

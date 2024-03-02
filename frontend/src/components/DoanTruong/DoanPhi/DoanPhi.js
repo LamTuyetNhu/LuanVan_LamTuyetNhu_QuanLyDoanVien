@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import DeleteConfirmationModal from "../../Modal/DeleteConfirmationModal";
@@ -19,32 +19,38 @@ import {
 } from "../../../services/apiService";
 
 const DanhSachDoanPhi = (props) => {
+  const navigate = useNavigate();
+  const IDTruong = localStorage.getItem("IDTruong");
+
   const [DSDoanPhi, setDSDoanPhi] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
 
   const [selectedIDDoanPhi, setSelectedIDDoanPhi] = useState(null);
 
   const [idnamhoc, setIDNamHoc] = useState(1);
   const [NamHoc, setNamHoc] = useState([]);
-
-  const changePage = (newPage) => {
-    setCurrentPage(newPage);
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
   };
-
   useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
     fetchDSDoanPhi();
     fetchDSNamHoc();
-  }, [currentPage, totalPages, idnamhoc]);
+  }, [idnamhoc, IDTruong]);
 
   const fetchDSDoanPhi = async () => {
     try {
-      let res = await layTatCaDSDoanPhi(currentPage, idnamhoc);
+      let res = await layTatCaDSDoanPhi(IDTruong, idnamhoc);
       console.log(res);
 
       if (res.status === 200) {
         setDSDoanPhi(res.data.dataDP);
-        setTotalPages(res.data.totalPages);
       } else {
         // Xử lý trường hợp lỗi
         console.error("Lỗi khi gọi API:", res.statusText);
@@ -82,19 +88,6 @@ const DanhSachDoanPhi = (props) => {
       minimumFractionDigits: 0,
     });
     return formatter.format(amount);
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  // Hàm xử lý khi nhấn nút sang trái
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
   };
 
   const [showModal, setShowModal] = useState(false);
@@ -155,10 +148,10 @@ const DanhSachDoanPhi = (props) => {
             <thead>
               <tr>
                 <th className="table-item1">STT</th>
-                <th>Tên đoàn phí</th>
+                <th className="mb-tableItem">Tên đoàn phí</th>
                 <th>Năm học</th>
                 <th>Số tiền/Đoàn viên</th>
-                <th className="table-item2">Danh sách thu đoàn phí</th>
+                <th className="table-item2">DS thu đoàn phí</th>
                 <th className="table-item2">Cập nhật</th>
                 <th className="table-item2">Xóa</th>
               </tr>
@@ -170,7 +163,7 @@ const DanhSachDoanPhi = (props) => {
                   return (
                     <tr key={`table-chidoan-${index}`} className="tableRow">
                       <td className="col-center">{index + 1}</td>
-                      <td className="">{item.TenDoanPhi}</td>
+                      <td className="mb-tableItem mb-tableItem1">{item.TenDoanPhi}</td>
                       <td className="col-center">{item.TenNamHoc}</td>
                       <td className="col-right">
                         {formatCurrency(item.SoTien)}
@@ -180,7 +173,7 @@ const DanhSachDoanPhi = (props) => {
                         <NavLink
                           to={`/BCH-DoanTruong/DoanPhi/ChiTietDoanPhi/${item.IDDoanPhi}/${item.IDNamHoc}`}
                         >
-                          <button className="btnOnTable ">
+                          <button className="btnOnTable">
                             <FontAwesomeIcon icon={faEye} />
                           </button>
                         </NavLink>
@@ -189,14 +182,14 @@ const DanhSachDoanPhi = (props) => {
                         <NavLink
                           to={`/BCH-DoanTruong/DoanPhi/ChiTiet/${item.IDDoanPhi}`}
                         >
-                          <button className="btnOnTable ">
+                          <button className="btnOnTable clcapnhat">
                             <FontAwesomeIcon icon={faPenToSquare} />
                           </button>
                         </NavLink>
                       </td>
                       <td className="btnOnTable1">
                         <button
-                          className="btnOnTable"
+                          className="btnOnTable mauxoa"
                           onClick={() => {
                             setSelectedIDDoanPhi(item.IDDoanPhi);
                             setShowModal(true);

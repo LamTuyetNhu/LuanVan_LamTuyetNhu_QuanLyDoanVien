@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
 import Form from "react-bootstrap/Form";
-import { NavLink } from "react-router-dom";
 import {
   LayMotHoatDong,
 } from "../../../services/apiService";
-import "react-toastify/dist/ReactToastify.css";
-import "react-datepicker/dist/react-datepicker.css";
-import { useParams } from "react-router-dom";
+import { useParams, NavLink, useNavigate } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 import {
   faBackward,
@@ -14,12 +12,26 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const ChiTietHoatDong = (props) => {
+  const navigate = useNavigate();
+
   const {  IDHoatDong } = useParams();
   const IDLop = localStorage.getItem("IDLop");
 
   const [HoatDong, setHoatDong] = useState([]);
 
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
+
   useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
     layMotHoatDong();
   }, [IDHoatDong]);
 

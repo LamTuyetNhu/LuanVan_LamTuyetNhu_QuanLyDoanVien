@@ -17,7 +17,8 @@ body {
   --color: rgb(0, 0, 146);
   --border: #e1e1e1;
   --red: hsl(0, 50%, 50%);
-  --capnhat: #eecfa1;
+  --capnhat: #ffa500;
+
 }
 
 html {
@@ -74,6 +75,11 @@ header {
   align-items: center;
   font-weight: 700;
   text-decoration: none;
+}
+
+.gachchan {
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 .img-heigh {
@@ -179,6 +185,10 @@ header {
   background-color: var(--rgba);
 }
 
+.pd-left {
+  padding-left: 6px;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -199,7 +209,7 @@ header {
   transform: translateX(-50%); /* Dịch chuyển về trái 50% để căn giữa */
   background-color: #fff;
   border-radius: 10px;
-  box-shadow: 0 1px 3.125em 0 rgb(0, 0, 0, 0.2);
+  box-shadow: 0 1px 10px var(--blue);
   display: none;
   animation: fadeIn ease-in 0.2s;
   cursor: default;
@@ -211,7 +221,7 @@ header {
 .header__cart-list::after {
   content: "";
   position: absolute;
-  right: 30%;
+  right: 37%;
   top: -32px;
   border-width: 20px 23px;
   border-style: solid;
@@ -229,7 +239,9 @@ header {
   align-items: center;
   position: relative;
   cursor: pointer;
-  font-size: 0.7em;
+  font-size: 0.7em;    
+  
+  padding: 0 25px;
 }
 
 .header__cart-item-info {
@@ -237,17 +249,22 @@ header {
   display: block;
   width: 100%;
   color: #000000b8;
-  padding: 8px 25px;
   white-space: nowrap;
-  font-size: 0.8em;
+  font-size: 0.7em;
   text-decoration: none;
+  padding: 7px 0;
+  
+  border-bottom: 1px solid #ccc;
 }
 
 .header__cart-item-info:hover {
-  color: #000000b8;
-  text-decoration: none;
+  color: var(--color);
+  text-decoration: none
 }
 
+.tableCK {
+  position: sticky;
+}
 /* Content */
 #app {
   background-color: var(--white);
@@ -303,13 +320,17 @@ header {
   justify-content: space-between;
 }
 
+.searchDV-mobile {
+  font-size: 1em;
+}
+
 .tablet-mobile {
   display: none;
 }
 
 .searchDV-Right {
   display: flex;
-  font-size: 1.2em;
+  font-size: 1em;
   position: relative;
   justify-content: end;
 }
@@ -319,6 +340,10 @@ header {
   position: relative;
   margin: 16px;
 }
+
+// .searchDV-inputMobile {
+//   width: 100% !important;
+// }
 
 .searchDV-input-small {
   font-size: 20px;
@@ -412,16 +437,16 @@ header {
 }
 
 .bgcapnhat {
-  background-color: var(--capnhat) !important;
+  background-color: #ffa500 !important;
 }
 
 .bgcapnhat:hover {
-  box-shadow: 0 0 1px var(--capnhat), 0 0 6px var(--capnhat),
-    0 0 18px var(--capnhat) !important;
+  box-shadow: 0 0 1px#ffa500, 0 0 6px #ffa500,
+    0 0 18px #ffa500 !important;
 }
 
 .clcapnhat {
-  color: var(--capnhat) !important;
+  color: #ffa500 !important;
 }
 
 .col-cusor {
@@ -433,15 +458,13 @@ header {
 }
 /* Table */
 .table-container {
-  // max-width: 100%;
-  // overflow-x: auto;
   color: var(--black);
   font-size: 1.2em;
   margin: 32px 0;
+  min-height: 250px;
 }
 
 .table {
-  height: auto;
   position: relative;
   width: 100%;
 }
@@ -541,9 +564,9 @@ header {
 }
 
 .form-group {
-  font-size: 1.4em;
+  font-size: 1.3em;
   position: relative;
-  margin-bottom: 2em;
+  margin-bottom: 1em;
 }
 
 .form-group input {
@@ -570,6 +593,11 @@ header {
   background-color: #fff;
   padding: 0 0.25rem;
   color: var(--color);
+}
+
+.form-groupMK {
+  width: 50%;
+  margin: 0 auto;
 }
 
 /* Add these styles to your CSS file */
@@ -691,6 +719,7 @@ header {
 .input-box input:focus ~ label,
 .input-box input:valid ~ label {
   top: -5px;
+  background: transparent;
 }
 
 .input-box input {
@@ -779,7 +808,7 @@ header {
 }
 
 .formHD {
-  min-height: 250px;
+  min-height: 350px;
   font-size: 1.3em;
   background-color: #fff !important;
 }
@@ -805,6 +834,10 @@ header {
 #IDNamHoc,
 #TenNamHoc1,
 #TenHoatDong,
+#TenTruong,
+#EmailTruong,
+#TenLop,
+#EmailLop,
 #NgayBatDau,
 #NgayHetHan,
 #NgayBanHanh,
@@ -1148,6 +1181,8 @@ header {
   display: flex;
   justify-content: center;
   position: relative;
+  font-size: 20px;
+
 }
 
 .tabs .line {
@@ -1161,9 +1196,9 @@ header {
   transition: all 0.2s ease;
 }
 .tab-item {
-  min-width: 80px;
+  // min-width: 80px;
   padding: 16px 20px 11px 20px;
-  font-size: 20px;
+  font-size: 32px;
   text-align: center;
   color: #c23564;
   background-color: #fff;
@@ -1293,17 +1328,16 @@ header {
 
 .strength-meter {
   display: flex;
-  margin-top: 5px;
+  margin-top: 10px;
 }
 
 .strength {
   position: relative;
-  width: 100px ;
+  width: 75px ;
 }
 
 .strength-bar {
   height: 10px;
-  // width: 25%;
   margin: 0 2px;
   border-radius: 30px;
   transition: background-color 0.3s;
@@ -1328,4 +1362,9 @@ header {
 
 .password-input-container input {
   padding-right: 30px; /* Đảm bảo khoảng trắng đủ để hiển thị icon */
+}
+
+.notfound {
+  display: block;
+  margin: auto;
 }

@@ -4,59 +4,12 @@ import { Modal, Button, Table } from "react-bootstrap";
 import { namhoc } from "../../services/apiService";
 
 const ExcelDataModal = ({ excelData, idnamhoc, onClose, onConfirm, selectedFile, DSNamHoc   }) => {
-  // const [idnamhoc, setNamHoc] = useState(1);
-  // const [DSNamHoc, setDSNamHoc] = useState([]);
-
-  // useEffect(() => {
-  //   fetchDSNamHoc();
-  // }, [idnamhoc]);
-
-  // const fetchDSNamHoc = async () => {
-  //   try {
-  //     let res = await namhoc();
-  //     if (res.status === 200) {
-  //       // setListKhoa(res.data.dataNH); // Cập nhật state với danh sách khóa học
-  //       const NamHocdata = res.data.dataNH;
-
-  //       // Kiểm tra nếu khoaData là mảng trước khi cập nhật state
-  //       if (Array.isArray(NamHocdata)) {
-  //         setDSNamHoc(NamHocdata);
-  //       } else {
-  //         console.error("Dữ liệu khóa không hợp lệ:", NamHocdata);
-  //       }
-  //     } else {
-  //       console.error("Lỗi khi gọi API:", res.statusText);
-  //     }
-  //   } catch (error) {
-  //     console.error("Lỗi khi gọi API:", error.message);
-  //   }
-  // };
-
-  // const handleNamHocChange = (e) => {
-  //   const selectedIDNamHoc = e.target.value;
-  //   setNamHoc(selectedIDNamHoc);
-  // };
 
   const renderTableHeader = () => {
     return (
       <thead>
         <tr>
           <div className="searchDV-input">
-            {/* <select
-              type="text"
-              className="search_name"
-              value={idnamhoc}
-              onChange={handleNamHocChange}
-            >
-              {DSNamHoc.map((item, index) => {
-                return (
-                  <option key={index} value={item.IDNamHoc}>
-                    {item.TenNamHoc}
-                  </option>
-                );
-              })}
-            </select> */}
-            {/* <span>Năm học: {idnamhoc}</span> */}
           </div>
         </tr>
         <tr>

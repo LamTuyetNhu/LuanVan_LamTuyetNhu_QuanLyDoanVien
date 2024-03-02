@@ -1,15 +1,19 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Modal from "../../Modal/Modal";
-import { faSave, faEdit } from "@fortawesome/free-solid-svg-icons";
+import * as XLSX from "xlsx";
+
+import { faSave, faEye, faCloudArrowDown } from "@fortawesome/free-solid-svg-icons";
 import {
   LayDSDiemDanh,
   SaveCheckboxStatesDiemDanh,
 } from "../../../services/apiService";
 
 const DiemDanh = (props) => {
+  const navigate = useNavigate();
+
   const [DSDiemDanh, setDSDiemDanh] = useState([]);
   const [TenHoatDong, setTenHoatDong] = useState([]);
   const [TenNamHoc, setTenNamHoc] = useState([]);
@@ -17,7 +21,19 @@ const DiemDanh = (props) => {
   const [checkboxStates, setCheckboxStates] = useState([]);
   const { IDHoatDong, IDNamHoc } = useParams();
 
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
+
   useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
     fetchDSDiemDanh();
   }, [IDHoatDong]);
 
@@ -88,6 +104,44 @@ const DiemDanh = (props) => {
     setIsErrorModal(false);
   };
 
+  const handleViewButtonClick = (itemID) => {
+    localStorage.setItem("IDLop", itemID);
+    navigate(`/BCH-DoanTruong/ChiTietHoatDong/DiemDanhChiDoan/${IDHoatDong}/${IDNamHoc}/DanhSachDiemDanhCuaChiDoan`);
+  };
+
+  const exportToExcel = () => {
+    try {
+      const filteredData = DSDiemDanh.map((item) => ({
+        'Mã chi đoàn': item.MaLop,
+        'Tên chi đoàn': item.TenLop,
+        'Khóa': item.Khoa,
+        'Điểm danh': item.Check === 1 ? 'X' : '',
+      }));
+  
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(filteredData);
+  
+      XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+  
+      const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  
+      const fileName = TenHoatDong; // Tên file sẽ là nội dung của thẻ h2, bạn có thể thay đổi theo yêu cầu
+  
+      // Tải file
+      const a = document.createElement('a');
+      document.body.appendChild(a);
+      a.style = 'display: none';
+      const url = window.URL.createObjectURL(data);
+      a.href = url;
+      a.download = `${fileName}.xlsx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Lỗi khi xuất Excel:', error.message);
+    }
+  };
+
   return (
     <>
       <div className="container-fluid app__content">
@@ -98,9 +152,11 @@ const DiemDanh = (props) => {
             <thead>
               <tr>
                 <th className="table-item1">STT</th>
+                <th className="mb-tableItem">Mã chi đoàn</th>
                 <th>Tên chi đoàn</th>
                 <th>Khóa</th>
                 <th>Điểm danh</th>
+                <th>DS điểm danh</th>
               </tr>
             </thead>
             <tbody id="myTable">
@@ -110,6 +166,7 @@ const DiemDanh = (props) => {
                   return (
                     <tr key={`table-chidoan-${index}`} className="tableRow">
                       <td className="col-center">{index + 1}</td>
+                      <td className="mb-tableItem mb-tableItem1">{item.MaLop}</td>
                       <td className="">{item.TenLop}</td>
                       <td className="col-center">{item.Khoa}</td>
                       <td className="col-center">
@@ -119,6 +176,14 @@ const DiemDanh = (props) => {
                           onChange={() => handleCheckboxChange(index)}
                         />
                       </td>
+                      <td className="col-center" onClick={() =>
+                              handleViewButtonClick(item.IDLop)
+                            }>
+                              <button className="btnOnTable ">
+
+                              <FontAwesomeIcon icon={faEye}></FontAwesomeIcon>
+                              </button>
+                            </td>
                     </tr>
                   );
                 })}
@@ -131,9 +196,15 @@ const DiemDanh = (props) => {
           </table>
 
           <div>
-            <button className="formatButton btnRight" onClick={handleSave}>
+            <div className="searchDV-Right">
+
+          <button className="formatButton" onClick={exportToExcel}>
+              <FontAwesomeIcon icon={faCloudArrowDown} /> Tải xuống
+            </button>
+            <button className="formatButton" onClick={handleSave}>
               <FontAwesomeIcon icon={faSave} /> Lưu
             </button>
+            </div>
           </div>
         </div>
       </div>

@@ -1,0 +1,119 @@
+import React, { useState, useEffect, useRef } from "react";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { faEdit } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import ModalSuccess from "../../Modal/ModalSuccess";
+
+function uploadAdapter(loader) {
+  return loader.file.then((file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = function (event) {
+        resolve({ default: event.target.result });
+      };
+
+      reader.onerror = function (error) {
+        reject(error);
+      };
+
+      reader.readAsDataURL(file);
+    });
+  });
+}
+
+function ThongTinDiemThi() {
+  const [editorData, setEditorData] = useState("");
+  const editorInstance = useRef(null);
+  const navigate = useNavigate();
+  const IDTieuChi = localStorage.getItem("IDTieuChi");
+  const [showModal, setShowModal] = useState(false);
+
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
+
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/LayMotTieuChi/${IDTieuChi}`
+      );
+      const ND = response.data.dataTC;
+      setEditorData(ND);
+    } catch (error) {
+      console.error("Lỗi khi lấy dữ liệu: ", error);
+    }
+  };
+
+  const handleUpdate = async () => {
+    try {
+      const update = await axios.post(`http://localhost:8080/api/CapNhatMotTieuChi/${IDTieuChi}`, {
+        NoiDungTieuChi: editorData,
+      });
+
+      // Hiển thị thông báo thành công
+      if (update.status === 200) {
+        setShowModal(true);
+      } else {
+        alert("Cập nhật thất bại!")
+      }
+    } catch (error) {
+      console.error("Lỗi khi cập nhật dữ liệu: ", error);
+    }
+  };
+
+  return (
+    <>
+      <div className="tableCK">
+        <CKEditor
+          editor={ClassicEditor}
+          onReady={(editor) => {
+            editorInstance.current = editor;
+            uploadPlugin(editor);
+          }}
+          onChange={(event, editor) => {
+            const data = editor.getData();
+            setEditorData(data);
+          }}
+          data={editorData}
+        />
+        {/* <div className="margin-bottom"></div> */}
+        <br />
+        <div className="btns">
+          <button className="allcus-button" onClick={handleUpdate}>
+            <FontAwesomeIcon icon={faEdit} /> Lưu
+          </button>
+        </div>
+      </div>
+
+      <br />
+
+
+      <ModalSuccess show={showModal} onHide={() => setShowModal(false)} />
+
+    </>
+  );
+}
+
+function uploadPlugin(editor) {
+  editor.plugins.get("FileRepository").createUploadAdapter = (loader) => {
+    return uploadAdapter(loader);
+  };
+}
+
+export default ThongTinDiemThi;

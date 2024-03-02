@@ -1,48 +1,41 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
 import * as XLSX from "xlsx";
-import { format } from "date-fns";
 import { NavLink, useNavigate } from "react-router-dom";
 import Modal from "../../Modal/Modal";
-import ExcelDataModal from "../../Modal/FileDanhGia";
-
-import axios from "axios";
 import {
   faEye,
-  faPlus,
-  faCloudArrowUp,
   faCloudArrowDown,
   faMagnifyingGlass,
   faChevronRight,
   faChevronLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import {
-  searchDoanVien,
+  searchDGDoanVien,
   searchManyDoanVien,
-  namhoc,
-  chucvu,
+  DanhGiaTungChiDoan,
+  namhoccuaxeploai,
   DSDanhGiaDoanVienCuaLop,
 } from "../../../services/apiService";
 
 const DanhSachDoanVien = (props) => {
   const IDLop = localStorage.getItem("IDLop");
+
   const navigate = useNavigate();
 
   const [DSDoanVien, setListDoanVien] = useState([]);
-
+  const [DSPhanLoai, setDSPhanLoai] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [pageSize, setPageSize] = useState(5);
-
-  const [idnamhoc, setNamHoc] = useState(1);
-
-  const [DSNamHoc, setDSNamHoc] = useState([]);
-  const [DSChucVu, setListChucVu] = useState([]);
   const [showModalUpdate, setShowModalUpdate] = useState(false);
   const [showExcelModal, setShowExcelModal] = useState(false);
   const [excelData, setExcelData] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [idnamhoc, setNamHoc] = useState(1);
+
+  const [DSNamHoc, setDSNamHoc] = useState([]);
+  const [PLChiDoan, setPLChiDoan] = useState([]);
 
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -50,55 +43,45 @@ const DanhSachDoanVien = (props) => {
     IDLop: IDLop,
     MSSV: "",
     HoTen: "",
-    IDChucVu: "",
-    GioiTinh: "",
+    IDNamHoc: idnamhoc,
+    PhanLoai: "",
   });
 
   const [searchMany, setsearchMany] = useState({
-    info: ""
+    info: "",
+    IDLop: IDLop,
+    IDNamHoc: idnamhoc,
   });
 
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
+
   useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
     fetchDSDoanVien();
-    fetchDSChucVu();
     fetchAllData();
+    fetchPhanLoai()
     fetchDSNamHoc();
   }, [IDLop, currentPage, totalPages, idnamhoc]);
 
   const fetchDSDoanVien = async () => {
     try {
       let res = await DSDanhGiaDoanVienCuaLop(IDLop, currentPage, idnamhoc);
-      console.log(res);
 
       if (res.status === 200) {
-        console.log("Data from API:", res.data.dataDG);
-        console.log("Total Pages from API:", res.data.totalPages);
-
-        setListDoanVien(res.data.dataDG)
+        setListDoanVien(res.data.dataDG);
         setTotalPages(res.data.totalPages);
-
+        setDSPhanLoai(res.data.phanLoaiCounts);
       } else {
-        console.error("Lỗi khi gọi API:", res.statusText);
-      }
-    } catch (error) {
-      console.error("Lỗi khi gọi API:", error.message);
-    }
-  };
-
-  const fetchDSChucVu = async () => {
-    try {
-      let res = await chucvu();
-      if (res.status === 200) {
-        // setListKhoa(res.data.DSKhoa); // Cập nhật state với danh sách khóa học
-        const khoaData = res.data.dataCV;
-
-        // Kiểm tra nếu khoaData là mảng trước khi cập nhật state
-        if (Array.isArray(khoaData)) {
-          setListChucVu(khoaData);
-        } else {
-          console.error("Dữ liệu khóa không hợp lệ:", khoaData);
-        }
-      } else {
+        alert("Chưa có đoàn viên thuộc cho đoàn này!");
         console.error("Lỗi khi gọi API:", res.statusText);
       }
     } catch (error) {
@@ -108,12 +91,10 @@ const DanhSachDoanVien = (props) => {
 
   const fetchDSNamHoc = async () => {
     try {
-      let res = await namhoc();
+      let res = await namhoccuaxeploai();
       if (res.status === 200) {
-        // setListKhoa(res.data.dataNH); // Cập nhật state với danh sách khóa học
         const NamHocdata = res.data.dataNH;
 
-        // Kiểm tra nếu khoaData là mảng trước khi cập nhật state
         if (Array.isArray(NamHocdata)) {
           setDSNamHoc(NamHocdata);
         } else {
@@ -127,18 +108,36 @@ const DanhSachDoanVien = (props) => {
     }
   };
 
+  const fetchPhanLoai = async () => {
+    try {
+      let res = await DanhGiaTungChiDoan(IDLop, idnamhoc);
+      if (res.status === 200) {
+        const PLChiDoan = res.data.PLChiDoan;
+
+        // if (Array.isArray(NamHocdata)) {
+          setPLChiDoan(PLChiDoan);
+        // } else {
+        //   console.error("Dữ liệu khóa không hợp lệ:", NamHocdata);
+        // }
+      } else {
+        console.error("Lỗi khi gọi API:", res.statusText);
+      }
+    } catch (error) {
+      console.error("Lỗi khi gọi API:", error.message);
+    }
+  };
+
   const handleSearch = async () => {
     try {
       const trimmedMSSV = searchData.MSSV.trim().toLowerCase();
       const trimmedHoTen = searchData.HoTen.trim().toLowerCase();
 
-      let res = await searchDoanVien({
+      let res = await searchDGDoanVien({
         ...searchData,
         MSSV: trimmedMSSV,
         HoTen: trimmedHoTen,
         IDNamHoc: idnamhoc,
-        currentPage: currentPage,
-      }); 
+      });
 
       console.log(res);
       if (res.status === 200) {
@@ -154,7 +153,11 @@ const DanhSachDoanVien = (props) => {
   const handleManySearch = async () => {
     try {
       const trimmedInfo = searchMany.info.trim().toLowerCase();
-      let res = await searchManyDoanVien({IDLop: IDLop, trimmedInfo, IDNamHoc: idnamhoc,}); // Assuming you have implemented the search API
+      let res = await searchManyDoanVien({
+        IDLop: IDLop,
+        trimmedInfo,
+        IDNamHoc: idnamhoc,
+      }); // Assuming you have implemented the search API
       console.log(res);
       if (res.status === 200) {
         setListDoanVien(res.data.dataCD);
@@ -217,11 +220,20 @@ const DanhSachDoanVien = (props) => {
         return {
           MSSV: item.MSSV,
           "Họ tên": item.HoTen,
-          "Điểm hk1": item.hk1.toFixed(2),
-          "Điểm hk1": item.hk2.toFixed(2),
+          "Điểm hk1": item.hk1?.toFixed(2),
+          "Điểm hk1": item.hk2?.toFixed(2),
           "Điểm rl hk1": item.rl1,
           "Điểm rl hk2": item.rl2,
-          "Phân loại": item.PhanLoai === 1 ? "Xuất sắc" : item.PhanLoai === 2 ? "Khá" : item.PhanLoai === 3 ? "Trung bình" : item.PhanLoai === 4 ? "Yếu kém" : "Chưa phân loại"
+          "Phân loại":
+            item.PhanLoai === 1
+              ? "Xuất sắc"
+              : item.PhanLoai === 2
+              ? "Khá"
+              : item.PhanLoai === 3
+              ? "Trung bình"
+              : item.PhanLoai === 4
+              ? "Yếu kém"
+              : "Chưa phân loại",
         };
       });
 
@@ -258,8 +270,7 @@ const DanhSachDoanVien = (props) => {
 
       setSelectedFile(selectedFile);
       const displayedData = excelData.slice(0, 10);
-      
-      // Lưu trữ dữ liệu Excel để thực hiện thêm vào cơ sở dữ liệu
+
       setExcelData(displayedData);
       setShowExcelModal(true);
     } catch (error) {
@@ -270,44 +281,14 @@ const DanhSachDoanVien = (props) => {
     }
   };
 
-  const handleConfirmExcelData = async () => {
-    console.log("Updated Excel Data:", excelData);
-    console.log("Selected Nam Hoc:", idnamhoc);
-
-    // Gọi API hoặc thực hiện các bước cần thiết
-    try {
-      const formData = new FormData();
-      formData.append("IDLop", IDLop);
-      formData.append("idnamhoc", idnamhoc);
-      formData.append("file", selectedFile);
-
-      let res = await axios.post(
-        "http://localhost:8080/api/DanhGiaDoanVienExcel",
-        formData
-      );
-
-      if (res.status === 200) {
-        // Thêm thành công
-        setSuccessMessage("Thêm thành công!");
-        setShowModalUpdate(true);
-        fetchDSDoanVien();
-      } else {
-        // Xử lý trường hợp lỗi
-        setErrorMessage("Thêm không thành công!")
-        setShowModalUpdate(true);
-      }
-    } catch (error) {
-      // Xử lý lỗi nếu có
-      console.error("Lỗi khi tải file:", error.message);
-      // setErrorMessage("Lỗi khi tải file!");
-      setErrorMessage();
-
-      setShowModalUpdate(true);
-    }
-  };
-
   const calculateIndex = (pageIndex, pageSize, itemIndex) => {
     return (pageIndex - 1) * pageSize + itemIndex + 1;
+  };
+
+  const handleViewButtonClick = (itemID, idnamhoc) => {
+    localStorage.setItem("IDDoanVien", itemID);
+    localStorage.setItem("IDNamHoc", idnamhoc);
+    navigate(`/ChiDoan/ChiTietDanhGia/DoanVien`);
   };
 
   const handleNamHocChange = (e) => {
@@ -315,18 +296,16 @@ const DanhSachDoanVien = (props) => {
     setNamHoc(selectedIDNamHoc);
   };
 
-  const handleViewButtonClick = (itemID) => {
-    localStorage.setItem("IDDoanVien", itemID);
-    navigate(`/BCH-DoanTruong/ChiTietChiDoan/DoanVien`);
-  };
-
   return (
     <>
       <div className="container-fluid app__content">
         <div className="namhoc-center">
           <h2 className="text-center">Danh Sách Đánh Giá Đoàn Viên</h2>
+          <h3 className="text-center mauxoa">{PLChiDoan}</h3>
+
           <div className="searchDV-input">
-            Năm học: <select
+            Năm học:{" "}
+            <select
               type="text"
               className="search_name"
               value={idnamhoc}
@@ -371,27 +350,19 @@ const DanhSachDoanVien = (props) => {
                 <select
                   type="text"
                   className="search_name"
-                  value={searchData.IDChucVu}
+                  value={searchData.PhanLoai}
                   onChange={(e) => {
-                    setSearchData({ ...searchData, IDChucVu: e.target.value });
+                    setSearchData({ ...searchData, PhanLoai: e.target.value });
                   }}
                 >
-                  <option value="" disabled selected>Chọn phân loại</option>
-                      <option value="1">
-                        Xuất sắc
-                      </option>
-                      <option value="2">
-                        Khá
-                      </option>
-                      <option value="3">
-                        Trung bình
-                      </option>
-                      <option value="4">
-                        Yếu kém
-                      </option>
-                      <option value="0">
-                        Chưa phân loại
-                      </option>
+                  <option value="" disabled selected>
+                    Chọn phân loại
+                  </option>
+                  <option value="1">Xuất sắc</option>
+                  <option value="2">Khá</option>
+                  <option value="3">Trung bình</option>
+                  <option value="4">Yếu kém</option>
+                  <option value="0">Chưa phân loại</option>
                 </select>
               </div>
 
@@ -401,18 +372,13 @@ const DanhSachDoanVien = (props) => {
             </div>
             <div className="buttonSearch">
               <div>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  style={{ display: "none" }}
-                  onChange={handleFileChange}
-                />
-                <button className="formatButton" onClick={handleButtonClick}>
-                  <FontAwesomeIcon icon={faCloudArrowUp} />
-                </button>
+                <NavLink to="/ChiDoan/TieuChiDanhGia" className="navlink">
+                  <button className="formatButton">Tiêu chí</button>
+                </NavLink>
               </div>
-
               <div>
+
+
                 <button className="formatButton" onClick={exportToExcel}>
                   <FontAwesomeIcon icon={faCloudArrowDown} />
                 </button>
@@ -421,13 +387,26 @@ const DanhSachDoanVien = (props) => {
           </div>
 
           <div className="searchDV tablet-mobile">
+            <div className="searchDV-Right">
+            <div>
+                <NavLink to="/ChiDoan/TieuChiDanhGia" className="navlink">
+                  <button className="formatButton">Tiêu chí</button>
+                </NavLink>
+              </div>
+              <div>
+                <button className="formatButton" onClick={exportToExcel}>
+                  <FontAwesomeIcon icon={faCloudArrowDown} />
+                </button>
+              </div>
+            </div>
+
             <div className="">
               <div className="searchDV-input">
                 <input
                   type="text"
                   className="search_name"
-                  placeholder="Tìm theo mã, tên, phân loại"
-                  value={searchData.info}
+                  placeholder="Tìm mã, tên đoàn viên"
+                  value={searchMany.info}
                   onChange={(e) => {
                     setsearchMany({ info: e.target.value });
                   }}
@@ -438,80 +417,76 @@ const DanhSachDoanVien = (props) => {
                 <FontAwesomeIcon icon={faMagnifyingGlass} />
               </button>
             </div>
-            <div className="buttonSearch">
-              <NavLink to={`/BCH-DoanTruong/ThemMoi-DoanVien/${IDLop}`}>
-                <button className="formatButton">
-                  <FontAwesomeIcon icon={faPlus} />
-                </button>
-              </NavLink>
-              <div>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  style={{ display: "none" }}
-                  onChange={handleFileChange}
-                />
-                <button className="formatButton" onClick={handleButtonClick}>
-                  <FontAwesomeIcon icon={faCloudArrowUp} />
-                </button>
-              </div>
-
-              <div>
-                <button className="formatButton" onClick={exportToExcel}>
-                  <FontAwesomeIcon icon={faCloudArrowDown} />
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </div>
 
-      <div className="listDV">
-        <div className="table-container">
-          <table className="table table-striped">
-            <thead>
-              <tr>
-                <th className="">STT</th>
-                <th className="mb-tableItem">Mã Đoàn Viên</th>
-                <th >Tên Đoàn Viên</th>
-                <th>Điểm học kỳ 1</th>
-                <th>Điểm học kỳ 2</th>
-                <th>Điểm rèn luyện học kỳ 1</th>
-                <th>Điểm rèn luyện học kỳ 2</th>
-                <th className="">Đánh giá đoàn viên</th>
-                <th className="">Cập nhật</th>
+      <div className="table-container">
+        <table className="table table-striped mb-table">
+          <thead>
+            <tr>
+              <th className="">STT</th>
+              <th className="mb-tableItem">Mã Đoàn Viên</th>
+              <th>Tên Đoàn Viên</th>
+              <th>Điểm học kỳ 1</th>
+              <th>Điểm học kỳ 2</th>
+              <th>Điểm rèn luyện học kỳ 1</th>
+              <th>Điểm rèn luyện học kỳ 2</th>
+              <th className="">Đánh giá đoàn viên</th>
+              <th className="">Cập nhật</th>
+            </tr>
+          </thead>
+          <tbody id="myTable">
+            {DSDoanVien &&
+              DSDoanVien.length > 0 &&
+              DSDoanVien.map((item, index) => {
+                const stt = calculateIndex(currentPage, pageSize, index);
+                return (
+                  <tr key={`table-doanvien-${index}`} className="tableRow">
+                    <td className=" col-center">{stt}</td>
+                    <td className="mb-tableItem mb-tableItem1">{item.MSSV}</td>
+                    <td className="">{item.HoTen}</td>
+                    <td className="col-center">{item.hk1.toFixed(2)}</td>
+                    <td className="col-center">{item.hk2.toFixed(2)}</td>
+                    <td className="col-center">{item.rl1}</td>
+                    <td className="col-center">{item.rl2}</td>
+                    <td className="">
+                      {item.PhanLoai === 1
+                        ? "Xuất sắc"
+                        : item.PhanLoai === 2
+                        ? "Khá"
+                        : item.PhanLoai === 3
+                        ? "Trung bình"
+                        : item.PhanLoai === 4
+                        ? "Yếu kém"
+                        : "Chưa đánh giá"}
+                    </td>
+                    <td className="btnOnTable1">
+                      <button
+                        className="btnOnTable"
+                        onClick={() =>
+                          handleViewButtonClick(item.IDDoanVien, idnamhoc)
+                        }
+                      >
+                        <FontAwesomeIcon icon={faEye} />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            {DSDoanVien && DSDoanVien.length === 0 && (
+              <tr className="tablenone">
+                <td className="tablenone">Không có đoàn viên nào!</td>
               </tr>
-            </thead>
-            <tbody id="myTable">
-              {DSDoanVien &&
-                DSDoanVien.length > 0 &&
-                DSDoanVien.map((item, index) => {
-                  const stt = calculateIndex(currentPage, pageSize, index);
-                  return (
-                    <tr key={`table-doanvien-${index}`} className="tableRow">
-                      <td className=" col-center">{stt}</td>
-                      <td className="mb-tableItem mb-tableItem1">{item.MSSV}</td>
-                      <td className="">{item.HoTen}</td>
-                      <td className="col-center">{item.hk1.toFixed(2)}</td>
-                      <td className="col-center">{item.hk2.toFixed(2)}</td>
-                      <td className="col-center">{item.rl1}</td>
-                      <td className="col-center">{item.rl2}</td>
-                      <td className="">{item.PhanLoai === 1 ? "Xuất sắc" : item.PhanLoai === 2 ? "Khá" : item.PhanLoai === 3 ? "Trung bình" : item.PhanLoai === 4 ? "Yếu kém" : "Chưa đánh giá"}</td>
-                      <td className="btnOnTable1">
-                          <button className="btnOnTable" onClick={() => handleViewButtonClick(item.IDDoanVien)}>
-                            <FontAwesomeIcon icon={faEye} />
-                          </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              {DSDoanVien && DSDoanVien.length === 0 && (
-                <tr className="tablenone">
-                  <td className="tablenone">Không có đoàn viên nào!</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+            )}
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div className="searchDV-Right laptop">
+          Xuất sắc: {DSPhanLoai[1] || 0} | Khá: {DSPhanLoai[2] || 0} | Trung
+          bình: {DSPhanLoai[3] || 0} | Yếu kém: {DSPhanLoai[4] || 0} | Chưa phân
+          loại: {DSPhanLoai[0] || 0}
         </div>
       </div>
 
@@ -609,17 +584,14 @@ const DanhSachDoanVien = (props) => {
           />
         )}
       </div>
-
-      {showExcelModal && (
-        <ExcelDataModal
-          excelData={excelData}
-          idnamhoc={idnamhoc}
-          onClose={() => setShowExcelModal(false)}
-          onConfirm={handleConfirmExcelData}
-          selectedFile={selectedFile}
-          DSNamHoc={DSNamHoc}
-        />
-      )}
+      <div className="tablet-mobile">
+        <div className="searchDV-Right">
+          Xuất sắc: {DSPhanLoai[1] || 0} <br /> Khá: {DSPhanLoai[2] || 0} <br />{" "}
+          Trung bình: {DSPhanLoai[3] || 0} <br /> Yếu kém: {DSPhanLoai[4] || 0}{" "}
+          <br /> Chưa phân loại: {DSPhanLoai[0] || 0}
+        </div>
+      </div>
+      <div className="margin-bottom"></div>
     </>
   );
 };

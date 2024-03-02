@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { format } from "date-fns";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
 import loadVietnamBoundary from "./DiaGioiVN";
@@ -25,6 +25,7 @@ import {
 import logo from "../../../assets/logo.jpg";
 
 const DoanVien = (props) => {
+  const navigate = useNavigate();
   // const { IDLop } = useParams();
   const IDLop = localStorage.getItem("IDLop");
 
@@ -35,7 +36,7 @@ const DoanVien = (props) => {
   const [ChucVu, setChucVu] = useState([]);
 
   const [apiMessage, setApiMessage] = useState("");
-const [apiError, setApiError] = useState(false);
+  const [apiError, setApiError] = useState(false);
 
   const [vietnamBoundaryData, setVietnamBoundaryData] = useState(null);
 
@@ -61,7 +62,19 @@ const [apiError, setApiError] = useState(false);
   const [IDChucVu, setIDChucVu] = useState("");
   const [IDNamHoc, setIDNamHoc] = useState("");
 
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
+
   useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
     fetchDSNamHoc();
     fetchChucVu();
     fetchTonGiao();
@@ -299,15 +312,10 @@ const [apiError, setApiError] = useState(false);
         GioiTinh === undefined || GioiTinh === ""
           ? "Vui lòng nhập giới tính"
           : "",
-      NgaySinh:
-        !NgaySinh.trim() === ""
-          ? "Vui lòng nhập ngày sinh"
-          : "",
+      NgaySinh: !NgaySinh.trim() === "" ? "Vui lòng nhập ngày sinh" : "",
 
       NgayVaoDoan:
-        !NgayVaoDoan.trim() === ""
-          ? "Vui lòng nhập ngày vào đoàn"
-          : "",
+        !NgayVaoDoan.trim() === "" ? "Vui lòng nhập ngày vào đoàn" : "",
       IDDanToc: !IDDanToc ? "Vui lòng nhập tên dân tộc" : "",
       IDTonGiao: !IDTonGiao ? "Vui lòng nhập tên tôn giáo" : "",
       IDChucVu: !IDChucVu ? "Vui lòng chọn tên chức vụ" : "",
@@ -368,7 +376,7 @@ const [apiError, setApiError] = useState(false);
         <h2 className="text-center"> Thêm Mới Đoàn Viên</h2>
         <div className="margin-top">
           <div className="row formAdd">
-            <div className="col col-2">
+            <div className="col-12 col-md-3 col-lg-2">
               <div className="avatar">
                 <img className="avatar_img" src={previewImage || logo} alt="" />
                 <label htmlFor="fileInput" className="camera-icon">
@@ -383,9 +391,9 @@ const [apiError, setApiError] = useState(false);
                 </label>
               </div>
             </div>
-            <div className="col col-10">
+            <div className="col-12 col-md-9 col-lg-10 margin-top1">
               <div className="row">
-                <div className="form-group col col-4">
+                <div className="form-group col-12 col-md-6 col-lg-4">
                   <Form.Label htmlFor="MaLop">Mã chi đoàn</Form.Label>
                   <Form.Control
                     className="form-control"
@@ -396,7 +404,7 @@ const [apiError, setApiError] = useState(false);
                     disabled
                   />
                 </div>
-                <div className="form-group col col-4">
+                <div className="form-group col-12 col-md-6 col-lg-4">
                   <Form.Label htmlFor="TenLop">Tên chi đoàn</Form.Label>
 
                   <Form.Control
@@ -408,7 +416,7 @@ const [apiError, setApiError] = useState(false);
                     disabled
                   />
                 </div>
-                <div className="form-group col col-4">
+                <div className="form-group col-12 col-md-6 col-lg-4">
                   <Form.Label htmlFor="Khoa">Khóa</Form.Label>
 
                   <Form.Control
@@ -420,7 +428,7 @@ const [apiError, setApiError] = useState(false);
                     disabled
                   />
                 </div>
-                <div className="form-group col col-4">
+                <div className="form-group col-12 col-md-6 col-lg-4">
                   <Form.Label htmlFor="MSSV">Mã số sinh viên</Form.Label>
 
                   <Form.Control
@@ -433,7 +441,7 @@ const [apiError, setApiError] = useState(false);
                   />
                   <div className="error-message">{errors.MSSV}</div>
                 </div>
-                <div className="form-group col col-4">
+                <div className="form-group col-12 col-md-6 col-lg-4">
                   <Form.Label htmlFor="HoTen">Họ tên đoàn viên</Form.Label>
 
                   <Form.Control
@@ -447,34 +455,7 @@ const [apiError, setApiError] = useState(false);
                   />
                   <div className="error-message">{errors.HoTen}</div>
                 </div>
-
-                <div className="form-group col col-4">
-                  <Form.Label htmlFor="Email">Email</Form.Label>
-
-                  <Form.Control
-                    className="form-control"
-                    type="email"
-                    id="Email"
-                    aria-describedby="Email"
-                    value={Email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                  <div className="error-message">{errors.Email}</div>
-                </div>
-                <div className="form-group col col-4">
-                  <Form.Label htmlFor="SoDT">Số điện thoại</Form.Label>
-
-                  <Form.Control
-                    className="form-control"
-                    type="text"
-                    id="SoDT"
-                    aria-describedby="SoDT"
-                    value={SoDT}
-                    onChange={(e) => setSoDT(e.target.value)}
-                  />
-                  <div className="error-message">{errors.SoDT}</div>
-                </div>
-                <div className="form-group col col-4">
+                <div className="form-group col-12 col-md-6 col-lg-4">
                   <Form.Label htmlFor="GioiTinh">Giới tính</Form.Label>
 
                   <Form.Select
@@ -494,20 +475,33 @@ const [apiError, setApiError] = useState(false);
                   </Form.Select>
                   <div className="error-message">{errors.GioiTinh}</div>
                 </div>
-                <div className="form-group col col-4">
-                  <Form.Label htmlFor="NgaySinh">Ngày sinh</Form.Label>
+                <div className="form-group col-12 col-md-6 col-lg-8">
+                  <Form.Label htmlFor="Email">Email</Form.Label>
 
                   <Form.Control
                     className="form-control"
-                    type="date"
-                    id="NgaySinh"
-                    aria-describedby="NgaySinh"
-                    value={NgaySinh}
-                    onChange={(e) => setNgaySinh(e.target.value)}
+                    type="email"
+                    id="Email"
+                    aria-describedby="Email"
+                    value={Email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
-                  <div className="error-message">{errors.NgaySinh}</div>
+                  <div className="error-message">{errors.Email}</div>
                 </div>
-                <div className="form-group col col-4">
+                <div className="form-group col-12 col-md-6 col-lg-4">
+                  <Form.Label htmlFor="SoDT">Số điện thoại</Form.Label>
+
+                  <Form.Control
+                    className="form-control"
+                    type="text"
+                    id="SoDT"
+                    aria-describedby="SoDT"
+                    value={SoDT}
+                    onChange={(e) => setSoDT(e.target.value)}
+                  />
+                  <div className="error-message">{errors.SoDT}</div>
+                </div>
+                <div className="form-group col-12 col-md-6 col-lg-4">
                   <Form.Label htmlFor="province">Tỉnh/Thành phố</Form.Label>
                   <Form.Select
                     className="form-select form-select-sm mb-3"
@@ -527,8 +521,7 @@ const [apiError, setApiError] = useState(false);
                   </Form.Select>
                   <div className="error-message">{errors.selectedProvince}</div>
                 </div>
-
-                <div className="form-group col col-4">
+                <div className="form-group col-12 col-md-6 col-lg-4">
                   <Form.Label htmlFor="district">Quận/Huyện</Form.Label>
                   <Form.Select
                     className="form-select form-select-sm mb-3"
@@ -554,8 +547,7 @@ const [apiError, setApiError] = useState(false);
                   </Form.Select>
                   <div className="error-message">{errors.selectedDistrict}</div>
                 </div>
-
-                <div className="form-group col col-4">
+                <div className="form-group col-12 col-md-6 col-lg-4">
                   <Form.Label htmlFor="ward">Phường/Xã</Form.Label>
                   <Form.Select
                     className="form-select form-select-sm"
@@ -584,8 +576,20 @@ const [apiError, setApiError] = useState(false);
                   </Form.Select>
                   <div className="error-message">{errors.selectedWard}</div>
                 </div>
+                <div className="form-group col-12 col-md-6 col-lg-4">
+                  <Form.Label htmlFor="NgaySinh">Ngày sinh</Form.Label>
 
-                <div className="form-group col col-4">
+                  <Form.Control
+                    className="form-control"
+                    type="date"
+                    id="NgaySinh"
+                    aria-describedby="NgaySinh"
+                    value={NgaySinh}
+                    onChange={(e) => setNgaySinh(e.target.value)}
+                  />
+                  <div className="error-message">{errors.NgaySinh}</div>
+                </div>
+                <div className="form-group col-12 col-md-6 col-lg-4">
                   <Form.Label htmlFor="NgayVaoDoan">Ngày vào đoàn</Form.Label>
 
                   <Form.Control
@@ -598,7 +602,7 @@ const [apiError, setApiError] = useState(false);
                   />
                   <div className="error-message">{errors.NgayVaoDoan}</div>
                 </div>
-                <div className="form-group col col-4">
+                <div className="form-group col-12 col-md-6 col-lg-4">
                   <Form.Label htmlFor="IDDanToc">Dân tộc</Form.Label>
                   <Form.Select
                     className="form-control"
@@ -621,7 +625,7 @@ const [apiError, setApiError] = useState(false);
                   </Form.Select>
                   <div className="error-message">{errors.IDDanToc}</div>
                 </div>
-                <div className="form-group col col-4">
+                <div className="form-group col-12 col-md-6 col-lg-4">
                   <Form.Label htmlFor="IDTonGiao">Tôn giáo</Form.Label>
 
                   <Form.Select
@@ -645,7 +649,7 @@ const [apiError, setApiError] = useState(false);
                   </Form.Select>
                   <div className="error-message">{errors.IDTonGiao}</div>
                 </div>
-                <div className="form-group col col-4">
+                <div className="form-group col-12 col-md-6 col-lg-4">
                   <Form.Label htmlFor="IDChucVu">Chức vụ</Form.Label>
 
                   <Form.Select
@@ -669,7 +673,7 @@ const [apiError, setApiError] = useState(false);
                   </Form.Select>
                   <div className="error-message">{errors.IDChucVu}</div>
                 </div>
-                <div className="form-group col col-4">
+                <div className="form-group col-12 col-md-6 col-lg-4">
                   <Form.Label htmlFor="TenNamHoc">Năm học</Form.Label>
                   <Form.Select
                     className="form-control"
@@ -693,24 +697,24 @@ const [apiError, setApiError] = useState(false);
                   <div className="error-message">{errors.IDNamHoc}</div>
                 </div>
               </div>
-            </div>
-          </div>
-          <div className="update row">
-            <div className="btns">
-              <button className="allcus-button" type="submit">
-                <NavLink
-                  to={`/ChiDoan`}
-                  className="navlink"
-                >
-                  <FontAwesomeIcon icon={faBackward} />
-                </NavLink>
-              </button>
+              <div className="update row">
+                <div className="btns">
+                  <button className="allcus-button" type="submit">
+                    <NavLink to={`/ChiDoan`} className="navlink">
+                      <FontAwesomeIcon icon={faBackward} />
+                    </NavLink>
+                  </button>
 
-              <>
-                <button className="allcus-button" onClick={handleSaveChanges}>
-                  <FontAwesomeIcon icon={faSave} /> Lưu
-                </button>
-              </>
+                  <>
+                    <button
+                      className="allcus-button"
+                      onClick={handleSaveChanges}
+                    >
+                      <FontAwesomeIcon icon={faSave} /> Lưu
+                    </button>
+                  </>
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Form from "react-bootstrap/Form";
-import { NavLink } from "react-router-dom";
+import { NavLink , useNavigate } from "react-router-dom";
 import zxcvbn from "zxcvbn";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
@@ -10,6 +10,7 @@ import ModalSuccess from "../Modal/ModalSuccess";
 import axios from "axios";
 const PasswordStrengthMeter = () => {
   const IDDoanVien = localStorage.getItem("IDDoanVien");
+  const navigate = useNavigate();
 
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -29,7 +30,20 @@ const PasswordStrengthMeter = () => {
     apiError: "", // Thêm một trường để lưu trữ lỗi từ API
   });
 
-  useEffect(() => {}, [IDDoanVien]);
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
+
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
+  }, [IDDoanVien]);
 
   const toggleShowPassword = (type) => {
     switch (type) {
@@ -65,7 +79,8 @@ const PasswordStrengthMeter = () => {
     if (newPassword !== confirmPassword) {
       newErrors.confirmPassword =
         "Mật khẩu mới và xác nhận mật khẩu không khớp.";
-        return;
+      setErrors(newErrors);
+      return;
     }
 
     if (!newPassword && !oldPassword && !confirmPassword) {
@@ -74,7 +89,7 @@ const PasswordStrengthMeter = () => {
       newErrors.confirmPassword = "Vui lòng nhập mật khẩu.";
       setErrors(newErrors);
     } else if (newPassword && !oldPassword && !confirmPassword) {
-      newErrors.oldPassword ="Vui lòng nhập mật khẩu.";
+      newErrors.oldPassword = "Vui lòng nhập mật khẩu.";
       newErrors.confirmPassword = "Vui lòng nhập mật khẩu.";
       setErrors(newErrors);
     } else if (!newPassword && oldPassword && !confirmPassword) {
@@ -97,8 +112,9 @@ const PasswordStrengthMeter = () => {
     } else {
       if (newPasswordStrength < 2) {
         newErrors.newPassword = "Mật khẩu mới quá yếu.";
+        setErrors(newErrors);
+        return;
       }
-      setErrors(newErrors);
 
       console.log(oldPassword);
       try {
@@ -168,8 +184,8 @@ const PasswordStrengthMeter = () => {
         <h2 className="text-center">Đổi mật khẩu</h2>
 
         <form id="customerForm" className="formAdd">
-          <div className="row">
-            <div className="form-group col-12 col-md-12 col-lg-12">
+          <div className="">
+            <div className="form-group form-groupMK">
               <Form.Label htmlFor="oldPassword">Mật khẩu hiện tại</Form.Label>
               <div className="password-input-container">
                 <Form.Control
@@ -190,12 +206,8 @@ const PasswordStrengthMeter = () => {
               <div className="error-message">{errors.oldPassword}</div>
             </div>
           </div>
-
-          <div className="row">
-            <div className="form-group col-12 col-md-12 col-lg-6">
-              <Form.Label htmlFor="newPassword">
-                Mật khẩu mới
-              </Form.Label>
+            <div className="form-group form-groupMK">
+              <Form.Label htmlFor="newPassword">Mật khẩu mới</Form.Label>
               <div className="password-input-container">
                 <Form.Control
                   type={showNewPassword ? "text" : "password"}
@@ -213,7 +225,7 @@ const PasswordStrengthMeter = () => {
               {renderPasswordStrengthBar()}
               <div className="error-message">{errors.newPassword}</div>
             </div>
-            <div className="form-group col-12 col-md-12 col-lg-6">
+            <div className="form-group form-groupMK">
               <Form.Label htmlFor="confirmPassword">
                 Nhập lại mật khẩu
               </Form.Label>
@@ -232,8 +244,6 @@ const PasswordStrengthMeter = () => {
               </div>
               <div className="error-message">{errors.confirmPassword}</div>
             </div>
-          </div>
-          <br />
           <div className="update row">
             <div className="btns">
               <button className="allcus-button button-error" type="submit">

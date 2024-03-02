@@ -1,14 +1,14 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState, useRef } from "react";
 import { format } from "date-fns";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate  } from "react-router-dom";
 import Form from "react-bootstrap/Form";
 import {
   faCloudArrowUp,
   faCloudArrowDown,
   faEye,
 } from "@fortawesome/free-solid-svg-icons";
-import { namhoc, mauUngTuyen } from "../../services/apiService";
+import { namhoc, mauUngTuyen, layTieuChi } from "../../services/apiService";
 import Modal from "../Modal/Modal";
 import ModalPDF from "../Modal/PDF";
 import ResultSVNT from "../Modal/ResultSVNT";
@@ -17,6 +17,7 @@ import { pdfjs } from "react-pdf";
 
 const SinhVienNamTot = (props) => {
   const IDDoanVien = localStorage.getItem("IDDoanVien");
+  const navigate = useNavigate();
 
   const [idnamhoc, setNamHoc] = useState(1);
   const [DSNamHoc, setDSNamHoc] = useState([]);
@@ -28,38 +29,72 @@ const SinhVienNamTot = (props) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [MauUngTuyen, setMauUngTuyen] = useState([]);
+  const [DSTieuChi, setDSTieuChi] = useState([]);
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
+
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
 
   useEffect(() => {
-    const $ = document.querySelector.bind(document);
-    const $$ = document.querySelectorAll.bind(document);
+    // const $ = document.querySelector.bind(document);
+    // const $$ = document.querySelectorAll.bind(document);
 
-    const tabs = $$(".tab-item");
-    const panes = $$(".tab-pane");
+    // const tabs = $$(".tab-item");
+    // const panes = $$(".tab-pane");
 
-    const tabActive = $(".tab-item.active");
-    const line = $(".tabs .line");
+    // const tabActive = $(".tab-item.active");
+    // const line = $(".tabs .line");
 
-    line.style.left = tabActive.offsetLeft + "px";
-    line.style.width = tabActive.offsetWidth + "px";
+    // line.style.left = tabActive.offsetLeft + "px";
+    // line.style.width = tabActive.offsetWidth + "px";
 
-    tabs.forEach((tab, index) => {
-      var pane = panes[index];
+    // tabs.forEach((tab, index) => {
+    //   var pane = panes[index];
 
-      tab.onclick = function () {
-        $(".tab-item.active").classList.remove("active");
-        $(".tab-pane.active").classList.remove("active");
+    //   tab.onclick = function () {
+    //     $(".tab-item.active").classList.remove("active");
+    //     $(".tab-pane.active").classList.remove("active");
 
-        line.style.left = this.offsetLeft + "px";
-        line.style.width = this.offsetWidth + "px";
+    //     line.style.left = this.offsetLeft + "px";
+    //     line.style.width = this.offsetWidth + "px";
 
-        this.classList.add("active");
-        pane.classList.add("active");
-      };
-    });
-
+    //     this.classList.add("active");
+    //     pane.classList.add("active");
+    //   };
+    // });
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
+    DanhSachTieuChi();
     fetchDSNamHoc();
     fetchMauUngTuyen();
   }, [IDDoanVien, idnamhoc]);
+
+  const DanhSachTieuChi = async () => {
+    try {
+      let res = await layTieuChi();
+      console.log(res);
+
+      if (res.status === 200) {
+        console.log("Data from API:", res.data.dataTC);
+        setDSTieuChi(res.data.dataTC);
+      } else {
+        console.error("Lỗi khi gọi API:", res.statusText);
+      }
+    } catch (error) {
+      console.error("Lỗi khi gọi API:", error.message);
+    }
+  };
+
+  const handleTabClick = (index) => {
+    setActiveTabIndex(index);
+  };
 
   const fetchDSNamHoc = async () => {
     try {
@@ -88,13 +123,9 @@ const SinhVienNamTot = (props) => {
       console.log(res);
       if (res.status === 200) {
         const MauUngTuyenData = res.data.dataUT;
-        // if (Array.isArray(MauUngTuyenData)) {
-          const url = MauUngTuyenData[0].TenFile;
+        const url = MauUngTuyenData[0].TenFile;
 
-          setMauUngTuyen(url);
-        // } else {
-        //   console.error("Dữ liệu khóa không hợp lệ:", MauUngTuyenData);
-        // }
+        setMauUngTuyen(url);
       } else {
         console.error("Lỗi khi gọi API:", res.statusText);
       }
@@ -196,295 +227,43 @@ const SinhVienNamTot = (props) => {
           </h2>
         </div>
         <div className="tabs">
-          <div className="tab-item active">
-            <i className="tab-icon fas fa-code"></i>
-            Đạo đức tốt
-          </div>
-          <div className="tab-item">
-            <i className="tab-icon fas fa-cog"></i>
-            Học tập tốt
-          </div>
-          <div className="tab-item">
-            <i className="tab-icon fas fa-plus-circle"></i>
-            Thể lực tốt
-          </div>
-          <div className="tab-item">
-            <i className="tab-icon fas fa-pen-nib"></i>
-            Tình nguyện tốt
-          </div>
-          <div className="tab-item">
-            <i className="tab-icon fas fa-pen-nib"></i>
-            Hội nhập tốt
-          </div>
-          <div className="tab-item">
-            <i className="tab-icon fas fa-pen-nib"></i>
-            Ứng tuyển
-          </div>
+          {DSTieuChi.map((tieuChi, index) => (
+            <div
+              key={index}
+              className={`tab-item ${index === activeTabIndex ? "active" : ""}`}
+              onClick={() => handleTabClick(index)}
+            >
+              <i className="tab-icon fas fa-code"></i>
+              <div
+                dangerouslySetInnerHTML={{ __html: tieuChi.TenTieuChi }}
+              ></div>
+            </div>
+          ))}
+
           <div className="line"></div>
         </div>
 
         <div className="tab-content">
-          <div className="tab-pane active">
-            <h2>Đạo đức tốt</h2>
-            <form id="customerForm" className="formHD">
-              <div>
-                <ul>
-                  <li>
-                    Điểm trung bình cộng của Học kỳ 1 và 2 trong năm học đạt từ
-                    2,5 trở lên và không bị nợ học phần trong năm học.
-                  </li>
-                  <li>
-                    Lưu ý:
-                    <ul>
-                      <li>Không xét điểm học tập Học kỳ 3.</li>
-                      <li>
-                        Sinh viên học lại học phần nợ ở các học kỳ trước trong
-                        học kỳ 3 của năm học xét trao danh hiệu, nếu đạt điểm D
-                        trở lên sẽ được xét không nợ môn.
-                      </li>
-                    </ul>
-                  </li>
-                  <li>
-                    Ưu tiên khi xét trao danh hiệu:
-                    <ul>
-                      <li>
-                        Tham gia sinh hoạt thường xuyên ít nhất 01 câu lạc bộ
-                        học thuật.
-                      </li>
-                      <li>
-                        Tham gia kỳ thi Olympic các môn học từ cấp khoa trở lên
-                        tổ chức.
-                      </li>
-                      <li>
-                        Là chủ nhiệm đề tài nghiên cứu khoa học sinh viên trong
-                        năm học.
-                      </li>
-                      <li>
-                        Là thành viên các đội tuyển tham gia thi cấp quốc gia,
-                        quốc tế.
-                      </li>
-                      <li>Tham gia các cuộc thi ý tưởng sáng tạo.</li>
-                    </ul>
-                  </li>
-                </ul>
-              </div>
-            </form>
-          </div>
-          <div className="tab-pane">
-            <h2>Học tập tốt</h2>
-            <form id="customerForm" className="formHD">
-              <div>
-                <ul>
-                  Đạt 01 trong các tiêu chí sau:
-                  <li>
-                    Trong năm học phải học ít nhất 01 học phần Giáo dục thể chất
-                    (học phần có rèn luyện thể lực) và đạt điểm B trở lên.
-                  </li>
-                  <li>
-                    Tham gia ít nhất 01 hoạt động rèn luyện thể dục, thể thao do
-                    cấp Khoa, Liên chi hội trở lên tổ chức.
-                  </li>
-                </ul>
-                <p>
-                  * Đối với những sinh viên khuyết tật: tiêu chuẩn về thể lực
-                  bao gồm: tập thể dục hàng ngày hoặc rèn luyện ít nhất 01 môn
-                  thể thao dành cho người khuyết tật.
-                </p>
-              </div>
-            </form>
-          </div>
-          <div className="tab-pane">
-            <h2>Thể lực tốt</h2>
-            <form id="customerForm" className="formHD">
-              <div>
-                <ul>
-                  Đạt 01 trong các tiêu chí sau:
-                  <li>
-                    Trong năm học phải học ít nhất 01 học phần Giáo dục thể chất
-                    (học phần có rèn luyện thể lực) và đạt điểm B trở lên.
-                  </li>
-                  <li>
-                    Tham gia ít nhất 01 hoạt động rèn luyện thể dục, thể thao do
-                    cấp Khoa, Liên chi hội trở lên tổ chức.
-                  </li>
-                </ul>
-                <p>
-                  * Đối với những sinh viên khuyết tật: tiêu chuẩn về thể lực
-                  bao gồm: tập thể dục hàng ngày hoặc rèn luyện ít nhất 01 môn
-                  thể thao dành cho người khuyết tật.
-                </p>
-              </div>
-            </form>
-          </div>
-          <div className="tab-pane">
-            <h2>Tình nguyện tốt</h2>
-            <form id="customerForm" className="formHD">
-              <div>
-                <ul>
-                  Đạt 01 trong các tiêu chuẩn sau:
-                  <li>Được khen thưởng trong hoạt động tình nguyện.</li>
-                  <li>Tham gia ít nhất 03 hoạt động tình nguyện.</li>
-                  <li>Tham gia ít nhất 02 lần Hiến máu tình nguyện.</li>
-                </ul>
-              </div>
-            </form>
-          </div>
-          <div className="tab-pane">
-            <h2>Hội nhập tốt</h2>
-            <div>
-              <form id="customerForm" className="formHD">
-                <div>
-                  <ul>
-                    Đạt 02 trong 03 tiêu chuẩn sau:
-                    <li>
-                      Về ngoại ngữ: đạt 01 trong 02 tiêu chí sau:
-                      <ul>
-                        <li>
-                          Được cấp giấy khen tham gia cuộc thi ngoại ngữ cấp
-                          trường trở lên.
-                        </li>
-                        <li>
-                          Đạt chứng chỉ ngoại ngữ theo bảng quy đổi bên dưới
-                       <div className="table-container">
-                       <table className="table table-striped margin-top">
-                            <thead>
-                              <th>Đối tượng</th>
-                              <th>Chứng chỉ</th>
-                              <th>CEFR</th>
-                              <th>IELTS</th>
-                              <th>TOEIC</th>
-                              <th>TOEFL</th>
-                            </thead>
-                            <tbody id="myTable">
-                              <tr>
-                                <td>Sinh viên năm 1, 2</td>
-                                <td className="col-center">A</td>
-                                <td className="col-center">A1</td>
-                                <td className="col-center">2.0</td>
-                                <td className="col-center">250</td>
-                                <td className="col-center">60 CBT / 19 iBT</td>
-                              </tr>
+          {DSTieuChi.map((tieuChi, index) => (
+            <div
+              key={index}
+              className={`tab-pane ${index === activeTabIndex ? "active" : ""}`}
+            >
+              <h5 dangerouslySetInnerHTML={{ __html: tieuChi.TenTieuChi }}></h5>
 
-                              <tr>
-                                <td>Sinh viên năm 3 trở lên</td>
-                                <td className="col-center">B</td>
-                                <td className="col-center">A2</td>
-                                <td className="col-center">3.0</td>
-                                <td className="col-center">350</td>
-                                <td className="col-center">96 CBT / 40 iBT</td>
-                              </tr>
-                            </tbody>
-                          </table>
-                       </div>
-                        </li>
-                        <p>
-                          Lưu ý:
-                          <ul>
-                            <li>
-                              Các chứng chỉ phải được cấp trong thời gian năm
-                              học (từ tháng 8/2019 đến tháng 7/2020).
-                            </li>
-                            <li>
-                              Các chứng chỉ được cấp trước thời gian nêu trên,
-                              yêu cầu phải đạt thêm 01 trong những tiêu chí sau:
-                              <ul>
-                                <li>
-                                  Trong năm học phải học ít nhất 01 học phần
-                                  hoặc khóa học về ngoại ngữ.
-                                </li>
-                                <li>
-                                  Được cấp giấy chứng nhận tham gia cuộc thi
-                                  ngoại ngữ cấp khoa, trường trở lên.
-                                </li>
-                              </ul>
-                            </li>
-                            <li>
-                              Đối với sinh viên chuyên ngành Tiếng Anh: có chứng
-                              chỉ ngoại ngữ khác tương đương chứng chỉ A trở
-                              lên.
-                            </li>
-                          </ul>
-                        </p>
-                      </ul>
-                    </li>
-                    <li>
-                      Tin học: đạt 01 trong 04 tiêu chí sau:
-                      <ul>
-                        <li>Đạt chứng chỉ tin học cơ bản trở lên;</li>
-                        <li>
-                          Điểm trung bình của 2 học phần tin học căn bản từ điểm
-                          B trở lên;
-                        </li>
-                        <li>
-                          Được cấp giấy khen hoặc giấy chứng nhận tham gia cuộc
-                          thi tin học cấp khoa, trường trở lên.
-                        </li>
-                        <li>
-                          Trong năm học có học ít nhất 01 học phần hoặc khóa học
-                          về tin học, công nghệ thông tin và điểm trung bình học
-                          phần đạt từ B hoặc khóa học đạt từ 7.0 điểm (loại khá)
-                          trở lên. (Lưu ý: không xét điều kiện này đối với sinh
-                          viên chuyên ngành Công nghệ thông tin, tin học)
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      Tham gia các hoạt động, phong trào nâng cao kỹ năng Hội
-                      nhập: đạt 02 trong 06 tiêu chí sau:
-                      <ul>
-                        <li>
-                          Được chứng nhận tham gia 01 hoạt động Hội nhập do cấp
-                          trường trở lên tổ chức.
-                        </li>
-                        <li>
-                          Được chứng nhận tham gia 01 hoạt động giao lưu với
-                          sinh viên quốc tế, trao đổi sinh viên do cấp khoa,
-                          liên chi hội trở lên tổ chức hoặc tham gia các khóa
-                          học ngắn hạn tại nước ngoài.
-                        </li>
-                        <li>
-                          Được Hội Sinh viên, Đoàn Thanh niên từ cấp Khoa trở
-                          lên khen thưởng về thành tích xuất sắc trong công tác
-                          Hội và phong trào sinh viên hoặc công tác Đoàn và
-                          phong trào thanh niên trong năm học.
-                        </li>
-                        <li>
-                          Trực tiếp tổ chức hoặc được chứng nhận tham gia ít
-                          nhất 01 lớp tập huấn hoặc khóa học bồi dưỡng kỹ năng
-                          do cấp Khoa, Liên chi hội trở lên tổ chức.
-                        </li>
-                        <li>
-                          Đạt điểm B trở lên đối với các Học phần về Kỹ năng do
-                          Trường tổ chức giảng dạy (như Kỹ năng mềm, Đổi mới
-                          sáng tạo và khởi nghiệp,…)
-                        </li>
-                        <li>
-                          Đạt từ giải khuyến khích trở lên các cuộc thi tìm hiểu
-                          về văn hóa, lịch sử, xã hội trong nước và thế giới do
-                          cấp Khoa, Liên chi hội trở lên tổ chức.
-                        </li>
-                        <p>
-                          Lưu ý:
-                          <ul>
-                            <li>
-                              Tất cả các thành tích đề nghị danh hiệu “Sinh viên
-                              5 tốt” cấp trường được tính trong khoảng thời gian
-                              của năm học được xét trao danh hiệu.
-                            </li>
-                            <li>
-                              Trường hợp có thêm các tiêu chuẩn ngoài nội dung
-                              trên, Thường trực Hội Sinh viên trường sẽ xem xét.
-                            </li>
-                          </ul>
-                        </p>
-                      </ul>
-                    </li>
-                  </ul>
-                </div>
+              <form id="customerForm" className="formHD">
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: tieuChi.NoiDungTieuChi,
+                  }}
+                ></div>
               </form>
-            </div>
+
+              <div className="tab-item active">
+            <i className="tab-icon fas fa-pen-nib"></i>
+            Ứng tuyển
           </div>
-          <div className="tab-pane">
+          <div className="tab-pane active">
             <h2>Ứng tuyển</h2>
             <div className="margin-top">
               <div className="table-container">
@@ -509,7 +288,7 @@ const SinhVienNamTot = (props) => {
                           onClick={handleViewResultClick}
                         />
                       </td>
-                    </tr >
+                    </tr>
                     <tr className="tableRow">
                       <td>Nộp file ứng tuyển</td>
                       <td className="col-center">
@@ -533,7 +312,12 @@ const SinhVienNamTot = (props) => {
               </div>
             </div>
           </div>
+            </div>
+
+            
+          ))}
         </div>
+
       </div>
 
       <div>

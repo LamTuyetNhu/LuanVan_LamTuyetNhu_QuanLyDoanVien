@@ -1,23 +1,33 @@
-import { NavLink } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Modal from "../../Modal/Modal";
-import { faSave, faEdit } from "@fortawesome/free-solid-svg-icons";
+import { faSave } from "@fortawesome/free-solid-svg-icons";
 import {
   LayDSNopDoanPhi,
   SaveCheckboxStates,
 } from "../../../services/apiService";
 
 const NopDoanPhi = (props) => {
+  const navigate = useNavigate();
   const [DSNopDoanPhi, setDSNopDoanPhi] = useState([]);
   const [TenDP, setTenDP] = useState([]);
   const [TenNamHoc, setTenNamHoc] = useState([]);
 
   const [checkboxStates, setCheckboxStates] = useState([]);
   const { IDDoanPhi, IDNamHoc } = useParams();
-
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
   useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
     fetchDSNopDoanPhi();
   }, [IDDoanPhi, IDNamHoc]);
 
@@ -100,7 +110,7 @@ const NopDoanPhi = (props) => {
     <>
       <div className="container-fluid app__content">
         <h5 className="text-center">
-          {TenDP} ({TenNamHoc})
+          {TenDP} <br/> {TenNamHoc}
         </h5>
 
         <div className="table-container">
@@ -108,7 +118,7 @@ const NopDoanPhi = (props) => {
             <thead>
               <tr>
                 <th className="table-item1">STT</th>
-                <th>Tên chi đoàn</th>
+                <th className="mb-tableItem">Tên chi đoàn</th>
                 <th>Khóa</th>
                 <th>Số đoàn viên</th>
                 <th>Số tiền</th>
@@ -123,7 +133,7 @@ const NopDoanPhi = (props) => {
                   return (
                     <tr key={`table-chidoan-${index}`} className="tableRow">
                       <td className="col-center">{index + 1}</td>
-                      <td className="">{item.TenLop}</td>
+                      <td className="mb-tableItem mb-tableItem1">{item.TenLop}</td>
                       <td className="col-center">{item.Khoa}</td>
                       <td className="col-center">{item.SoLuongDoanVien}</td>
 

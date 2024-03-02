@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate  } from "react-router-dom";
 import Form from "react-bootstrap/Form";
 import ModalSuccess from "../Modal/ModalSuccess";
 import axios from "axios";
@@ -21,6 +21,7 @@ import {
 
 const DoanVien = (props) => {
   const IDDoanVien = localStorage.getItem("IDDoanVien");
+  const navigate = useNavigate();
 
   const [DoanVien, setDoanVien] = useState([]);
   const [CVDoanVien, setCVDoanVien] = useState([]);
@@ -37,7 +38,19 @@ const DoanVien = (props) => {
   const [image, setImage] = useState("");
   const [previewImage, setPreviewImage] = useState("");
 
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
+
   useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
     layMotDoanVien();
     fetchChucVu();
     fetchTonGiao();
@@ -179,8 +192,6 @@ const DoanVien = (props) => {
       }));
     }
   };
-  
-
 
   const handleToggleEdit = () => {
     setIsEditing((prevIsEditing) => !prevIsEditing);
@@ -232,8 +243,7 @@ const handleChangeChucVu = (e, index) => {
     IDChucVu: [...listIDChucVu],
   }));
 };
-
-  
+ 
   const handleSaveChanges = async (e) => {
     e.preventDefault();
 
@@ -340,7 +350,7 @@ const handleChangeChucVu = (e, index) => {
         <h2 className="text-center">Đoàn Viên</h2>
 
         <div className="row formAdd">
-          <div className="col-12 col-md-3 col-lg-2">
+          <div className="col-6 col-md-3 col-lg-2">
             <div className="avatar">
               <img
                 className="avatar_img"

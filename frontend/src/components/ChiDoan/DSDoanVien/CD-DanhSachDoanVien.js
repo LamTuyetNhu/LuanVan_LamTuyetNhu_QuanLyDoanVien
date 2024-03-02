@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import * as XLSX from "xlsx";
 import { format } from "date-fns";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import Modal from "../../Modal/Modal";
 import ExcelDataModal from "../../Modal/ExcelDataModal1";
 
@@ -22,9 +22,11 @@ import {
   laymotlop,
   namhoc,
   chucvu,
+  searchManyDoanVien
 } from "../../../services/apiService";
 
 const DanhSachDoanVien = (props) => {
+  const navigate = useNavigate();
   const IDLop = localStorage.getItem("IDLop");
 
   const [DSDoanVien, setListDoanVien] = useState([]);
@@ -52,7 +54,23 @@ const DanhSachDoanVien = (props) => {
     GioiTinh: "",
   });
 
+  const [searchMany, setsearchMany] = useState({
+    info: "",
+  });
+
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
+
   useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
     fetchDSDoanVien();
     fetchDSChucVu();
     fetchAllData();
@@ -121,22 +139,6 @@ const DanhSachDoanVien = (props) => {
     }
   };
 
-  // const fetchDSNamHocCuaLop = async () => {
-  //   try {
-  //     let res = await namhoccuachidoan(IDLop);
-  //     console.log(res);
-  //     if (res.status === 200) {
-  //       const NamHocdata = res.data.dataNH;
-  //         setNamHoc(NamHocdata[0].IDNamHoc);
-  //         setDSNamHoc(NamHocdata);
-  //     } else {
-  //       console.error("Lỗi khi gọi API:", res.statusText);
-  //     }
-  //   } catch (error) {
-  //     console.error("Lỗi khi gọi API:", error.message);
-  //   }
-  // };
-
   const handleSearch = async () => {
     try {
       const trimmedMSSV = searchData.MSSV.trim().toLowerCase();
@@ -148,7 +150,7 @@ const DanhSachDoanVien = (props) => {
         HoTen: trimmedHoTen,
         IDNamHoc: idnamhoc,
         currentPage: currentPage,
-      }); // Assuming you have implemented the search API
+      });
 
       console.log(res);
       if (res.status === 200) {
@@ -172,6 +174,24 @@ const DanhSachDoanVien = (props) => {
     }
   };
 
+  const handleManySearch = async () => {
+    try {
+      const trimmedInfo = searchMany.info.trim().toLowerCase();
+      let res = await searchManyDoanVien({
+        IDLop: IDLop,
+        trimmedInfo,
+        IDNamHoc: idnamhoc,
+      }); // Assuming you have implemented the search API
+      console.log(res);
+      if (res.status === 200) {
+        setListDoanVien(res.data.dataCD);
+      } else {
+        console.error("Lỗi khi tìm kiếm:", res.statusText);
+      }
+    } catch (error) {
+      console.error("Lỗi khi tìm kiếm:", error.message);
+    }
+  };
   // Hàm xử lý khi nhấn nút sang trái
   const handlePrevPage = () => {
     if (currentPage > 1) {
@@ -345,7 +365,7 @@ const DanhSachDoanVien = (props) => {
           </div>
         </div>
         <div className="search">
-          <div className="searchDV">
+          <div className="searchDV laptop">
             <div className="">
               <div className="searchDV-input">
                 <input
@@ -418,6 +438,50 @@ const DanhSachDoanVien = (props) => {
               </div>
             </div>
           </div>
+
+          <div className="searchDV tablet-mobile">
+            <div className="searchDV-Right">
+              <NavLink to={`/ChiDoan/ThemMoi-DoanVien`}>
+                <button className="formatButton">
+                  <FontAwesomeIcon icon={faPlus} />
+                </button>
+              </NavLink>
+              <div>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  style={{ display: "none" }}
+                  onChange={handleFileChange}
+                />
+                <button className="formatButton" onClick={handleButtonClick}>
+                  <FontAwesomeIcon icon={faCloudArrowUp} />
+                </button>
+              </div>
+
+              <div>
+                <button className="formatButton" onClick={exportToExcel}>
+                  <FontAwesomeIcon icon={faCloudArrowDown} />
+                </button>
+              </div>
+            </div>
+            <div className="">
+              <div className="searchDV-input">
+                <input
+                  type="text"
+                  className="search_name "
+                  placeholder="Tìm mã, tên đoàn viên"
+                  value={searchData.info}
+                  onChange={(e) => {
+                    setsearchMany({ info: e.target.value });
+                  }}
+                />
+              </div>
+
+              <button className="formatButton" onClick={handleManySearch}>
+                <FontAwesomeIcon icon={faMagnifyingGlass} />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -427,8 +491,8 @@ const DanhSachDoanVien = (props) => {
             <thead>
               <tr>
                 <th className="table-item ">STT</th>
-                <th className="table-item">Mã Đoàn Viên</th>
-                <th className="table-item">Tên Đoàn Viên</th>
+                <th className="mb-tableItem">Mã đoàn viên</th>
+                <th className="">Tên đoàn viên</th>
                 <th>Ngày sinh</th>
                 <th>Giới tính</th>
                 <th>Chức vụ</th>
@@ -446,8 +510,8 @@ const DanhSachDoanVien = (props) => {
                   return (
                     <tr key={`table-doanvien-${index}`} className="tableRow">
                       <td className=" col-center">{stt}</td>
-                      <td className="">{item.MSSV}</td>
-                      <td className="">{item.HoTen}</td>
+                      <td className="mb-tableItem mb-tableItem1">{item.MSSV}</td>
+                      <td class="">{item.HoTen}</td>
                       <td className="col-center">
                         {format(new Date(item.NgaySinh), "dd/MM/yyyy")}
                       </td>

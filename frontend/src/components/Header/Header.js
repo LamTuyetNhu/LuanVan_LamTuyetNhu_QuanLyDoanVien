@@ -1,13 +1,38 @@
 import { NavLink } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown, faBars } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronDown,
+  faBars,
+  faArrowRightFromBracket,
+} from "@fortawesome/free-solid-svg-icons";
 
 import huyhieu from "../../assets/huyhieu.png";
 import logo from "../../assets/logo.jpg";
-
+import { laytentruong } from "../../services/apiService";
 import { useState, useEffect } from "react";
 
 function Header() {
+  const IDTruong = localStorage.getItem("IDTruong");
+  const [TenTruong, setTenTruong] = useState([]);
+  useEffect(() => {
+    fetchTenTruong();
+  }, [IDTruong]);
+
+  const fetchTenTruong = async () => {
+    try {
+      let res = await laytentruong(IDTruong);
+      console.log(res);
+
+      if (res.status === 200) {
+        setTenTruong(res.data.dataDT.TenTruong);
+      } else {
+        console.error("Lỗi khi gọi API:", res.statusText);
+      }
+    } catch (error) {
+      console.error("Lỗi khi gọi API:", error.message);
+    }
+  };
+
   const [isMenuOpen, setMenuOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -24,14 +49,23 @@ function Header() {
     return () => {
       document.removeEventListener("click", closeMenu);
     };
-  }, []); 
+  }, []);
 
   const handleHeaderClick = (e) => {
     e.stopPropagation();
   };
 
+  const handleLogout = () => {
+    // Xóa toàn bộ localStorage
+    localStorage.clear();
+    // Hoặc xóa chỉ các key cụ thể nếu cần
+    // localStorage.removeItem("key1");
+    // localStorage.removeItem("key2");
+    // window.location.href = "/"; 
+  };
+
   return (
-    <header >
+    <header>
       <div className={`header ${isMenuOpen ? "menu-open" : ""}`}>
         <div className="logo">
           <NavLink to="/BCH-DoanTruong">
@@ -46,13 +80,29 @@ function Header() {
           <img className="logo-img1" src={logo} alt="logo-dtn" />
 
           <div className="username">
-            Đoàn trường CNTT&TT
+            Đoàn {TenTruong}
             <div className="header__cart-list">
               <ul className="header__cart-list-item">
                 <li className="header__cart-item">
-                  <a href="/" className="header__cart-item-info">
+                  <NavLink
+                    to="/BCH-DoanTruong/ThongTinCaNhan"
+                    className="header__cart-item-info"
+                  >
+                    Trang cá nhân
+                  </NavLink>
+                </li>
+                <li className="header__cart-item">
+                  <NavLink
+                    to="/BCH-DoanTruong/DoiMatKhau"
+                    className="header__cart-item-info"
+                  >
+                    Đổi mật khẩu
+                  </NavLink>
+                </li>
+                <li className="header__cart-item"  onClick={handleLogout}>
+                  <NavLink to="/" className="header__cart-item-info ">
                     Đăng xuất
-                  </a>
+                  </NavLink>
                 </li>
               </ul>
             </div>
@@ -60,7 +110,12 @@ function Header() {
         </div>
       </div>
 
-      <div className={`contentHeader contentHeaderMb ${isMenuOpen ? "menu-open" : ""}`} onClick={handleHeaderClick}>
+      <div
+        className={`contentHeader contentHeaderMb ${
+          isMenuOpen ? "menu-open" : ""
+        }`}
+        onClick={handleHeaderClick}
+      >
         <FontAwesomeIcon
           icon={faBars}
           className="menu-icon"
@@ -74,15 +129,20 @@ function Header() {
             </a>
             <ul className="subnav">
               <li>
-                <NavLink to="/BCH-DoanTruong">Danh sách chi đoàn</NavLink>
+                <NavLink to="/BCH-DoanTruong" onClick={closeMenu}>
+                  Danh sách chi đoàn
+                </NavLink>
               </li>
               <li>
-                <NavLink to="/BCH-DoanTruong/DanhSachBCH">
+                <NavLink to="/BCH-DoanTruong/DanhSachBCH" onClick={closeMenu}>
                   Danh sách BCH
                 </NavLink>
               </li>
               <li>
-                <NavLink to="/BCH-DoanTruong/SinhVienNamTot">
+                <NavLink
+                  to="/BCH-DoanTruong/SinhVienNamTot"
+                  onClick={closeMenu}
+                >
                   Sinh viên năm tốt
                 </NavLink>
               </li>
@@ -95,18 +155,24 @@ function Header() {
             </a>
             <ul className="subnav">
               <li>
-                <NavLink to="/BCH-DoanTruong/DoanPhi">Đoàn phí</NavLink>
+                <NavLink to="/BCH-DoanTruong/DoanPhi" onClick={closeMenu}>
+                  Đoàn phí
+                </NavLink>
               </li>
-              {/* <li>
-                <a>Khai trừ chi đoàn</a>
-              </li> */}
               <li>
-                <a>Đánh giá và xếp loại chi đoàn</a>
+                <NavLink
+                  to="/BCH-DoanTruong/DanhGiaChiDoan"
+                  onClick={closeMenu}
+                >
+                  Đánh giá và xếp loại chi đoàn
+                </NavLink>
               </li>
             </ul>
           </li>
           <li className="nav-item">
-            <NavLink to="/BCH-DoanTruong/HoatDong">HOẠT ĐỘNG</NavLink>
+            <NavLink to="/BCH-DoanTruong/HoatDong" onClick={closeMenu}>
+              HOẠT ĐỘNG
+            </NavLink>
           </li>
         </ul>
       </div>

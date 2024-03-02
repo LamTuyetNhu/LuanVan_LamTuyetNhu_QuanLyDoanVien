@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 import Form from "react-bootstrap/Form";
 import { useParams } from "react-router-dom";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import ModalSuccess from "../../Modal/ModalSuccess";
 
 import {
@@ -15,13 +15,24 @@ import { laymotchidoan, CapNhatChiDoan } from "../../../services/apiService";
 import logo from "../../../assets/logo.jpg";
 
 const ChiTietChiDoan = (props) => {
+  const navigate = useNavigate();
   const IDLop = localStorage.getItem("IDLop");
   const [ChiDoan, setChiDoan] = useState([]);
 
   const [editedChiDoan, setEditedChiDoan] = useState({});
   const [isEditing, setIsEditing] = useState(false);
-
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
   useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
     LayMotChiDoan();
   }, [IDLop]);
 
@@ -250,6 +261,8 @@ const ChiTietChiDoan = (props) => {
             </div>
           </div>
           <br />
+          <div className="update row">
+
           <div className="btns">
             <button className="allcus-button" type="submit">
               <NavLink to="/BCH-DoanTruong" className="navlink">
@@ -268,6 +281,7 @@ const ChiTietChiDoan = (props) => {
               </button>
             )}
 
+          </div>
           </div>
         </form>
 

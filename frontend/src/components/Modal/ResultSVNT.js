@@ -36,8 +36,8 @@ const ExcelDataModal = ({ onClose  }) => {
       <thead>
         <tr>
           <th>MSSV</th>
-          <th>Họ Tên</th>
-          <th>Ngày ứng tuyển</th>
+          <th className="NoneMoblie">Họ Tên</th>
+          <th className="NoneMoblie">Ngày ứng tuyển</th>
           <th>Năm học</th>
           <th>Trạng thái</th>
         </tr>
@@ -51,8 +51,8 @@ const ExcelDataModal = ({ onClose  }) => {
         {DSUngTuyen.map((data, index) => (
           <tr key={index}>
             <td>{data.MSSV}</td>
-            <td>{data.HoTen}</td>
-            <td className="col-center">{formatDate(data.NgayUngTuyen)}</td>
+            <td className="NoneMoblie">{data.HoTen}</td>
+            <td className="col-center NoneMoblie">{formatDate(data.NgayUngTuyen)}</td>
             <td className="col-center">{data.TenNamHoc}</td>
             <td>{data.TTUngTuyen === 0 ? "Chưa xét duyệt" : data.TTUngTuyen === 1 ? "Đã xét duyệt" : "Không đủ điều kiện"}</td>
           </tr>

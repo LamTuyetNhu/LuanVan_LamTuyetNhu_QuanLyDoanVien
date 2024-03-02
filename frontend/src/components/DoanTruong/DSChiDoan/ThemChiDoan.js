@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Form from "react-bootstrap/Form";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import Modal from "../../Modal/Modal";
 import ModalAddSuccess from "../../Modal/ModalAddSuccess";
 
@@ -8,6 +8,23 @@ import { themChiDoan } from "../../../services/apiService";
 import logo from "../../../assets/logo.jpg";
 
 const DoanVien = (props) => {
+  const navigate = useNavigate();
+  const IDTruong = localStorage.getItem("IDTruong");
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
+
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
+  }, [IDTruong]);
+
   const [themchidoan, setthemchidoan] = useState({
     MaLop: "",
     TenLop: "",
@@ -63,7 +80,7 @@ const DoanVien = (props) => {
     }
 
     try {
-      let res = await themChiDoan(themchidoan);
+      let res = await themChiDoan(IDTruong, themchidoan);
       // Xử lý sau khi thêm thành công (chuyển hướng hoặc hiển thị thông báo)
       if (res.status === 200) {
         setSuccessMessage("Thêm thành công!");
@@ -143,6 +160,7 @@ const DoanVien = (props) => {
             </div>
           </div>
           <br />
+          <div className="update row">
           <div className="btns">
             <button className="allcus-button button-error" type="submit">
               <NavLink to="/BCH-DoanTruong" className="navlink">
@@ -154,6 +172,7 @@ const DoanVien = (props) => {
               Thêm mới
             </button>
           </div>
+</div>
         </form>
         <div className="margin-bottom"></div>
 

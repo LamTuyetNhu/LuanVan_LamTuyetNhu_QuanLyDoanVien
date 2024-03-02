@@ -1,8 +1,10 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import Form from "react-bootstrap/Form";
 import ModalSuccess from "../../Modal/ModalSuccess";
+import DeleteSuccess from "../../Modal/DeleteSuccess";
+import DeleteConfirmationModal from "../../Modal/DeleteConfirmationModal";
 import axios from "axios";
 
 import {
@@ -10,25 +12,33 @@ import {
   faSave,
   faEdit,
   faCamera,
+  faX,
+  faTrash
 } from "@fortawesome/free-solid-svg-icons";
 import {
   chucvu,
   LayTonGiao,
   LayDanToc,
   layDSChucVuDoanVien,
+  XoaDoanVien,
   laytendoanvien,
+  XoaChiTietDoanVien,
+  layDSDanhGiaDoanVien,
 } from "../../../services/apiService";
 
 const DoanVien = (props) => {
+  const navigate = useNavigate();
   const IDDoanVien = localStorage.getItem("IDDoanVien");
 
   const [DoanVien, setDoanVien] = useState([]);
   const [CVDoanVien, setCVDoanVien] = useState([]);
+  const [DGDoanVien, setDGDoanVien] = useState([]);
 
   const [DanToc, setDanToc] = useState([]);
   const [TonGiao, setTonGiao] = useState([]);
   const [ChucVu, setChucVu] = useState([]);
   const [listIDChucVu, setListIDChucVu] = useState([]);
+  const [listIDDanhGia, setListIDDanhGia] = useState([]);
 
   const [editedDoanVien, seteditedDoanVien] = useState({});
   const [isEditing, setIsEditing] = useState(false);
@@ -37,13 +47,40 @@ const DoanVien = (props) => {
   const [image, setImage] = useState("");
   const [previewImage, setPreviewImage] = useState("");
 
+  const [showModal, setShowModal] = useState(false);
+  const [showModal1, setShowModal1] = useState(false);
+  const [showModal2, setShowModal2] = useState(false);
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
   useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
     layMotDoanVien();
     fetchChucVu();
     fetchTonGiao();
     fetchDanToc();
+    DSDanhGiaDoanVien();
     DSChucVuDoanVien();
   }, [IDDoanVien]);
+
+  const handleDelete = async () => {
+    try {
+      await XoaDoanVien(IDDoanVien);
+      setShowModal(false);
+      setShowModal1(true);
+      console.log("Hoạt động đã được xóa thành công!");
+    } catch (error) {
+      console.error("Lỗi khi xóa hoạt động:", error);
+    }
+  };
+
 
   const layMotDoanVien = async () => {
     try {
@@ -73,6 +110,22 @@ const DoanVien = (props) => {
         // Assuming dataDV contains roles (ChucVu)
         setCVDoanVien(dataDV);
         setListIDChucVu(dataDV.map((item) => item.IDChucVu));
+      } else {
+        console.error("Lỗi khi gọi API:", res.statusText);
+      }
+    } catch (error) {
+      console.error("Lỗi khi gọi API:", error.message);
+    }
+  };
+
+  const DSDanhGiaDoanVien = async () => {
+    try {
+      let res = await layDSDanhGiaDoanVien(IDDoanVien);
+      if (res.status === 200) {
+        const { dataDV } = res.data;
+        // Assuming dataDV contains roles (ChucVu)
+        setDGDoanVien(dataDV);
+        setListIDDanhGia(dataDV.map((item) => item.IDDanhGia));
       } else {
         console.error("Lỗi khi gọi API:", res.statusText);
       }
@@ -329,6 +382,16 @@ const handleChangeChucVu = (e, index) => {
       setIsEditing(false);
     } catch (error) {
       console.error("Lỗi khi cập nhật dữ liệu:", error);
+    }
+  };
+
+  const handleDisplayButtonClick = async (itemID, IDDanhGia) => {
+    try {
+      await XoaChiTietDoanVien(itemID, IDDanhGia);
+      setCVDoanVien(prevCVDoanVien => prevCVDoanVien.filter(item => item.IDChiTietNamHoc !== itemID));
+      setShowModal2(true);
+    } catch (error) {
+      console.error("Lỗi khi xóa hoạt động:", error);
     }
   };
 
@@ -667,6 +730,9 @@ const handleChangeChucVu = (e, index) => {
                         <th className="table-item">STT</th>
                         <th className="table-item">Tên năm học</th>
                         <th>Chức vụ</th>
+                        <th>Phân loại</th>
+                        <th>Xóa năm học</th>
+
                       </tr>
                     </thead>
                     <tbody id="myTable">
@@ -702,6 +768,32 @@ const handleChangeChucVu = (e, index) => {
                                   item.TenCV
                                 )}
                               </td>
+                              <td>
+                                {DGDoanVien[index]
+                                  ? DGDoanVien[index].PhanLoai === 1
+                                    ? "Xuất sắc"
+                                    : DGDoanVien[index].PhanLoai === 2
+                                    ? "Khá"
+                                    : DGDoanVien[index].PhanLoai === 3
+                                    ? "Trung bình"
+                                    : DGDoanVien[index].PhanLoai === 4
+                                    ? "Yếu kém"
+                                    : "Chưa phân loại"
+                                  : "Chưa có đánh giá"}
+                              </td>
+                              <td className="btnOnTable1">
+                                <button
+                                  className="btnOnTable mauxoa"
+                                  onClick={() =>
+                                    handleDisplayButtonClick(
+                                      item.IDChiTietNamHoc,
+                                      DGDoanVien[index].IDDanhGia
+                                    )
+                                  }
+                                >
+                                  <FontAwesomeIcon icon={faX} />
+                                </button>
+                              </td>
                             </tr>
                           );
                         })}
@@ -735,6 +827,13 @@ const handleChangeChucVu = (e, index) => {
                     <FontAwesomeIcon icon={faEdit} /> Cập nhật
                   </button>
                 )}
+                <button
+                  className="allcus-button button-error"
+                  type="button"
+                  onClick={() => setShowModal(true)}
+                >
+                  <FontAwesomeIcon icon={faTrash} />
+                </button>
               </div>
             </div>
           </div>

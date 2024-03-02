@@ -1,24 +1,43 @@
-import { NavLink } from "react-router-dom";
+import { NavLink , useNavigate} from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Modal from "../../Modal/Modal";
-import { faSave, faEdit } from "@fortawesome/free-solid-svg-icons";
+import * as XLSX from "xlsx";
 import {
+  faSave,
+  faCloudArrowDown,
+  faMagnifyingGlass,
+} from "@fortawesome/free-solid-svg-icons";
+import {
+  searchManyDoanPhiCuaDoanVien,
   LayDSNopDoanPhiCuaMotLop,
   SaveCheckboxStatesCuaMotLop,
 } from "../../../services/apiService";
 
 const NopDoanPhi = (props) => {
+  const navigate = useNavigate();
   const [DSNopDoanPhi, setDSNopDoanPhi] = useState([]);
   const [TenDP, setTenDP] = useState([]);
   const [TenNamHoc, setTenNamHoc] = useState([]);
 
   const [checkboxStates, setCheckboxStates] = useState([]);
-  const {  IDDoanPhi, IDNamHoc } = useParams();
+  const { IDDoanPhi, IDNamHoc } = useParams();
   const IDLop = localStorage.getItem("IDLop");
 
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
+
   useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
     fetchDSNopDoanPhi();
   }, [IDDoanPhi, IDNamHoc]);
 
@@ -30,12 +49,11 @@ const NopDoanPhi = (props) => {
   const fetchDSNopDoanPhi = async () => {
     try {
       let res = await LayDSNopDoanPhiCuaMotLop(IDLop, IDDoanPhi, IDNamHoc);
-      console.log("API Response:", res.data); 
+      console.log("API Response:", res.data);
       if (res.status === 200) {
         setDSNopDoanPhi(res.data.ChiTietDoanPhi);
         setTenDP(res.data.TenDoanPhi);
         setTenNamHoc(res.data.TenNamHoc);
-
       } else {
         // Xử lý trường hợp lỗi
         console.error("Lỗi khi gọi API:", res.statusText);
@@ -69,8 +87,8 @@ const NopDoanPhi = (props) => {
         isChecked: checkboxStates[index],
       }));
 
-      console.log(dataToSave)
-  
+      console.log(dataToSave);
+
       let res = await SaveCheckboxStatesCuaMotLop(IDDoanPhi, dataToSave);
       if (res.status === 200) {
         setModalMessage("Cập nhật thành công!");
@@ -98,17 +116,92 @@ const NopDoanPhi = (props) => {
     setIsErrorModal(false);
   };
 
+  const exportToExcel = () => {
+    try {
+      const filteredData = DSNopDoanPhi.map((item) => ({
+        MSSV: item.MSSV,
+        "Tên đoàn viên": item.HoTen,
+        "Điểm danh": item.Check === 1 ? "X" : "",
+      }));
+
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(filteredData);
+
+      XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+
+      const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+      const data = new Blob([excelBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+
+      const fileName = TenDP; // Tên file sẽ là nội dung của thẻ h2, bạn có thể thay đổi theo yêu cầu
+
+      // Tải file
+      const a = document.createElement("a");
+      document.body.appendChild(a);
+      a.style = "display: none";
+      const url = window.URL.createObjectURL(data);
+      a.href = url;
+      a.download = `${fileName}.xlsx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Lỗi khi xuất Excel:", error.message);
+    }
+  };
+
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = () => {
+    const filteredData = DSNopDoanPhi.filter((item) => {
+      const lowerCaseSearchQuery = searchQuery.toLowerCase();
+      return (
+        item.MSSV.toLowerCase().includes(lowerCaseSearchQuery) ||
+        item.HoTen.toLowerCase().includes(lowerCaseSearchQuery)
+      );
+    });
+
+    setDSNopDoanPhi(filteredData);
+  };
+
   return (
     <>
       <div className="container-fluid app__content">
-        <h5 className="text-center">{TenDP} - {TenNamHoc}</h5>
+      <div className="namhoc-center">
+
+        <h5 className="text-center">
+          {TenDP} <br /> {TenNamHoc}
+        </h5>
+      </div>
+
+        <div className="search">
+          <div className="searchDV">
+            <div className="">
+              <div className="searchDV-input">
+                <input
+                  type="text"
+                  className="search_name "
+                  placeholder="Tìm mã, tên đoàn viên"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+
+              <button className="formatButton" onClick={handleSearch}>
+                <FontAwesomeIcon icon={faMagnifyingGlass} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="listDV">
 
         <div className="table-container">
           <table className="table table-striped">
             <thead>
               <tr>
                 <th className="table-item1">STT</th>
-                <th>MSSV</th>
+                <th className="mb-tableItem">MSSV</th>
                 <th>Tên đoàn viên</th>
                 <th>Số tiền</th>
                 <th>Đã đóng</th>
@@ -121,7 +214,9 @@ const NopDoanPhi = (props) => {
                   return (
                     <tr key={`table-chidoan-${index}`} className="tableRow">
                       <td className="col-center">{index + 1}</td>
-                      <td className="">{item.MSSV}</td>
+                      <td className="mb-tableItem mb-tableItem1">
+                        {item.MSSV}
+                      </td>
                       <td className="">{item.HoTen}</td>
 
                       <td className="col-right">
@@ -144,15 +239,21 @@ const NopDoanPhi = (props) => {
               )}
             </tbody>
           </table>
-
-          <div>
-            <button className="formatButton btnRight" onClick={handleSave}>
+        </div>
+        {DSNopDoanPhi && DSNopDoanPhi.length > 0 && (
+        <div className="">
+          <div className="searchDV-Right">
+            <button className="formatButton" onClick={exportToExcel}>
+              <FontAwesomeIcon icon={faCloudArrowDown} /> Tải xuống
+            </button>
+            <button className="formatButton" onClick={handleSave}>
               <FontAwesomeIcon icon={faSave} /> Lưu
             </button>
           </div>
         </div>
-
-        <div className="margin-bottom"></div>
+        )}
+        <br/>
+        </div>
       </div>
 
       <Modal

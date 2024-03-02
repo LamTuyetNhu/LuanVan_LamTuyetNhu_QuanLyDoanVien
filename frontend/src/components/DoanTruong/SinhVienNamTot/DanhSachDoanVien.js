@@ -1,34 +1,32 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useState, useNavigate } from "react";
 import * as XLSX from "xlsx";
-import { format } from "date-fns";
-import { NavLink } from "react-router-dom";
-import Modal from "../../Modal/Modal";
 import ModalUpdateStatus from "../../Modal/UpdateStatus";
-import ModalSuccess from "../../Modal/ModalSuccess";
+import { NavLink } from "react-router-dom";
 
-import axios from "axios";
 import {
   faEdit,
   faFilePdf,
   faCloudArrowDown,
   faMagnifyingGlass,
+  faChevronLeft,
+  faChevronRight
 } from "@fortawesome/free-solid-svg-icons";
 import {
   searchManySVNT,
   namhoc,
-  DanhSachUngTuyen,
+  DanhSachUngTuyenCT,
 } from "../../../services/apiService";
 
 const DanhSachDoanVien = (props) => {
   const [DSDoanVien, setListDoanVien] = useState([]);
-
+  const IDTruong = localStorage.getItem("IDTruong");
   const [idnamhoc, setNamHoc] = useState(1);
   const [DSNamHoc, setDSNamHoc] = useState([]);
   const [isModalOpen, setModalOpen] = useState(false);
   const [selectedIDUngTuyen, setSelectedIDUngTuyen] = useState(null);
   const [showModalUpdate, setShowModalUpdate] = useState(false);
+  const navigate = useNavigate();
 
   const handleIconClick = (IDUngTuyen) => {
     setSelectedIDUngTuyen(IDUngTuyen);
@@ -39,20 +37,37 @@ const DanhSachDoanVien = (props) => {
     setModalOpen(false);
   };
 
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+
   const [searchData, setSearchData] = useState({
-    info: ""
+    info: "",
   });
 
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
+
   useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
     fetchDSDoanVien();
     fetchAllData();
     fetchDSNamHoc();
-    setShowModalUpdate(true)
-  }, [idnamhoc]);
+    setShowModalUpdate(true);
+  }, [idnamhoc, IDTruong, currentPage, totalPages]);
 
   const fetchDSDoanVien = async () => {
     try {
-      let res = await DanhSachUngTuyen(idnamhoc);
+      let res = await DanhSachUngTuyenCT(idnamhoc, IDTruong, currentPage);
       console.log(res);
 
       if (res.status === 200) {
@@ -91,6 +106,7 @@ const DanhSachDoanVien = (props) => {
       let res = await searchManySVNT({
         trimmedInfo: trimmedInfo,
         IDNamHoc: idnamhoc,
+        IDTruong: IDTruong,
       });
 
       console.log(res);
@@ -109,13 +125,14 @@ const DanhSachDoanVien = (props) => {
   const fetchAllData = async () => {
     try {
       let allDataArray = [];
-      let res = await DanhSachUngTuyen(idnamhoc);
-
-      if (res.status === 200) {
+      for (let page = 1; page <= totalPages; page++) {
+        let res = await DanhSachUngTuyenCT(idnamhoc, IDTruong, page);
+        if (res.status === 200) {
         allDataArray = [...allDataArray, ...res.data.dataUT];
       } else {
         console.error("Lỗi khi gọi API:", res.statusText);
       }
+    }
       setAllData(allDataArray);
     } catch (error) {
       console.error("Lỗi khi gọi API:", error.message);
@@ -157,6 +174,24 @@ const DanhSachDoanVien = (props) => {
     }
   };
 
+  
+  const changePage = (newPage) => {
+    setCurrentPage(newPage);
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+
   const handleNamHocChange = (e) => {
     const selectedIDNamHoc = e.target.value;
     setNamHoc(selectedIDNamHoc);
@@ -186,7 +221,7 @@ const DanhSachDoanVien = (props) => {
           </div>
         </div>
         <div className="search">
-          <div className="searchDV">
+          <div className="searchDV laptop">
             <div className="">
               <div className="searchDV-input">
                 <input
@@ -195,22 +230,61 @@ const DanhSachDoanVien = (props) => {
                   placeholder="Tìm lớp, mssv, họ tên"
                   value={searchData.info}
                   onChange={(e) => {
-                    setSearchData({info: e.target.value });
+                    setSearchData({ info: e.target.value });
                   }}
                 />
               </div>
-             
+
               <button className="formatButton" onClick={handleSearch}>
                 <FontAwesomeIcon icon={faMagnifyingGlass} />
               </button>
             </div>
             <div className="buttonSearch">
               <div>
+                <NavLink to="/BCH-DoanTruong/TieuChi" className="navlink">
+                  <button className="formatButton">Tiêu chí</button>
+                </NavLink>
+              </div>
+              <div>
                 <button className="formatButton" onClick={exportToExcel}>
                   <FontAwesomeIcon icon={faCloudArrowDown} />
                 </button>
               </div>
             </div>
+          </div>
+
+          <div className="searchDV tablet-mobile">
+          <div className="searchDV-Right">
+              <div>
+                <NavLink to="/BCH-DoanTruong/TieuChi" className="navlink">
+                  <button className="formatButton">Tiêu chí</button>
+                </NavLink>
+              </div>
+              <div>
+                <button className="formatButton" onClick={exportToExcel}>
+                  <FontAwesomeIcon icon={faCloudArrowDown} />
+                </button>
+              </div>
+            </div>
+            
+            <div className="">
+              <div className="searchDV-input">
+                <input
+                  type="text"
+                  className="search_name"
+                  placeholder="Tìm lớp, mssv, họ tên"
+                  value={searchData.info}
+                  onChange={(e) => {
+                    setSearchData({ info: e.target.value });
+                  }}
+                />
+              </div>
+
+              <button className="formatButton" onClick={handleSearch}>
+                <FontAwesomeIcon icon={faMagnifyingGlass} />
+              </button>
+            </div>
+
           </div>
         </div>
       </div>
@@ -222,7 +296,7 @@ const DanhSachDoanVien = (props) => {
               <tr>
                 <th>STT</th>
                 <th>Mã lớp</th>
-                <th>MSSV</th>
+                <th className="mb-tableItem">MSSV</th>
                 <th>Họ tên</th>
                 <th>Email</th>
                 <th>Hồ sơ</th>
@@ -238,7 +312,9 @@ const DanhSachDoanVien = (props) => {
                     <tr key={`table-doanvien-${index}`} className="tableRow">
                       <td className="col-center">{index + 1}</td>
                       <td className="">{item.MaLop}</td>
-                      <td className="">{item.MSSV}</td>
+                      <td className="mb-tableItem mb-tableItem1">
+                        {item.MSSV}
+                      </td>
                       <td className="">{item.HoTen}</td>
                       <td className="">{item.Email}</td>
                       <td className="col-center">
@@ -278,6 +354,74 @@ const DanhSachDoanVien = (props) => {
           </table>
         </div>
       </div>
+
+      {DSDoanVien && DSDoanVien.length > 0 && (
+        <div className="pagination pagination1">
+          <button
+            className="btn-footer"
+            onClick={handlePrevPage}
+            disabled={currentPage <= 1}
+          >
+            <FontAwesomeIcon icon={faChevronLeft} />
+          </button>
+
+          {totalPages > 4 && currentPage > 3 && (
+            <div className="footer">
+              <span className="ellipsis"></span>
+            </div>
+          )}
+
+          {Array.from(
+            { length: totalPages > 4 ? 3 : totalPages },
+            (_, index) => {
+              let pageToShow;
+              if (totalPages <= 4) {
+                pageToShow = index + 1;
+              } else if (currentPage <= 3) {
+                pageToShow = index + 1;
+              } else if (currentPage >= totalPages - 2) {
+                pageToShow = totalPages - 2 + index;
+              } else {
+                pageToShow = currentPage - 1 + index;
+              }
+
+              return (
+                <div className="footer" key={index}>
+                  <button
+                    className={`btn-footer ${
+                      currentPage === pageToShow ? "active" : ""
+                    }`}
+                    onClick={() => changePage(pageToShow)}
+                    disabled={currentPage === pageToShow}
+                  >
+                    {pageToShow}
+                  </button>
+                </div>
+              );
+            }
+          )}
+
+          {totalPages > 4 && currentPage < totalPages - 2 && (
+            <div className="footer">
+              <span className="ellipsis"></span>
+            </div>
+          )}
+
+          <button
+            className="btn-footer"
+            onClick={handleNextPage}
+            disabled={currentPage >= totalPages}
+          >
+            <FontAwesomeIcon icon={faChevronRight} />
+          </button>
+        </div>
+      )}
+
+      {DSDoanVien && DSDoanVien.length <= 5 && (
+        <div className="pagination pagination1">
+          {/* You can add some message or content indicating that pagination is not shown */}
+        </div>
+      )}
 
       {isModalOpen && (
         <ModalUpdateStatus

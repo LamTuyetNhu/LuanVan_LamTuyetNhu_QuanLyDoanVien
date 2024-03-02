@@ -1,39 +1,44 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
 import * as XLSX from "xlsx";
-import { format } from "date-fns";
-import { NavLink } from "react-router-dom";
-import Modal from "../../Modal/Modal";
-import ExcelDataModal from "../../Modal/ExcelDataModal1";
+import { NavLink, useNavigate } from "react-router-dom";
 
-import axios from "axios";
 import {
-  faEdit,
   faFilePdf,
   faCloudArrowDown,
   faMagnifyingGlass,
 } from "@fortawesome/free-solid-svg-icons";
 import {
-  searchDoanVien,
+  searchManySVNT,
   namhoc,
-  DanhSachUngTuyen,
+  DanhSachUngTuyenCuaLop,
 } from "../../../services/apiService";
 
 const DanhSachDoanVien = (props) => {
+  const navigate = useNavigate();
+  const IDLop = localStorage.getItem("IDLop");
   const [DSDoanVien, setListDoanVien] = useState([]);
 
   const [idnamhoc, setNamHoc] = useState(1);
   const [DSNamHoc, setDSNamHoc] = useState([]);
 
   const [searchData, setSearchData] = useState({
-    MSSV: "",
-    HoTen: "",
-    IDChucVu: "",
-    GioiTinh: "",
+    info: "",
   });
 
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
+
   useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
     fetchDSDoanVien();
     fetchAllData();
     fetchDSNamHoc();
@@ -41,7 +46,7 @@ const DanhSachDoanVien = (props) => {
 
   const fetchDSDoanVien = async () => {
     try {
-      let res = await DanhSachUngTuyen(idnamhoc);
+      let res = await DanhSachUngTuyenCuaLop(idnamhoc, IDLop);
       console.log(res);
 
       if (res.status === 200) {
@@ -77,15 +82,10 @@ const DanhSachDoanVien = (props) => {
 
   const handleSearch = async () => {
     try {
-      const trimmedMaLop = searchData.MaLop.trim().toLowerCase();
-      const trimmedMSSV = searchData.MSSV.trim().toLowerCase();
-      const trimmedHoTen = searchData.HoTen.trim().toLowerCase();
+      const trimmedInfo = searchData.info.trim().toLowerCase();
 
-      let res = await searchDoanVien({
-        ...searchData,
-        MaLop: trimmedMaLop,
-        MSSV: trimmedMSSV,
-        HoTen: trimmedHoTen,
+      let res = await searchManySVNT({
+        trimmedInfo: trimmedInfo,
         IDNamHoc: idnamhoc,
       });
 
@@ -105,7 +105,7 @@ const DanhSachDoanVien = (props) => {
   const fetchAllData = async () => {
     try {
       let allDataArray = [];
-      let res = await DanhSachUngTuyen(idnamhoc);
+      let res = await DanhSachUngTuyenCuaLop(idnamhoc, IDLop);
 
       if (res.status === 200) {
         allDataArray = [...allDataArray, ...res.data.dataUT];
@@ -125,9 +125,6 @@ const DanhSachDoanVien = (props) => {
 
       const dataToExport = allData.map((item) => {
         return {
-          "Mã Chi Đoàn": item.MaLop,
-          "Tên Chi Đoàn": item.TenLop,
-          Khóa: item.Khoa,
           MSSV: item.MSSV,
           "Họ tên": item.HoTen,
           Email: item.Email,
@@ -143,7 +140,10 @@ const DanhSachDoanVien = (props) => {
       XLSX.utils.book_append_sheet(wb, ws, "DanhSachSinhVienNamTot");
 
       // Xuất file Excel
-      XLSX.writeFile(wb, `DanhSachSinhVienNamTot - ${allData[0].TenNamHoc}.xlsx`);
+      XLSX.writeFile(
+        wb,
+        `DanhSachSinhVienNamTot - ${allData[0].TenNamHoc}.xlsx`
+      );
     } catch (error) {
       console.error("Lỗi khi tải dữ liệu:", error.message);
       // Xử lý lỗi nếu có
@@ -179,38 +179,16 @@ const DanhSachDoanVien = (props) => {
           </div>
         </div>
         <div className="search">
-          <div className="searchDV">
+          <div className="searchDV laptop">
             <div className="">
               <div className="searchDV-input">
                 <input
                   type="text"
                   className="search_name"
-                  placeholder="Mã Lớp"
-                  value={searchData.MaLop}
+                  placeholder="Tìm lớp, mssv, họ tên"
+                  value={searchData.info}
                   onChange={(e) => {
-                    setSearchData({ ...searchData, MaLop: e.target.value });
-                  }}
-                />
-              </div>
-              <div className="searchDV-input">
-                <input
-                  type="text"
-                  className="search_name"
-                  placeholder="Mã đoàn viên"
-                  value={searchData.MSSV}
-                  onChange={(e) => {
-                    setSearchData({ ...searchData, MSSV: e.target.value });
-                  }}
-                />
-              </div>
-              <div className="searchDV-input">
-                <input
-                  type="text"
-                  className="search_name"
-                  placeholder="Tên đoàn viên"
-                  value={searchData.HoTen}
-                  onChange={(e) => {
-                    setSearchData({ ...searchData, HoTen: e.target.value });
+                    setSearchData({ info: e.target.value });
                   }}
                 />
               </div>
@@ -219,12 +197,52 @@ const DanhSachDoanVien = (props) => {
                 <FontAwesomeIcon icon={faMagnifyingGlass} />
               </button>
             </div>
+
             <div className="buttonSearch">
+              <div>
+                <NavLink to="/ChiDoan/TieuChi" className="navlink">
+                  <button className="formatButton">Tiêu chí</button>
+                </NavLink>
+              </div>
               <div>
                 <button className="formatButton" onClick={exportToExcel}>
                   <FontAwesomeIcon icon={faCloudArrowDown} />
                 </button>
               </div>
+            </div>
+          </div>
+
+          <div className="searchDV tablet-mobile">
+            <div className="searchDV-Right">
+              <div className="buttonSearch">
+                <div>
+                  <NavLink to="/ChiDoan/TieuChi" className="navlink">
+                    <button className="formatButton">Tiêu chí</button>
+                  </NavLink>
+                </div>
+                <div>
+                  <button className="formatButton" onClick={exportToExcel}>
+                    <FontAwesomeIcon icon={faCloudArrowDown} />
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="">
+              <div className="searchDV-input">
+                <input
+                  type="text"
+                  className="search_name"
+                  placeholder="Tìm lớp, mssv, họ tên"
+                  value={searchData.info}
+                  onChange={(e) => {
+                    setSearchData({ info: e.target.value });
+                  }}
+                />
+              </div>
+
+              <button className="formatButton" onClick={handleSearch}>
+                <FontAwesomeIcon icon={faMagnifyingGlass} />
+              </button>
             </div>
           </div>
         </div>
@@ -236,8 +254,7 @@ const DanhSachDoanVien = (props) => {
             <thead>
               <tr>
                 <th>STT</th>
-                <th>Mã lớp</th>
-                <th>MSSV</th>
+                <th className="mb-tableItem">MSSV</th>
                 <th>Họ tên</th>
                 <th>Email</th>
                 <th>Hồ sơ</th>
@@ -251,8 +268,9 @@ const DanhSachDoanVien = (props) => {
                   return (
                     <tr key={`table-doanvien-${index}`} className="tableRow">
                       <td className="col-center">{index + 1}</td>
-                      <td className="">{item.MaLop}</td>
-                      <td className="">{item.MSSV}</td>
+                      <td className="mb-tableItem mb-tableItem1">
+                        {item.MSSV}
+                      </td>
                       <td className="">{item.HoTen}</td>
                       <td className="">{item.Email}</td>
                       <td className="col-center">

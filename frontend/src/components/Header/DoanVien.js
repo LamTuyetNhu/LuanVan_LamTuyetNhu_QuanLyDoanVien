@@ -37,7 +37,7 @@ function Header() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("IDDoanVien");
+    localStorage.clear();
   };
 
   return (
@@ -67,11 +67,15 @@ function Header() {
 
             <div className="header__cart-list">
               <ul className="header__cart-list-item">
-                
+              <li className="header__cart-item">
+                  <NavLink to="" className="header__cart-item-info" onClick={handleLogout}>
+                    Ảnh điểm danh
+                  </NavLink>
+                </li>
                 <li className="header__cart-item">
-                  <a href="/" className="header__cart-item-info" onClick={handleLogout}>
+                <NavLink to="/" className="header__cart-item-info " onClick={handleLogout}>
                     Đăng xuất
-                  </a>
+                  </NavLink>
                 </li>
               </ul>
             </div>

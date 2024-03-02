@@ -1,50 +1,42 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import * as XLSX from "xlsx";
 import { format } from "date-fns";
-import { NavLink } from "react-router-dom";
-import axios from "axios";
+import { NavLink, useNavigate } from "react-router-dom";
 
 import {
   faCloudArrowDown,
-  faMagnifyingGlass,
-  faChevronRight,
-  faChevronLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   laydsBCHMotLop,
-  chucvu,
-  searchBCH,
   namhoc,
-  getKhoa
 } from "../../../services/apiService";
 
 const DanhSachBCH = (props) => {
-  // const { IDLop } = useParams();
+  const navigate = useNavigate();
+
   const IDLop = localStorage.getItem("IDLop");
-
   const [DoanVien, setDoanVien] = useState([]);
-
   const [DSChucVu, setListChucVu] = useState([]);
-
   const [idnamhoc, setNamHoc] = useState(1);
   const [DSNamHoc, setDSNamHoc] = useState([]);
   const [DSKhoa, setKhoa] = useState([]);
 
-  // const [searchData, setSearchData] = useState({
-  //   IDNamHoc: idnamhoc,
-  //   MSSV: "",
-  //   HoTen: "",
-  //   IDChucVu: "",
-  //   Khoa: "",
-  // });
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
 
   useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
     fetchDoanVien();
-    // fetchDSChucVu();
     fetchDSNamHoc();
-    // fetchDSKhoa()
   }, [IDLop, idnamhoc]);
 
   const fetchDoanVien = async () => {
@@ -153,11 +145,18 @@ const DanhSachBCH = (props) => {
                     DoanVien.map((item, index) => {
                       return (
                         <div className="col-lg-4 col-md-6 col-sm-6 giang-vien-col lazy">
-                          <NavLink
+                          {/* <NavLink
                             to={`/ChiDoan/DanhSachBCH/${item.IDDoanVien}/${item.IDChiTietNamHoc}`}
                             className="NavLink-item"
-                          >
-                            <div className="giang-vien-item">
+                          > */}
+                            <div className="giang-vien-item"
+                            onClick={() => {
+                              localStorage.setItem('IDChiTietNamHoc', item.IDChiTietNamHoc);
+                              localStorage.setItem('IDDoanVien', item.IDDoanVien);
+                              
+                              navigate(`/ChiDoan/ChiTietBanChapHanh`);
+                            }}
+                            >
                               <div className="gv-image img-hover-zoom gv1">
                                 <a>
                                   <img
@@ -178,7 +177,7 @@ const DanhSachBCH = (props) => {
                                 <p>{item.TenCV}</p>
                               </div>
                             </div>
-                          </NavLink>
+                          {/* </NavLink> */}
                         </div>
                       );
                     })}

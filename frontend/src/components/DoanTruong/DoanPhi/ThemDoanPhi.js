@@ -1,17 +1,29 @@
 import React, { useState, useEffect } from "react";
 import Form from "react-bootstrap/Form";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { themDoanPhi } from "../../../services/apiService";
 import "react-toastify/dist/ReactToastify.css";
 import ModalAddSuccess from "../../Modal/ModalAddSuccess";
 import { namhoc } from "../../../services/apiService";
 const ThemDoanPhi = (props) => {
+  const navigate = useNavigate();
+  const IDTruong = localStorage.getItem("IDTruong");
 
   const [NamHoc, setNamHoc] = useState([]);
-
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
   useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
     fetchDSNamHoc();
-  }, []);
+  }, [IDTruong]);
 
   const fetchDSNamHoc = async () => {
     try {
@@ -109,7 +121,7 @@ const ThemDoanPhi = (props) => {
     }
 
     try {
-      await themDoanPhi(themdoanphi);
+      await themDoanPhi(IDTruong, themdoanphi);
       // Xử lý sau khi thêm thành công (chuyển hướng hoặc hiển thị thông báo)
       setShowModal(true);
       console.log("Đoàn phí đã được thêm mới thành công!");

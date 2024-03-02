@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Form from "react-bootstrap/Form";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayMotHoatDong,
   CapNhatHoatDong,
@@ -25,11 +25,24 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 const ChiTietHoatDong = (props) => {
   const { IDHoatDong } = useParams();
   const [HoatDong, setHoatDong] = useState([]);
+  const navigate = useNavigate();
 
   const [editedDoanPhi, seteditedDoanPhi] = useState({});
   const [isEditing, setIsEditing] = useState(false);
 
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
+
   useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
     layMotHoatDong();
   }, [IDHoatDong]);
 
@@ -139,8 +152,7 @@ const ChiTietHoatDong = (props) => {
       setHoatDong(editedDoanPhi);
       setShowModalUpdate(true);
       setIsEditing(false);
-      // Xử lý sau khi thêm thành công (chuyển hướng hoặc hiển thị thông báo)
-      // handleShowModal("", "Cập nhật thành công!");
+      
       console.log("Hoạt động đã được thêm mới thành công!");
     } catch (error) {
       console.error("Lỗi khi thêm mới hoạt động:", error);
@@ -289,12 +301,12 @@ const ChiTietHoatDong = (props) => {
 
             {isEditing ? (
               <>
-                <button className="allcus-button" onClick={handleSaveChanges}>
+                <button className="allcus-button bgcapnhat" onClick={handleSaveChanges}>
                   <FontAwesomeIcon icon={faSave} /> Lưu
                 </button>
               </>
             ) : (
-              <button className="allcus-button" onClick={handleToggleEdit}>
+              <button className="allcus-button bgcapnhat" onClick={handleToggleEdit}>
                 <FontAwesomeIcon icon={faEdit} /> Cập nhật
               </button>
             )}

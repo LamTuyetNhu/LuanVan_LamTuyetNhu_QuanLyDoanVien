@@ -23,9 +23,7 @@ const ModalUpdateStatus = ({ onClose, selectedIDUngTuyen }) => {
         alert("Cập nhâp thành công!");
 
         onClose();
-        // setTimeout(() => {
           window.location.reload();
-        // }, 1000);
       } else {
         alert("Cập nhâp thất bại!");
         console.error("Lỗi khi gọi API:", res.statusText);
@@ -63,7 +61,7 @@ const ModalUpdateStatus = ({ onClose, selectedIDUngTuyen }) => {
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <button className="allcus-button" onClick={handleCapNhatTrangThai}>
+          <button className="allcus-button bgcapnhat" onClick={handleCapNhatTrangThai}>
             Cập nhật
           </button>
           <button className="allcus-button" onClick={onClose}>

@@ -1,11 +1,8 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import * as XLSX from "xlsx";
 import { format } from "date-fns";
-import { NavLink, useNavigate} from "react-router-dom";
-import axios from "axios";
-import logo from "../../../assets/logo.jpg"
+import { useNavigate } from "react-router-dom";
 
 import {
   faCloudArrowDown,
@@ -17,47 +14,61 @@ import {
   laydsBCH,
   chucvu,
   searchBCH,
-  namhoc,
-  getKhoa
+  namhoccuakhoa,
+  getKhoa,
+  searchManyDoanVienBCH
 } from "../../../services/apiService";
 
 const DanhSachBCH = (props) => {
+  const IDTruong = localStorage.getItem("IDTruong");
   const navigate = useNavigate();
 
   const [DoanVien, setDoanVien] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [DSKhoa, setKhoa] = useState([]);
   const [DSChucVu, setListChucVu] = useState([]);
 
   const [idnamhoc, setNamHoc] = useState(1);
+  const [DSNamHoc, setDSNamHoc] = useState([]);
   const [khoa, setChoiceKhoa] = useState(46);
 
-  const [DSNamHoc, setDSNamHoc] = useState([]);
-  const [DSKhoa, setKhoa] = useState([]);
-
-
+  const [searchMany, setsearchMany] = useState({
+    info: "",
+  });
 
   const changePage = (newPage) => {
     setCurrentPage(newPage);
   };
-
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
   useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
     fetchDoanVien();
     fetchDSChucVu();
     fetchDSNamHoc();
     fetchAllData();
-    fetchDSKhoa()
+    fetchDSKhoa();
     setSearchData((prevSearchData) => ({
       ...prevSearchData,
       IDNamHoc: idnamhoc,
       Khoa: khoa,
+      IDTruong: IDTruong
     }));
-  }, [currentPage, idnamhoc, khoa]);
+  }, [currentPage, idnamhoc, khoa, IDTruong]);
 
   const fetchDoanVien = async () => {
     try {
-      let res = await laydsBCH(currentPage, idnamhoc, khoa);
+      let res = await laydsBCH(currentPage, idnamhoc, khoa, IDTruong);
       console.log(res);
       if (res.status === 200) {
         setDoanVien(res.data.dataCD);
@@ -91,10 +102,10 @@ const DanhSachBCH = (props) => {
 
   const fetchDSNamHoc = async () => {
     try {
-      let res = await namhoc();
+      let res = await namhoccuakhoa(khoa);
       if (res.status === 200) {
         const NamHocdata = res.data.dataNH;
-
+        console.log(NamHocdata);
         if (Array.isArray(NamHocdata)) {
           setDSNamHoc(NamHocdata);
         } else {
@@ -113,12 +124,7 @@ const DanhSachBCH = (props) => {
       let res = await getKhoa();
       if (res.status === 200) {
         const Khoa = res.data.dataCD;
-
-        // if (Array.isArray(NamHocdata)) {
-          setKhoa(Khoa);
-        // } else {
-        //   console.error("Dữ liệu khóa không hợp lệ:", NamHocdata);
-        // }
+        setKhoa(Khoa);
       } else {
         console.error("Lỗi khi gọi API:", res.statusText);
       }
@@ -139,6 +145,26 @@ const DanhSachBCH = (props) => {
     }
   };
 
+  const handleManySearchBCH = async () => {
+    try {
+      const trimmedInfo = searchMany.info.trim().toLowerCase();
+      let res = await searchManyDoanVienBCH({
+        Khoa: khoa,
+        trimmedInfo,
+        IDNamHoc: idnamhoc,
+        IDTruong: IDTruong
+      }); // Assuming you have implemented the search API
+      console.log(res);
+      if (res.status === 200) {
+        setDoanVien(res.data.dataCD);
+      } else {
+        console.error("Lỗi khi tìm kiếm:", res.statusText);
+      }
+    } catch (error) {
+      console.error("Lỗi khi tìm kiếm:", error.message);
+    }
+  };
+
   const handleNamHocChange = (e) => {
     const selectedIDNamHoc = e.target.value;
     setNamHoc(selectedIDNamHoc);
@@ -147,6 +173,7 @@ const DanhSachBCH = (props) => {
   const handleKhoaChange = (e) => {
     const selectedKhoa = e.target.value;
     setChoiceKhoa(selectedKhoa);
+    fetchDSNamHoc();
   };
 
   const [searchData, setSearchData] = useState({
@@ -155,6 +182,7 @@ const DanhSachBCH = (props) => {
     HoTen: "",
     IDChucVu: "",
     Khoa: khoa,
+    IDTruong: IDTruong
   });
 
   const handleSearch = async () => {
@@ -166,6 +194,7 @@ const DanhSachBCH = (props) => {
         ...searchData,
         MSSV: trimmedMSSV,
         HoTen: trimmedHoTen,
+        IDTruong: IDTruong
       }); // Assuming you have implemented the search API
 
       console.log(res);
@@ -186,7 +215,7 @@ const DanhSachBCH = (props) => {
       let allDataArray = [];
 
       for (let page = 1; page <= totalPages; page++) {
-        let res = await laydsBCH(page, idnamhoc);
+        let res = await laydsBCH(page, idnamhoc, khoa, IDTruong);
 
         if (res.status === 200) {
           allDataArray = [...allDataArray, ...res.data.dataCD];
@@ -208,10 +237,10 @@ const DanhSachBCH = (props) => {
       return {
         "Mã Chi Đoàn": item.MaLop,
         "Tên Chi Đoàn": item.TenLop,
-        "Khóa": item.Khoa,
-        "MSSV": item.MSSV,
+        Khóa: item.Khoa,
+        MSSV: item.MSSV,
         "Họ tên": item.HoTen,
-        "Email": item.Email,
+        Email: item.Email,
         "Số điện thoại": item.SoDT,
         "Giới tính":
           item.GioiTinh === 0 ? "Nữ" : item.GioiTinh === 1 ? "Nam" : "Khác",
@@ -243,23 +272,8 @@ const DanhSachBCH = (props) => {
       <div className="container-fluid app__content">
         <div className="namhoc-center">
           <h2 className="text-center">Danh Sách Ban Chấp Hành</h2>
-          <div className="searchDV-input">Khóa: 
-          <select
-                type="text"
-                className="search_name"
-                value={khoa}
-                onChange={handleKhoaChange}
-              >
-                {DSKhoa.map((khoa, index) => {
-                  return (
-                    <option key={index} value={khoa.khoa}>
-                      {khoa.khoa}
-                    </option>
-                  );
-                })}
-              </select>
-          </div>
-          <div className="searchDV-input">Năm học: 
+          <div className="searchDV-input">
+            Năm học:
             <select
               type="text"
               className="search_name"
@@ -275,10 +289,27 @@ const DanhSachBCH = (props) => {
               })}
             </select>
           </div>
+          <div className="searchDV-input">
+            Khóa:
+            <select
+              type="text"
+              className="search_name"
+              value={khoa}
+              onChange={handleKhoaChange}
+            >
+              {DSKhoa.map((khoa, index) => {
+                return (
+                  <option key={index} value={khoa.khoa}>
+                    {khoa.khoa}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
         </div>
 
         <div className="search">
-          <div className="searchDV">
+          <div className="searchDV laptop">
             <div className="">
               <div className="searchDV-input">
                 <input
@@ -311,7 +342,9 @@ const DanhSachBCH = (props) => {
                     setSearchData({ ...searchData, IDChucVu: e.target.value });
                   }}
                 >
-                  <option value="" disabled selected>Chọn chức vụ</option>
+                  <option value="" disabled selected>
+                    Chọn chức vụ
+                  </option>
                   {DSChucVu.map((item, index) => {
                     return (
                       <option key={index} value={item.IDChucVu}>
@@ -327,7 +360,33 @@ const DanhSachBCH = (props) => {
             </div>
             <div className="">
               <button className="formatButton" onClick={exportToExcel}>
-                <FontAwesomeIcon icon={faCloudArrowDown} /> 
+                <FontAwesomeIcon icon={faCloudArrowDown} />
+              </button>
+            </div>
+          </div>
+
+          <div className="searchDV tablet-mobile">
+            <div className="searchDV-Right">
+              <button className="formatButton" onClick={exportToExcel}>
+                <FontAwesomeIcon icon={faCloudArrowDown} />
+              </button>
+            </div>
+
+            <div className="">
+              <div className="searchDV-input ">
+                <input
+                  type="text"
+                  className="search_name"
+                  placeholder="Tìm theo mã, tên, chức vụ"
+                  value={searchData.info}
+                  onChange={(e) => {
+                    setsearchMany({ info: e.target.value });
+                  }}
+                />
+              </div>
+
+              <button className="formatButton" onClick={handleManySearchBCH}>
+                <FontAwesomeIcon icon={faMagnifyingGlass} />
               </button>
             </div>
           </div>
@@ -347,27 +406,32 @@ const DanhSachBCH = (props) => {
                             to={`/BCH-DoanTruong/DanhSachBCH/${idnamhoc}/${item.IDDoanVien}`}
                             className="NavLink-item"
                           > */}
-                            <div className="giang-vien-item" onClick={() => handleViewButtonClick(item.IDDoanVien)}>
-                              <div className="gv-image img-hover-zoom gv1">
-                                <a>
-                                  <img
-                                    src={`http://localhost:8080/images/${item.TenAnh}`}
-                                  />
-                                </a>
-                              </div>
-                              <div className="gv-body">
-                                <div className="giang-vien-subtitle">
-                                  {item.MSSV}
-                                </div>
-                                <div className="giang-vien-title">
-                                  <a>{item.HoTen}</a>
-                                </div>
-                                <div className="giang-vien-subtitle">
-                                  {item.TenLop}
-                                </div>
-                                <p>{item.TenCV}</p>
-                              </div>
+                          <div
+                            className="giang-vien-item"
+                            onClick={() =>
+                              handleViewButtonClick(item.IDDoanVien)
+                            }
+                          >
+                            <div className="gv-image img-hover-zoom gv1">
+                              <a>
+                                <img
+                                  src={`http://localhost:8080/images/${item.TenAnh}`}
+                                />
+                              </a>
                             </div>
+                            <div className="gv-body">
+                              <div className="giang-vien-subtitle">
+                                {item.MSSV}
+                              </div>
+                              <div className="giang-vien-title">
+                                <a>{item.HoTen}</a>
+                              </div>
+                              <div className="giang-vien-subtitle">
+                                {item.TenLop}
+                              </div>
+                              <p>{item.TenCV}</p>
+                            </div>
+                          </div>
                         </div>
                       );
                     })}

@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import huyhieu from "../../assets/huyhieu.png";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faEye,
@@ -9,6 +10,8 @@ import {
   faEnvelope,
 } from "@fortawesome/free-solid-svg-icons";
 import Modal1 from "../Modal/Modal";
+import QuenMK from "../Modal/QuenMatKhau";
+
 import { jwtDecode } from "jwt-decode";
 
 const DangNhap = (props) => {
@@ -19,7 +22,11 @@ const DangNhap = (props) => {
   const [modalMessage, setModalMessage] = useState("");
   const [modalIsError, setModalIsError] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [quenMKModal, setQuenMKModal] = useState(false);
 
+  const handleQuenMatKhau = () => {
+    setQuenMKModal(true);
+  };
   const navigate = useNavigate();
 
   const [errors, setErrors] = useState({
@@ -27,10 +34,10 @@ const DangNhap = (props) => {
     password: "",
   });
 
-  const validateEmail = (Email) => {
-    return String(Email)
+  const validateEmail = (email) => {
+    return String(email)
       .toLowerCase()
-      .match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/);
+      .match(/^[a-zA-Z0-9._%+&-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/);
   };
 
   const validatePassWord = (Email) => {
@@ -68,8 +75,10 @@ const DangNhap = (props) => {
 
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("role", decodedToken.role);
+        localStorage.setItem("IDTruong", response.data.IDTruong);
         localStorage.setItem("IDLop", response.data.IDLop);
         localStorage.setItem("IDDoanVien", response.data.IDDoanVien);
+        localStorage.setItem("IDDHCT", response.data.IDDHCT);
 
         setModalMessage("Đăng nhập thành công!");
         setModalIsError(false);
@@ -77,7 +86,9 @@ const DangNhap = (props) => {
         console.log("Đăng nhập thành công!");
 
         setTimeout(() => {
-          if (decodedToken.role === "Admin") {
+          if (decodedToken.role === "DHCT") {
+            navigate("/DaiHocCanTho");
+          } else if (decodedToken.role === "Admin") {
             navigate("/BCH-DoanTruong");
           } else if (decodedToken.role === "BCHChiDoan") {
             navigate(`/ChiDoan`);
@@ -103,6 +114,7 @@ const DangNhap = (props) => {
       setErrorMessage("Sai tên đăng nhập hoặc mật khẩu");
     }
   };
+
   return (
     <>
       <div className="app-background">
@@ -159,7 +171,10 @@ const DangNhap = (props) => {
                   </div>
                 </div>
 
-                <a className="login-qmk">Quên mật khẩu?</a>
+                <div onClick={handleQuenMatKhau}>
+                  <div className="login-qmk">Quên mật khẩu?</div>
+                </div>
+
                 <button
                   type="submit"
                   className="btn-submit-login"
@@ -179,6 +194,10 @@ const DangNhap = (props) => {
           message={modalMessage}
           isError={modalIsError}
         />
+      )}
+
+      {quenMKModal && (
+        <QuenMK show={quenMKModal} onHide={() => setQuenMKModal(false)} />
       )}
     </>
   );

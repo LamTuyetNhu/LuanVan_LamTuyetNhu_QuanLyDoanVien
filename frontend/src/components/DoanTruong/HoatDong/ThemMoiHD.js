@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Form from "react-bootstrap/Form";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { themHoatDong } from "../../../services/apiService";
 import { format, parseISO } from "date-fns";
 import "react-toastify/dist/ReactToastify.css";
@@ -12,19 +12,36 @@ import {
 } from "../../../services/apiService";
 
 const ThemMoiHoatDong = (props) => {
+  const IDTruong = localStorage.getItem("IDTruong");
+  const navigate = useNavigate();
+
   const [NamHoc, setNamHoc] = useState([]);
   const [IDNamHoc, setIDNamHoc] = useState("");
 
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
+
   useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
+    
     fetchDSNamHoc();
-  }, []);
+  }, [IDTruong]);
 
   const [themhoatdong, setThemhoatdong] = useState({
     TenHoatDong: "",
     NgayBatDau: "",
     NgayHetHan: "",
     ChiTietHoatDong: "",
-    IDNamHoc: ""
+    IDNamHoc: "",
+    IDTruong: IDTruong
   });
 
   const [errors, setErrors] = useState({

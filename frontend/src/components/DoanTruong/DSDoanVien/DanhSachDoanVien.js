@@ -56,11 +56,22 @@ const DanhSachDoanVien = (props) => {
   });
 
   const [searchMany, setsearchMany] = useState({
-    
-    info: ""
+    info: "",
   });
 
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
+
   useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
     fetchDSDoanVien();
     fetchDSChucVu();
     fetchAllData();
@@ -76,9 +87,8 @@ const DanhSachDoanVien = (props) => {
         console.log("Data from API:", res.data.dataCD);
         console.log("Total Pages from API:", res.data.totalPages);
 
-        setListDoanVien(res.data.dataCD)
+        setListDoanVien(res.data.dataCD);
         setTotalPages(res.data.totalPages);
-
       } else {
         console.error("Lỗi khi gọi API:", res.statusText);
       }
@@ -91,10 +101,8 @@ const DanhSachDoanVien = (props) => {
     try {
       let res = await chucvu();
       if (res.status === 200) {
-        // setListKhoa(res.data.DSKhoa); // Cập nhật state với danh sách khóa học
         const khoaData = res.data.dataCV;
-
-        // Kiểm tra nếu khoaData là mảng trước khi cập nhật state
+        
         if (Array.isArray(khoaData)) {
           setListChucVu(khoaData);
         } else {
@@ -140,7 +148,7 @@ const DanhSachDoanVien = (props) => {
         HoTen: trimmedHoTen,
         IDNamHoc: idnamhoc,
         currentPage: currentPage,
-      }); 
+      });
 
       console.log(res);
       if (res.status === 200) {
@@ -156,7 +164,11 @@ const DanhSachDoanVien = (props) => {
   const handleManySearch = async () => {
     try {
       const trimmedInfo = searchMany.info.trim().toLowerCase();
-      let res = await searchManyDoanVien({IDLop: IDLop, trimmedInfo, IDNamHoc: idnamhoc,}); // Assuming you have implemented the search API
+      let res = await searchManyDoanVien({
+        IDLop: IDLop,
+        trimmedInfo,
+        IDNamHoc: idnamhoc,
+      }); // Assuming you have implemented the search API
       console.log(res);
       if (res.status === 200) {
         setListDoanVien(res.data.dataCD);
@@ -268,7 +280,7 @@ const DanhSachDoanVien = (props) => {
 
       setSelectedFile(selectedFile);
       const displayedData = excelData.slice(0, 10);
-      
+
       // Lưu trữ dữ liệu Excel để thực hiện thêm vào cơ sở dữ liệu
       setExcelData(displayedData);
       setShowExcelModal(true);
@@ -304,7 +316,7 @@ const DanhSachDoanVien = (props) => {
         fetchDSDoanVien();
       } else {
         // Xử lý trường hợp lỗi
-        setErrorMessage("Thêm không thành công!")
+        setErrorMessage("Thêm không thành công!");
         setShowModalUpdate(true);
       }
     } catch (error) {
@@ -337,7 +349,8 @@ const DanhSachDoanVien = (props) => {
         <div className="namhoc-center">
           <h2 className="text-center">Danh Sách Đoàn Viên</h2>
           <div className="searchDV-input">
-            Năm học: <select
+            Năm học:{" "}
+            <select
               type="text"
               className="search_name"
               value={idnamhoc}
@@ -403,7 +416,7 @@ const DanhSachDoanVien = (props) => {
               </button>
             </div>
             <div className="buttonSearch">
-              <NavLink to={`/BCH-DoanTruong/ThemMoi-DoanVien`}>
+            <NavLink to={`/BCH-DoanTruong/ThemMoiDoanVien/${IDLop}`}>
                 <button className="formatButton">
                   <FontAwesomeIcon icon={faPlus} />
                 </button>
@@ -429,25 +442,8 @@ const DanhSachDoanVien = (props) => {
           </div>
 
           <div className="searchDV tablet-mobile">
-            <div className="">
-              <div className="searchDV-input">
-                <input
-                  type="text"
-                  className="search_name"
-                  placeholder="Tìm theo mã, tên, chức vụ"
-                  value={searchData.info}
-                  onChange={(e) => {
-                    setsearchMany({ info: e.target.value });
-                  }}
-                />
-              </div>
-
-              <button className="formatButton" onClick={handleManySearch}>
-                <FontAwesomeIcon icon={faMagnifyingGlass} />
-              </button>
-            </div>
-            <div className="buttonSearch">
-              <NavLink to={`/BCH-DoanTruong/ThemMoi-DoanVien/${IDLop}`}>
+            <div className="searchDV-Right">
+              <NavLink to={`/BCH-DoanTruong/ThemMoiDoanVien/${IDLop}`}>
                 <button className="formatButton">
                   <FontAwesomeIcon icon={faPlus} />
                 </button>
@@ -470,6 +466,23 @@ const DanhSachDoanVien = (props) => {
                 </button>
               </div>
             </div>
+            <div className="">
+              <div className="searchDV-input ">
+                <input
+                  type="text"
+                  className="search_name"
+                  placeholder="Tìm theo mã, tên đoàn viên"
+                  value={searchData.info}
+                  onChange={(e) => {
+                    setsearchMany({ info: e.target.value });
+                  }}
+                />
+              </div>
+
+              <button className="formatButton" onClick={handleManySearch}>
+                <FontAwesomeIcon icon={faMagnifyingGlass} />
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -480,8 +493,8 @@ const DanhSachDoanVien = (props) => {
             <thead>
               <tr>
                 <th className="">STT</th>
-                <th className="mb-tableItem">Mã Đoàn Viên</th>
-                <th >Tên Đoàn Viên</th>
+                <th className="mb-tableItem">Mã đoàn viên</th>
+                <th>Tên đoàn viên</th>
                 <th className="">Ngày sinh</th>
                 <th className="">Giới tính</th>
                 <th>Chức vụ</th>
@@ -499,7 +512,9 @@ const DanhSachDoanVien = (props) => {
                   return (
                     <tr key={`table-doanvien-${index}`} className="tableRow">
                       <td className=" col-center">{stt}</td>
-                      <td className="mb-tableItem mb-tableItem1">{item.MSSV}</td>
+                      <td className="mb-tableItem mb-tableItem1">
+                        {item.MSSV}
+                      </td>
                       <td className="">{item.HoTen}</td>
                       <td className="col-center">
                         {format(new Date(item.NgaySinh), "dd/MM/yyyy")}
@@ -518,9 +533,12 @@ const DanhSachDoanVien = (props) => {
                       <td className="">{item.SoDT}</td>
 
                       <td className="btnOnTable1">
-                          <button className="btnOnTable" onClick={() => handleViewButtonClick(item.IDDoanVien)}>
-                            <FontAwesomeIcon icon={faEye} />
-                          </button>
+                        <button
+                          className="btnOnTable"
+                          onClick={() => handleViewButtonClick(item.IDDoanVien)}
+                        >
+                          <FontAwesomeIcon icon={faEye} />
+                        </button>
                       </td>
                     </tr>
                   );

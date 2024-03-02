@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Form from "react-bootstrap/Form";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   namhoc,
   LayMotDoanPhi,
@@ -20,6 +20,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const ChiTietDoanPhi = (props) => {
+  const navigate = useNavigate();
   const { IDDoanPhi } = useParams();
   const [DoanPhi, setDoanPhi] = useState([]);
 
@@ -27,8 +28,18 @@ const ChiTietDoanPhi = (props) => {
 
   const [editedDoanPhi, seteditedDoanPhi] = useState({});
   const [isEditing, setIsEditing] = useState(false);
-
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
+    // Thêm logic kiểm tra hạn của token nếu cần
+    return true;
+  };
   useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
+    }
     layMotDoanPhi();
     fetchDSNamHoc();
   }, [IDDoanPhi]);
@@ -217,25 +228,6 @@ const ChiTietDoanPhi = (props) => {
                 Năm học
               </Form.Label>
               <br />
-              {isEditing ? (
-                <Form.Select
-                  id="IDNamHoc"
-                  type="text"
-                  aria-describedby="IDNamHoc"
-                  className="form-select search_name"
-                  value={editedDoanPhi.IDNamHoc}
-                  onChange={handleChange}
-                >
-                  {/* <option>{DoanPhi.TenNamHoc}</option> */}
-                  {NamHoc.map((namhoc, index) => {
-                    return (
-                      <option key={index} value={namhoc.IDNamHoc}>
-                        {namhoc.TenNamHoc}
-                      </option>
-                    );
-                  })}
-                </Form.Select>
-              ) : (
                 <Form.Control
                   id="IDNamHoc"
                   className="search_name form-control"
@@ -245,7 +237,6 @@ const ChiTietDoanPhi = (props) => {
                   onChange={handleChange}
                   disabled
                 />
-              )}
               <div className="error-message">{errors.IDNamHoc}</div>
             </div>
             </div>
@@ -266,7 +257,7 @@ const ChiTietDoanPhi = (props) => {
                 </button>
               </>
             ) : (
-              <button className="allcus-button" onClick={handleToggleEdit}>
+              <button className="allcus-button bgcapnhat" onClick={handleToggleEdit}>
                 <FontAwesomeIcon icon={faEdit} /> Cập nhật
               </button>
             )}

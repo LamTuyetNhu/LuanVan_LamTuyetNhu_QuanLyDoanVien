@@ -1,10 +1,5 @@
 import axios from "../utils/axiosUser";
 
-const getAllChiDoan = (page) => {
-  return axios.get(`api/dschidoan/${page}`, {
-  });
-};
-
 const XoaChiDoan = (selectedIDLop) => {
   return axios.post(`api/XoaChiDoan/${selectedIDLop}`);
 };
@@ -25,9 +20,18 @@ const searchChiDoan = (formData) => {
   return axios.post("api/searchChiDoan", formData);
 };
 
+const searchChiDoanXepLoai = (formData) => {
+  return axios.post("api/searchChiDoanXepLoai", formData);
+};
+
 const searchManyInfo = (formData) => {
   console.log(formData)
   return axios.post("api/searchManyChiDoan", formData);
+};
+
+const searchManyInfoHD = (formData) => {
+  console.log(formData)
+  return axios.post("api/searchManyHoatDong", formData);
 };
 
 const laymotlop = (IDLop, page, idnamhoc) => {
@@ -42,6 +46,10 @@ const searchDoanVien = (formData) => {
   return axios.post("api/searchDoanVien", formData);
 };
 
+const searchDGDoanVien = (formData) => {
+  return axios.post("api/searchDGDoanVien", formData);
+};
+
 const searchManyDoanVien = (formData) => {
   console.log(formData)
   return axios.post("api/searchManyDoanVien", formData);
@@ -51,8 +59,8 @@ const CapNhatDoanVien = (formData) => {
   return axios.post("api/CapNhatDoanVien", formData);
 };
 
-const laydshoatdong = (page, idnamhoc) => {
-  return axios.get(`api/layDSHoatDong/${page}/${idnamhoc}`);
+const laydshoatdong = (page, idnamhoc, IDTruong) => {
+  return axios.get(`api/layDSHoatDong/${page}/${idnamhoc}/${IDTruong}`);
 };
 
 const searchHoatDong = (formData) => {
@@ -92,12 +100,16 @@ const LayMotDoanVien = (IDLop, IDDoanVien, IDChiTietNamHoc) => {
   );
 };
 
-const XoaDoanVien = (IDChiTietNamHoc) => {
-  return axios.post(`api/XoaDoanVien/${IDChiTietNamHoc}`);
+const XoaDoanVien = (IDDoanVien) => {
+  return axios.post(`api/XoaDoanVien/${IDDoanVien}`);
 };
 
-const laydsBCH = (page, idnamhoc, khoa) => {
-  return axios.get(`api/dsBCH/${page}/${idnamhoc}/${khoa}`);
+const XoaChiTietDoanVien = (IDChiTietNamHoc, IDDanhGia) => {
+  return axios.post(`api/XoaChiTietDoanVien/${IDChiTietNamHoc}/${IDDanhGia}`);
+};
+
+const laydsBCH = (page, idnamhoc, khoa, IDTruong) => {
+  return axios.get(`api/dsBCH/${page}/${idnamhoc}/${khoa}/${IDTruong}`);
 };
 
 const laydsBCHMotLop = (IDLop, idnamhoc) => {
@@ -108,16 +120,30 @@ const searchBCH = (formData) => {
   return axios.post(`api/searchBCH`, formData);
 };
 
+const searchManyDoanVienBCH = (formData) => {
+  console.log(formData)
+  return axios.post("api/searchManyDoanVienBCH", formData);
+}
+
+const searchManyDoanPhiCuaDoanVien = (formData) => {
+  console.log(formData)
+  return axios.post("api/searchManyDoanPhiCuaDoanVien", formData);
+}
+
 const XoaBanChapHanh = (select) => {
   return axios.post(`api/XoaBanChapHanh/${select}`);
 };
 
-const themChiDoan = (formData) => {
-  return axios.post("api/ThemChiDoan", formData);
+const themChiDoan = (IDTruong, formData) => {
+  return axios.post(`api/ThemChiDoan/${IDTruong}`, formData);
 };
 
 const namhoc = () => {
   return axios.get(`api/namhoc`);
+};
+
+const namhoccuaxeploai = () => {
+  return axios.get(`api/namhoccuaxeploai`);
 };
 
 const namhoccuachidoan = (IDLop) => {
@@ -125,8 +151,13 @@ const namhoccuachidoan = (IDLop) => {
   return axios.get(`api/namhoccuamotchidoan/${IDLop}`);
 };
 
-const layTatCaDSDoanPhi = (page, idnamhoc) => {
-  return axios.get(`api/dsdoanphi/${page}/${idnamhoc}`);
+const namhoccuakhoa = (Khoa) => {
+  console.log(Khoa)
+  return axios.get(`api/namhoccuakhoa/${Khoa}`);
+};
+
+const layTatCaDSDoanPhi = (IDTruong, idnamhoc) => {
+  return axios.get(`api/dsdoanphi/${IDTruong}/${idnamhoc}`);
 };
 
 const searchNamHoc = (formData) => {
@@ -137,8 +168,8 @@ const xoaMotDoanPhi = (IDDoanPhi) => {
   return axios.post(`api/XoaMotDoanPhi/${IDDoanPhi}`);
 };
 
-const themDoanPhi = (formData) => {
-  return axios.post("api/ThemDoanPhi", formData);
+const themDoanPhi = (IDTruong, formData) => {
+  return axios.post(`api/ThemDoanPhi/${IDTruong}`, formData);
 };
 
 const LayMotDoanPhi = (IDDoanPhi) => {
@@ -174,7 +205,7 @@ const laytenlop = (IDLop) => {
 
 /* Chi Doan */
 const layDSDoanPhiCuaLop = (IDLop, idnamhoc) => {
-  return axios.get(`api/dsdoanphi/${IDLop}/${idnamhoc}`);
+  return axios.get(`api/dsdoanphicualop/${IDLop}/${idnamhoc}`);
 };
 
 const LayDSNopDoanPhiCuaMotLop = (IDLop, IDDoanPhi, IDNamHoc) => {
@@ -220,12 +251,26 @@ const layDSChucVuDoanVien = (IDDoanVien) => {
   );
 };
 
+const layDSDanhGiaDoanVien = (IDDoanVien) => {
+  return axios.get(
+    `api/layDSDanhGiaDoanVien/${IDDoanVien}}`
+  );
+};
+
 const laydshoatdongcuadoanvien = (IDDoanVien, idnamhoc) => {
   return axios.get(`api/laydshoatdongcuadoanvien/${IDDoanVien}/${idnamhoc}`);
 };
 
 const DanhSachUngTuyen = (IDNamHoc) => {
   return axios.get(`api/DanhSachUngTuyen/${IDNamHoc}`);
+};
+
+const DanhSachUngTuyenCT = (IDNamHoc, IDTruong, page) => {
+  return axios.get(`api/DanhSachUngTuyenCT/${IDNamHoc}/${IDTruong}/${page}`);
+};
+
+const DanhSachUngTuyenCuaLop = (IDNamHoc, IDLop) => {
+  return axios.get(`api/DanhSachUngTuyenCuaLop/${IDNamHoc}/${IDLop}`);
 };
 
 const DanhSachUngTuyenCuaDV = (IDDoanVien) => {
@@ -259,20 +304,156 @@ const DSDanhGiaDoanVienCuaLop = (IDLop, page, idnamhoc) => {
   return axios.get(`api/DanhSachDanhGiaDoanVienCuaLop/${page}/${IDLop}/${idnamhoc}`);
 };
 
+const DanhGiaTungChiDoan = (IDLop, idnamhoc) => {
+  return axios.get(`api/DanhGiaTungChiDoan/${IDLop}/${idnamhoc}`);
+};
+
+const DanhGiaChiDoan = (idnamhoc, khoa, IDTruong) => {
+  return axios.get(`api/DanhGiaChiDoan/${idnamhoc}/${khoa}/${IDTruong}`);
+};
+
 const DoiMatKhauDoanVien = (IDDoanVien) => {
   return axios.get(`api/doimatkhaudoanvien/${IDDoanVien}`);
 };
 
+const LayDiemCuaMotDoanVien = (IDDoanVien, IDNamHoc) => {
+  return axios.get(`api/LayDiemCuaMotDoanVien/${IDDoanVien}/${IDNamHoc}`);
+};
+
+const laytentruong = (IDTruong) => {
+  return axios.get(`api/laytentruong/${IDTruong}`);
+};
+
+const CapNhatThongTin = (formData) => {
+  return axios.post("api/CapNhatThongTinDoanTruong", formData);
+};
+
+const CapNhatThongTinLop = (formData) => {
+  return axios.post("api/CapNhatThongTinLop", formData);
+};
+
+const layTieuChi = () => {
+  return axios.get(`api/LayTieuChi`);
+};
+
+const layTieuChiChiDoan = () => {
+  return axios.get(`api/LayTieuChiChiDoan`);
+};
+
+const layTieuChiDoanVien = () => {
+  return axios.get(`api/LayTieuChiDoanVien`);
+};
+
+const laytentruongdh = (IDDHCT) => {
+  return axios.get(`api/laytentruongdh/${IDDHCT}`);
+};
+
+const getAllTruong = (page) => {
+  return axios.get(`api/dstruong/${page}`);
+};
+
+const laytatcatruong = () => {
+  return axios.get(`api/laytatcatruong`);
+};
+const themtruong = (formData) => {
+  return axios.post("api/ThemTruong", formData);
+};
+
+const searchManyTenTruong = (formData) => {
+  console.log(formData)
+  return axios.post("api/searchManyTenTruong", formData);
+};
+
+const XoaTruong = (selectedIDLop) => {
+  return axios.post(`api/XoaTruong/${selectedIDLop}`);
+};
+
+const laymottruong = (IDTruong) => {
+  return axios.get(`api/LayMotTruong/${IDTruong}`);
+};
+
+const CapNhatTruong = (IDTruong, formData) => {
+  return axios.post(`api/CapNhatTruong/${IDTruong}`, formData);
+};
+
+const getAllChiDoanCT = (IDTruong, page, khoa) => {
+  return axios.get(`api/dschidoan/${IDTruong}/${page}/${khoa}`, {
+  });
+};
+
+const themChiDoanCT = (IDTruong, formData) => {
+  return axios.post(`api/ThemChiDoan/${IDTruong}`, formData);
+};
+
+const laydsBCHTruong = (page, idnamhoc, IDTruong) => {
+  return axios.get(`api/BCHTruong/${page}/${idnamhoc}/${IDTruong}`);
+};
+
+const namhoccuabch = () => {
+  return axios.get(`api/namhoccuabch`);
+};
+
+const laytenBCH = (IDBCH) => {
+  return axios.get(`api/laytenBCH/${IDBCH}`);
+};
+
+const layDSChucVuBCH = (IDBCH) => {
+  return axios.get(
+    `api/layDSChucVuBCH/${IDBCH}}`
+  );
+};
+
+const searchBCHTruong = (formData) => {
+  return axios.post(`api/searchBCHTruong`, formData);
+};
+
+const searchManyBCH = (formData) => {
+  return axios.post("api/searchManyBCH", formData);
+}
+
+const XoaBCHTruong = (IDBCH) => {
+  return axios.post(`api/XoaBCHTruong/${IDBCH}`);
+};
+
+const XoaChiTietBCHTruong = (IDChiTietBCH) => {
+  return axios.post(`api/XoaChiTietBCHTruong/${IDChiTietBCH}`);
+};
+
+const CapNhatThongTinDHCT = (formData) => {
+  return axios.post("api/CapNhatThongTinDHCT", formData);
+};
+
 export {
-  getAllChiDoan,
+  CapNhatThongTinDHCT,
+  XoaChiTietDoanVien,
+  XoaChiTietBCHTruong,
+  XoaBCHTruong,
+  searchManyBCH,
+  searchBCHTruong,
+  layDSChucVuBCH,
+  laytenBCH,
+  namhoccuabch,
+  laydsBCHTruong,
+  DanhSachUngTuyenCT,
+  laytatcatruong,
+  themChiDoanCT,
+  getAllTruong,
+  themtruong,
+  searchManyTenTruong,
+  XoaTruong,
+  getAllChiDoanCT,
+
   searchChiDoan,
+  searchChiDoanXepLoai,
   searchManyInfo,
+  searchManyInfoHD,
   laymotchidoan,
   CapNhatChiDoan,
   getKhoa,
   laymotlop,
   chucvu,
   searchDoanVien,
+  searchDGDoanVien,
   searchManyDoanVien,
   laydshoatdong,
   searchHoatDong,
@@ -288,11 +469,14 @@ export {
   laydsBCH,
   laydsBCHMotLop,
   searchBCH,
+  searchManyDoanVienBCH,
   XoaBanChapHanh,
   themChiDoan,
   XoaChiDoan,
   namhoc,
   namhoccuachidoan,
+  namhoccuakhoa,
+  namhoccuaxeploai,
   searchNamHoc,
   layTatCaDSDoanPhi,
   xoaMotDoanPhi,
@@ -314,6 +498,7 @@ export {
   DVLayMotDoanVien,
   laydshoatdongcuadoanvien,
   DanhSachUngTuyen,
+  DanhSachUngTuyenCuaLop,
   DanhSachUngTuyenCuaDV,
   mauUngTuyen,
   CapNhatTrangThai,
@@ -322,5 +507,20 @@ export {
   laydsdoanphicuadoanvien,
   DoiMatKhauDoanVien,
   layDSChucVuDoanVien,
-  DSDanhGiaDoanVienCuaLop
+  layDSDanhGiaDoanVien,
+  DSDanhGiaDoanVienCuaLop,
+  LayDiemCuaMotDoanVien,
+  DanhGiaChiDoan,
+  laytentruong,
+  CapNhatThongTin,
+  CapNhatThongTinLop,
+  searchManyDoanPhiCuaDoanVien,
+  DanhGiaTungChiDoan,
+
+  layTieuChi,
+  layTieuChiChiDoan,
+  layTieuChiDoanVien,
+  laytentruongdh,
+  laymottruong,
+  CapNhatTruong
 };
