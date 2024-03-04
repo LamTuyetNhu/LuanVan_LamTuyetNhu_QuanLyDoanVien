@@ -8,14 +8,17 @@ import {
 
 import huyhieu from "../../assets/huyhieu.png";
 import logo from "../../assets/logo.jpg";
-import { laytentruong } from "../../services/apiService";
+import { laytentruong, laytenBCH } from "../../services/apiService";
 import { useState, useEffect } from "react";
 
 function Header() {
   const IDTruong = localStorage.getItem("IDTruong");
+  const IDBCH = localStorage.getItem("IDBCH");
+  const [DoanVien, setDoanVien] = useState([]);
   const [TenTruong, setTenTruong] = useState([]);
   useEffect(() => {
     fetchTenTruong();
+    layMotDoanVien();
   }, [IDTruong]);
 
   const fetchTenTruong = async () => {
@@ -25,6 +28,24 @@ function Header() {
 
       if (res.status === 200) {
         setTenTruong(res.data.dataDT.TenTruong);
+      } else {
+        console.error("Lỗi khi gọi API:", res.statusText);
+      }
+    } catch (error) {
+      console.error("Lỗi khi gọi API:", error.message);
+    }
+  };
+
+  const formatToTwoDigits = (value) => {
+    return value < 10 ? `0${value}` : value;
+  };
+
+  const layMotDoanVien = async () => {
+    try {
+      let res = await laytenBCH(IDBCH);
+      if (res.status === 200) {
+        const dataDV = res.data.dataDV.TenBCH;
+        setDoanVien(dataDV);
       } else {
         console.error("Lỗi khi gọi API:", res.statusText);
       }
@@ -61,7 +82,7 @@ function Header() {
     // Hoặc xóa chỉ các key cụ thể nếu cần
     // localStorage.removeItem("key1");
     // localStorage.removeItem("key2");
-    // window.location.href = "/"; 
+    // window.location.href = "/";
   };
 
   return (
@@ -80,26 +101,29 @@ function Header() {
           <img className="logo-img1" src={logo} alt="logo-dtn" />
 
           <div className="username">
-            Đoàn {TenTruong}
+           Đoàn {TenTruong}
+          {/* {((IDBCH !== "undefined") && (IDBCH !== null)) ? ( DoanVien) :   ("Đoàn " + TenTruong)}  */}
             <div className="header__cart-list">
               <ul className="header__cart-list-item">
                 <li className="header__cart-item">
+                  
                   <NavLink
                     to="/BCH-DoanTruong/ThongTinCaNhan"
                     className="header__cart-item-info"
                   >
-                    Trang cá nhân
+                    Thông tin đoàn trường
                   </NavLink>
+
                 </li>
-                <li className="header__cart-item">
-                  <NavLink
-                    to="/BCH-DoanTruong/DoiMatKhau"
-                    className="header__cart-item-info"
-                  >
-                    Đổi mật khẩu
-                  </NavLink>
+                  <li className="header__cart-item">
+                    <NavLink
+                      to="/BCH-DoanTruong/DoiMatKhau"
+                      className="header__cart-item-info"
+                    >
+                      Đổi mật khẩu
+                    </NavLink>
                 </li>
-                <li className="header__cart-item"  onClick={handleLogout}>
+                <li className="header__cart-item" onClick={handleLogout}>
                   <NavLink to="/" className="header__cart-item-info ">
                     Đăng xuất
                   </NavLink>
@@ -134,8 +158,16 @@ function Header() {
                 </NavLink>
               </li>
               <li>
+                  <NavLink
+                    to="/BCH-DoanTruong/DanhSachBCHTruong"
+                    onClick={closeMenu}
+                  >
+                    BCH đoàn trường
+                  </NavLink>
+                </li>
+              <li>
                 <NavLink to="/BCH-DoanTruong/DanhSachBCH" onClick={closeMenu}>
-                  Danh sách BCH
+                  BCH chi đoàn
                 </NavLink>
               </li>
               <li>

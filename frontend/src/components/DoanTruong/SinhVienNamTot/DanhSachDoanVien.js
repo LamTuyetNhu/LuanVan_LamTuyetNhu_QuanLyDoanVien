@@ -1,8 +1,8 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useState, useNavigate } from "react";
+import { useEffect, useState} from "react";
 import * as XLSX from "xlsx";
 import ModalUpdateStatus from "../../Modal/UpdateStatus";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate  } from "react-router-dom";
 
 import {
   faEdit,
@@ -19,6 +19,8 @@ import {
 } from "../../../services/apiService";
 
 const DanhSachDoanVien = (props) => {
+  const navigate = useNavigate();
+
   const [DSDoanVien, setListDoanVien] = useState([]);
   const IDTruong = localStorage.getItem("IDTruong");
   const [idnamhoc, setNamHoc] = useState(1);
@@ -26,7 +28,6 @@ const DanhSachDoanVien = (props) => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [selectedIDUngTuyen, setSelectedIDUngTuyen] = useState(null);
   const [showModalUpdate, setShowModalUpdate] = useState(false);
-  const navigate = useNavigate();
 
   const handleIconClick = (IDUngTuyen) => {
     setSelectedIDUngTuyen(IDUngTuyen);
@@ -51,7 +52,6 @@ const DanhSachDoanVien = (props) => {
     if (!token) {
       return false;
     }
-    // Thêm logic kiểm tra hạn của token nếu cần
     return true;
   };
 

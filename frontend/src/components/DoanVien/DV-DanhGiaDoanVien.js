@@ -223,9 +223,9 @@ const SinhVienNamTot = (props) => {
     }
   }
 
-  const handleDSKetQuaClick = (namHoc) => {
+  const handleDSKetQuaClick = (namHoc, IDDoanVien) => {
     localStorage.setItem("IDDoanVien", IDDoanVien);
-    localStorage.setItem("idnamhoc", namHoc);
+    localStorage.setItem("IDNamHoc", namHoc);
 
     navigate("/DoanVien/CapNhatDiem");
   };
@@ -443,7 +443,7 @@ const SinhVienNamTot = (props) => {
                 ) : (
                   DSKetQua.map((ketqua, index) => (
                     <div className="col-lg-6 col-md-6 col-sm-12 mb-4 mx-auto">
-                      <div className="card card-opacity1 " onClick={() => handleDSKetQuaClick(ketqua.IDNamHoc)}>
+                      <div className="card card-opacity1 " onClick={() => handleDSKetQuaClick(ketqua.IDNamHoc, ketqua.IDDoanVien)}>
                         <div className="card-body">
                           <div
                             className={`card-title card-title1 circle ${getClassForPhanLoai(

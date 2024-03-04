@@ -76,6 +76,11 @@ import CapNhatDiemDoanVien from "./components/DoanTruong/XepLoaiChiDoan/DanhGiaD
 import CapNhatTieuChiDanhGiaDoanVien from "./components/DoanTruong/XepLoaiChiDoan/CapNhatTieuChiDV";
 import ThongTinCaNhan from "./components/DoanTruong/Info/DoiThongTinCaNhan";
 import DoiMatKhau from "./components/DoanTruong/Info/DoiMatKhau";
+import TruongDSBCH from "./components/DoanTruong/DSBCHTruong/DanhSachBCH"
+import TruongBCH from "./components/DoanTruong/DSBCHTruong/BCH"
+import TruongThemBCH from "./components/DoanTruong/DSBCHTruong/ThemBCH"
+import ThongTinCuaBan from "./components/DoanTruong/Info/BCH"
+import DoiMatKhauCuaBan from "./components/DoanTruong/Info/DoiMatKhauBCH"
 
 /* Chi đoàn */
 import CDDanhSachDoanVien from "./components/ChiDoan/DSDoanVien/CD-DanhSachDoanVien";
@@ -105,7 +110,7 @@ import DVDanhGiaDoanVien from "./components/DoanVien/DV-DanhGiaDoanVien";
 import DVDoanPhi from "./components/DoanVien/DV-DanhSachDP";
 import DVDoiMatKhau from "./components/DoanVien/DV-DoiMatKhau";
 import DVCapNhatDiem from "./components/DoanVien/DV-XemDiem";
-
+import DVAnhDiemDanh from "./components/DoanVien/AnhDiemDanh"
 /* Not Found */
 import NotFoundPage from "./NotFoundPage"
 const root = ReactDOM.createRoot(document.getElementById("root"));
@@ -247,6 +252,13 @@ root.render(
           />
           <Route path="DoiMatKhau" element={<DoiMatKhau />} />
           <Route path="ThongTinCaNhan" element={<ThongTinCaNhan />} />
+
+          <Route path="ThongTinCuaBan" element={<ThongTinCuaBan />} />
+          <Route path="DoiMatKhauCuaBan" element={<DoiMatKhauCuaBan />} />
+
+          <Route path="DanhSachBCHTruong" element={<TruongDSBCH />} />
+          <Route path="DanhSachBCHTruong/BCHTruong" element={<TruongBCH />} />
+          <Route path="DanhSachThemBCH" element={<TruongThemBCH />} />
         </Route>
 
         <Route path="/ChiDoan" element={<BCH />}>
@@ -296,6 +308,7 @@ root.render(
           <Route path="DanhGiaDoanVien" element={<DVDanhGiaDoanVien />} />
           <Route path="DoiMatKhau" element={<DVDoiMatKhau />} />
           <Route path="CapNhatDiem" element={<DVCapNhatDiem />} />
+          <Route path="AnhDiemDanh" element={<DVAnhDiemDanh />} />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />

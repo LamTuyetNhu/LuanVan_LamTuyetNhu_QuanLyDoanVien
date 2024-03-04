@@ -76,6 +76,7 @@ const DangNhap = (props) => {
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("role", decodedToken.role);
         localStorage.setItem("IDTruong", response.data.IDTruong);
+        localStorage.setItem("IDBCH", response.data.IDBCH);
         localStorage.setItem("IDLop", response.data.IDLop);
         localStorage.setItem("IDDoanVien", response.data.IDDoanVien);
         localStorage.setItem("IDDHCT", response.data.IDDHCT);

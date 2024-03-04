@@ -3,6 +3,7 @@ import APIController from "../controller/APIController";
 let router = express.Router();
 const XLSX = require("xlsx");
 const multer = require("multer");
+const fs = require("fs");
 import pool from "../configs/connectDB";
 const { parse, format } = require("date-fns");
 const path = require("path");
@@ -50,10 +51,31 @@ const initAPIRoute = (app) => {
         "SELECT * FROM admin WHERE EmailTruong = ?",
         [email]
       );
-
       console.log(admin);
 
-      if (admin.length > 0) {
+      const [bchtruong] = await pool.execute(
+        "SELECT * FROM bchtruong, admin WHERE bchtruong.IDTruong = admin.IDTruong and bchtruong.EmailBCH = ?",
+        [email]
+      );
+
+      console.log(bchtruong);
+      if (bchtruong.length > 0 && admin.length === 0) {
+        const passwordHash = bchtruong[0].PassBCH;
+        const passwordMatch = await bcrypt.compare(password, passwordHash);
+
+        console.log(passwordMatch);
+        if (passwordMatch) {
+          const token = generateToken(bchtruong[0].EmailTruong, "Admin");
+          return res.json({
+            IDTruong: bchtruong[0].IDTruong,
+            IDBCH: bchtruong[0].IDBCH,
+            success: true,
+            token,
+          });
+        }
+      }
+
+      if (admin.length > 0 && bchtruong.length === 0) {
         const passwordHash = admin[0].PassTruong;
         const passwordMatch = await bcrypt.compare(password, passwordHash);
 
@@ -260,16 +282,16 @@ const initAPIRoute = (app) => {
 
   router.post("/CapNhatDoanVien", upload.single("file"), async (req, res) => {
     let {
-      Email,
-      HoTen,
       MSSV,
+      HoTen,
+      Email,
       SoDT,
-      QueQuan,
       GioiTinh,
       NgaySinh,
       NgayVaoDoan,
       IDDanToc,
       IDTonGiao,
+      QueQuan,
       IDDoanVien,
       listIDChucVu,
     } = req.body;
@@ -331,7 +353,7 @@ const initAPIRoute = (app) => {
       );
 
       const [chitietnamhocRows] = await pool.execute(
-        "SELECT * FROM chitietnamhoc WHERE IDDoanVien = ?",
+        "SELECT * FROM chitietnamhoc WHERE IDDoanVien = ? and ttChiTietNH = 1",
         [IDDoanVien]
       );
 
@@ -379,7 +401,10 @@ const initAPIRoute = (app) => {
     APIController.laymotdoanvien
   );
   router.post("/XoaDoanVien/:IDDoanVien", APIController.deleteDoanVien);
-  router.post("/XoaChiTietDoanVien/:IDChiTietNamHoc/:IDDanhGia", APIController.XoaChiTietDoanVien);
+  router.post(
+    "/XoaChiTietDoanVien/:IDChiTietNamHoc/:IDDanhGia",
+    APIController.XoaChiTietDoanVien
+  );
 
   router.get(
     "/layDSHoatDong/:page/:idnamhoc/:IDTruong",
@@ -913,7 +938,10 @@ const initAPIRoute = (app) => {
     "/DanhSachUngTuyenCT/:IDNamHoc/:IDTruong/:page",
     APIController.DanhSachUngTuyenCT
   );
-  router.get("/BCHTruong/:page/:idnamhoc/:IDTruong", APIController.getBCHTruong);
+  router.get(
+    "/BCHTruong/:page/:idnamhoc/:IDTruong",
+    APIController.getBCHTruong
+  );
   router.get("/namhoccuabch", APIController.namhoccuabch);
 
   router.post("/ThemMoiBCH", upload.single("file"), async (req, res) => {
@@ -966,7 +994,6 @@ const initAPIRoute = (app) => {
           );
         }
       } else {
-
         let [resultDoanVien] = await pool.execute(
           "INSERT INTO bchtruong (IDTruong, MaBCH, TenBCH, EmailBCH, PassBCH, SoDTBCH, GioiTinhBCH, QueQuanBCH, IDDanToc, IDTonGiao, NgaySinhBCH, NgayVaoDoanBCH) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
           [
@@ -1009,327 +1036,376 @@ const initAPIRoute = (app) => {
     }
   });
   router.get("/laytenBCH/:IDBCH", APIController.laytenBCH);
-  router.get(
-    "/layDSChucVuBCH/:IDBCH",
-    APIController.layDSChucVuBCH
-  );
-  router.post("/CapNhatBanChapHanh", upload.single("file"), async (req, res) => {
-    let {
-      MaBCH,
-      TenBCH,
-      EmailBCH,
-      SoDTBCH,
-      GioiTinhBCH,
-      NgaySinhBCH,
-      NgayVaoDoanBCH,
-      IDDanToc,
-      IDTonGiao,
-      IDBCH,
-      listIDChucVu,
-      QueQuanBCH,
-    } = req.body;
+  router.get("/layDSChucVuBCH/:IDBCH", APIController.layDSChucVuBCH);
+  router.post(
+    "/CapNhatBanChapHanh",
+    upload.single("file"),
+    async (req, res) => {
+      let {
+        MaBCH,
+        TenBCH,
+        EmailBCH,
+        SoDTBCH,
+        GioiTinhBCH,
+        NgaySinhBCH,
+        NgayVaoDoanBCH,
+        IDDanToc,
+        IDTonGiao,
+        IDBCH,
+        listIDChucVu,
+        QueQuanBCH,
+      } = req.body;
 
-    // Parse listIDChucVu into an array of numbers
-    listIDChucVu = JSON.parse(listIDChucVu).map((value) =>
-      value !== null ? Number(value) : null
-    );
-
-    console.log("abc===================");
-    console.log(req.body);
-    console.log(listIDChucVu);
-
-    const { file } = req; // Lấy thông tin về file từ request
-    let filename = file ? file.filename : undefined;
-    console.log(NgaySinhBCH);
-
-    const convertDateFormat = (dateString, originalFormat, targetFormat) => {
-      return format(
-        parse(dateString, originalFormat, new Date()),
-        targetFormat
-      );
-    };
-
-    const parsedNgaySinh = convertDateFormat(
-      NgaySinhBCH,
-      "dd/MM/yyyy",
-      "yyyy/MM/dd"
-    );
-
-    console.log(parsedNgaySinh)
-    const parsedNgayVaoDoan = convertDateFormat(
-      NgayVaoDoanBCH,
-      "dd/MM/yyyy",
-      "yyyy/MM/dd"
-    );
-    console.log(parsedNgayVaoDoan)
-
-    try {
-      // Kiểm tra xem file có tồn tại không và có thay đổi không
-      let filename = "";
-      if (file && file.filename) {
-        filename = file.filename;
-      }
-
-      // Cập nhật thông tin đoàn viên
-      await pool.execute(
-        "UPDATE bchtruong SET EmailBCH = ?, TenBCH = ?, MaBCH = ?, SoDTBCH = ?, QueQuanBCH = ?, GioiTinhBCH = ?, NgaySinhBCH = ?, NgayVaoDoanBCH = ?, IDDanToc = ?, IDTonGiao = ? WHERE IDBCH = ?",
-        [
-          EmailBCH,
-          TenBCH,
-          MaBCH,
-          SoDTBCH,
-          QueQuanBCH,
-          GioiTinhBCH,
-          parsedNgaySinh,
-          parsedNgayVaoDoan,
-          IDDanToc,
-          IDTonGiao,
-          IDBCH,
-        ]
+      // Parse listIDChucVu into an array of numbers
+      listIDChucVu = JSON.parse(listIDChucVu).map((value) =>
+        value !== null ? Number(value) : null
       );
 
-      console.log("Update Info bchtruong")
+      console.log("abc===================");
+      console.log(req.body);
+      console.log(listIDChucVu);
 
-      const [chitietnamhocRows] = await pool.execute(
-        "SELECT * FROM chitietbch WHERE IDBCH = ?",
-        [IDBCH]
+      const { file } = req; // Lấy thông tin về file từ request
+      let filename = file ? file.filename : undefined;
+      console.log(NgaySinhBCH);
+
+      const convertDateFormat = (dateString, originalFormat, targetFormat) => {
+        return format(
+          parse(dateString, originalFormat, new Date()),
+          targetFormat
+        );
+      };
+
+      const parsedNgaySinh = convertDateFormat(
+        NgaySinhBCH,
+        "dd/MM/yyyy",
+        "yyyy/MM/dd"
       );
 
-      console.log(chitietnamhocRows);
+      console.log(parsedNgaySinh);
+      const parsedNgayVaoDoan = convertDateFormat(
+        NgayVaoDoanBCH,
+        "dd/MM/yyyy",
+        "yyyy/MM/dd"
+      );
+      console.log(parsedNgayVaoDoan);
 
-      for (let i = 0; i < chitietnamhocRows.length; i++) {
-        const chitietnamhocRow = chitietnamhocRows[i];
-        console.log(chitietnamhocRow);
-        const newIDChucVu = listIDChucVu[i];
-        console.log(newIDChucVu);
+      try {
+        // Kiểm tra xem file có tồn tại không và có thay đổi không
+        let filename = "";
+        if (file && file.filename) {
+          filename = file.filename;
+        }
 
+        // Cập nhật thông tin đoàn viên
         await pool.execute(
-          "UPDATE chitietbch SET IDChucVu = ? WHERE IDChiTietBCH = ?",
-          [newIDChucVu, chitietnamhocRow.IDChiTietBCH]
+          "UPDATE bchtruong SET EmailBCH = ?, TenBCH = ?, MaBCH = ?, SoDTBCH = ?, QueQuanBCH = ?, GioiTinhBCH = ?, NgaySinhBCH = ?, NgayVaoDoanBCH = ?, IDDanToc = ?, IDTonGiao = ? WHERE IDBCH = ?",
+          [
+            EmailBCH,
+            TenBCH,
+            MaBCH,
+            SoDTBCH,
+            QueQuanBCH,
+            GioiTinhBCH,
+            parsedNgaySinh,
+            parsedNgayVaoDoan,
+            IDDanToc,
+            IDTonGiao,
+            IDBCH,
+          ]
         );
 
-      console.log("Update Info chitietbch")
+        console.log("Update Info bchtruong");
 
+        const [chitietnamhocRows] = await pool.execute(
+          "SELECT * FROM chitietbch WHERE IDBCH = ? and ttChiTietBCH = 1",
+          [IDBCH]
+        );
+
+        console.log(chitietnamhocRows);
+
+        for (let i = 0; i < chitietnamhocRows.length; i++) {
+          const chitietnamhocRow = chitietnamhocRows[i];
+          console.log(chitietnamhocRow);
+          const newIDChucVu = listIDChucVu[i];
+          console.log(newIDChucVu);
+
+          await pool.execute(
+            "UPDATE chitietbch SET IDChucVu = ? WHERE IDChiTietBCH = ?",
+            [newIDChucVu, chitietnamhocRow.IDChiTietBCH]
+          );
+
+          console.log("Update Info chitietbch");
+        }
+
+        if (file && file.filename) {
+          filename = file.filename;
+
+          // Cập nhật tên ảnh trong bảng 'anh'
+          await pool.execute(
+            "UPDATE anhbch SET TenAnhBCH = ? WHERE IDBCH = ?",
+            [filename, IDBCH]
+          );
+
+          console.log("Update Info anh");
+        }
+
+        return res.status(200).json({
+          message: "Cập nhật thành công!",
+        });
+      } catch (error) {
+        console.log("Không cập nhật được!", error);
+        return res.status(500).json({ error: "Không hiển thị được!" });
       }
-
-      if (file && file.filename) {
-        filename = file.filename;
-
-        // Cập nhật tên ảnh trong bảng 'anh'
-        await pool.execute("UPDATE anhbch SET TenAnhBCH = ? WHERE IDBCH = ?", [
-          filename,
-          IDBCH,
-        ]);
-
-      console.log("Update Info anh")
-
-      }
-
-      return res.status(200).json({
-        message: "Cập nhật thành công!",
-      });
-    } catch (error) {
-      console.log("Không cập nhật được!", error);
-      return res.status(500).json({ error: "Không hiển thị được!" });
     }
-  });
+  );
 
   router.post("/searchBCHTruong", APIController.searchBCHTruong);
   router.post("/searchManyBCH", APIController.searchManyBCH);
 
-  router.post(
-    "/ThemBCHExcel",
-    upload1.single("file"),
-    async (req, res) => {
-      let { IDTruong, idnamhoc } = req.body;
-      console.log(req.body);
+  router.post("/ThemBCHExcel", upload1.single("file"), async (req, res) => {
+    let { IDTruong, idnamhoc } = req.body;
+    console.log(req.body);
 
-      // Parse IDLop to an integer
-      IDTruong = parseInt(IDTruong, 10); // Assuming base 10
-      idnamhoc = parseInt(idnamhoc, 10); // Assuming base 10
+    // Parse IDLop to an integer
+    IDTruong = parseInt(IDTruong, 10); // Assuming base 10
+    idnamhoc = parseInt(idnamhoc, 10); // Assuming base 10
 
-      // Ensure that IDLop is a valid integer
-      if (isNaN(IDTruong)) {
-        console.error("Invalid IDTruong:", req.body.IDTruong);
-        res.status(400).json({ message: "Invalid IDTruong" });
-        return;
-      }
+    // Ensure that IDLop is a valid integer
+    if (isNaN(IDTruong)) {
+      console.error("Invalid IDTruong:", req.body.IDTruong);
+      res.status(400).json({ message: "Invalid IDTruong" });
+      return;
+    }
 
-      try {
-        const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        const data = XLSX.utils.sheet_to_json(worksheet);
+    try {
+      const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const data = XLSX.utils.sheet_to_json(worksheet);
 
-        for (const row of data) {
-          const {
-            MaBCH,
-            TenBCH,
-            Email,
-            SoDienThoai,
-            GioiTinh: GioiTinhFromRow,
-            QueQuan,
-            DanToc,
-            TonGiao,
-            NgaySinh,
-            NgayVaoDoan,
-            ChucVu,
-          } = row;
+      for (const row of data) {
+        const {
+          MaBCH,
+          TenBCH,
+          Email,
+          SoDienThoai,
+          GioiTinh: GioiTinhFromRow,
+          QueQuan,
+          DanToc,
+          TonGiao,
+          NgaySinh,
+          NgayVaoDoan,
+          ChucVu,
+        } = row;
 
-          console.log(row);
+        console.log(row);
 
-          const trimmedMSSV = String(MaBCH).trim();
-          const trimmedHoTen = String(TenBCH).trim();
-          const trimmedEmail = String(Email).trim();
-          const trimmedSoDienThoai = String(SoDienThoai).trim();
-          const trimmedGioiTinhFromRow = String(GioiTinhFromRow).trim();
-          const trimmedQueQuan = String(QueQuan).trim();
-          const trimmedDanToc = String(DanToc).trim();
-          const trimmedTonGiao = String(TonGiao).trim();
-          const trimmedChucVu = String(ChucVu).trim();
+        const trimmedMSSV = String(MaBCH).trim();
+        const trimmedHoTen = String(TenBCH).trim();
+        const trimmedEmail = String(Email).trim();
+        const trimmedSoDienThoai = String(SoDienThoai).trim();
+        const trimmedGioiTinhFromRow = String(GioiTinhFromRow).trim();
+        const trimmedQueQuan = String(QueQuan).trim();
+        const trimmedDanToc = String(DanToc).trim();
+        const trimmedTonGiao = String(TonGiao).trim();
+        const trimmedChucVu = String(ChucVu).trim();
 
-          const parsedNgaySinh = format(
-            parse(NgaySinh, "dd/MM/yyyy", new Date()),
-            "yyyy/MM/dd"
+        const parsedNgaySinh = format(
+          parse(NgaySinh, "dd/MM/yyyy", new Date()),
+          "yyyy/MM/dd"
+        );
+        const parsedNgayVaoDoan = format(
+          parse(NgayVaoDoan, "dd/MM/yyyy", new Date()),
+          "yyyy/MM/dd"
+        );
+
+        console.log(row);
+        try {
+          let GioiTinh;
+
+          if (trimmedGioiTinhFromRow === "Nữ") {
+            GioiTinh = 0;
+          } else if (trimmedGioiTinhFromRow === "Nam") {
+            GioiTinh = 1;
+          } else {
+            GioiTinh = 2;
+          }
+
+          const [dantoc, fieldsdantoc] = await pool.execute(
+            "SELECT * FROM dantoc WHERE dantoc.tendantoc like ?",
+            ["%" + trimmedDanToc + "%"]
           );
-          const parsedNgayVaoDoan = format(
-            parse(NgayVaoDoan, "dd/MM/yyyy", new Date()),
-            "yyyy/MM/dd"
+
+          const [tongiao, fieldsTongiao] = await pool.execute(
+            "SELECT * FROM tongiao WHERE tongiao.tentongiao like ?",
+            ["%" + trimmedTonGiao + "%"]
           );
 
-          console.log(row);
-          try {
-            let GioiTinh;
+          const [chucvu, fieldsChucvu] = await pool.execute(
+            "SELECT * FROM chucvu WHERE chucvu.TenCV like ?",
+            ["%" + trimmedChucVu + "%"]
+          );
 
-            if (trimmedGioiTinhFromRow === "Nữ") {
-              GioiTinh = 0;
-            } else if (trimmedGioiTinhFromRow === "Nam") {
-              GioiTinh = 1;
+          const [existingRows1, existingFields1] = await pool.execute(
+            "SELECT * FROM bchtruong WHERE bchtruong.MaBCH = ?",
+            [trimmedMSSV]
+          );
+
+          if (existingRows1.length > 0) {
+            const [existedNamHoc, existingNamHocFields1] = await pool.execute(
+              "SELECT * FROM chitietbch WHERE chitietbch.IDBCH = ? and chitietbch.IDNamHoc = ?",
+              [existingRows1[0].IDBCH, idnamhoc]
+            );
+
+            if (existedNamHoc.length > 0) {
+              console.log("Nam Hoc va MSSV da ton tai");
+              res.status(500).json({ message: "Nam Hoc va MSSV da ton tai" });
+              continue;
             } else {
-              GioiTinh = 2;
-            }
-
-            const [dantoc, fieldsdantoc] = await pool.execute(
-              "SELECT * FROM dantoc WHERE dantoc.tendantoc like ?",
-              ["%" + trimmedDanToc + "%"]
-            );
-
-            const [tongiao, fieldsTongiao] = await pool.execute(
-              "SELECT * FROM tongiao WHERE tongiao.tentongiao like ?",
-              ["%" + trimmedTonGiao + "%"]
-            );
-
-            const [chucvu, fieldsChucvu] = await pool.execute(
-              "SELECT * FROM chucvu WHERE chucvu.TenCV like ?",
-              ["%" + trimmedChucVu + "%"]
-            );
-
-            const [existingRows1, existingFields1] = await pool.execute(
-              "SELECT * FROM bchtruong WHERE bchtruong.MaBCH = ?",
-              [trimmedMSSV]
-            );
-
-            if (existingRows1.length > 0) {
-              const [existedNamHoc, existingNamHocFields1] = await pool.execute(
-                "SELECT * FROM chitietbch WHERE chitietbch.IDBCH = ? and chitietbch.IDNamHoc = ?",
-                [existingRows1[0].IDBCH, idnamhoc]
-              );
-
-              if (existedNamHoc.length > 0) {
-                console.log("Nam Hoc va MSSV da ton tai");
-                res.status(500).json({ message: "Nam Hoc va MSSV da ton tai" });
-                continue;
-              } else {
-                await pool.execute(
-                  "INSERT INTO chitietbch (IDBCH, IDChucVu, IDNamHoc) VALUES (?, ?, ?)",
-                  [existingRows1[0].IDBCH, chucvu[0].IDChucVu, idnamhoc]
-                );
-              }
-
-              // const [existedDanhGiaNamHoc, existingDanhGiaNamHocFields1] =
-              //   await pool.execute(
-              //     "SELECT * FROM danhgiadoanvien WHERE danhgiadoanvien.IDDoanVien = ? and danhgiadoanvien.IDNamHoc = ?",
-              //     [existingRows1[0].IDDoanVien, idnamhoc]
-              //   );
-
-              // if (existedDanhGiaNamHoc.length > 0) {
-              //   console.log("Nam Hoc va MSSV da ton tai");
-              //   res.status(500).json({ message: "Nam Hoc va MSSV da ton tai" });
-              //   // return;
-              //   continue;
-              // } else {
-              //   await pool.execute(
-              //     "INSERT INTO danhgiadoanvien (IDDoanVien, IDNamHoc) VALUES (?, ?)",
-              //     [existingRows1[0].IDDoanVien, idnamhoc]
-              //   );
-              // }
-            } else {
-              const password = trimmedMSSV;
-              const saltRounds = 10;
-              const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-              const [resultDoanVien] = await pool.execute(
-                "INSERT INTO bchtruong (IDTruong, MaBCH, TenBCH, EmailBCH, PassBCH, SoDTBCH, GioiTinhBCH, QueQuanBCH, IDDanToc, IDTonGiao, NgaySinhBCH, NgayVaoDoanBCH) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                [
-                  IDTruong,
-                  trimmedMSSV,
-                  trimmedHoTen,
-                  trimmedEmail,
-                  hashedPassword,
-                  trimmedSoDienThoai,
-                  GioiTinh,
-                  trimmedQueQuan,
-                  dantoc[0].IDDanToc,
-                  tongiao[0].IDTonGiao,
-                  parsedNgaySinh,
-                  parsedNgayVaoDoan,
-                ]
-              );
-
-              let IDDoanVien = resultDoanVien.insertId;
-
               await pool.execute(
                 "INSERT INTO chitietbch (IDBCH, IDChucVu, IDNamHoc) VALUES (?, ?, ?)",
-                [IDDoanVien, chucvu[0].IDChucVu, idnamhoc]
+                [existingRows1[0].IDBCH, chucvu[0].IDChucVu, idnamhoc]
               );
-
-              // await pool.execute(
-              //   "INSERT INTO danhgiadoanvien (IDDoanVien, IDNamHoc, hk1, hk2, rl1, rl2, PhanLoai) VALUES (?, ?, 0, 0, 0, 0, 0)",
-              //   [IDDoanVien, idnamhoc]
-              // );
-
-              await pool.execute(
-                "INSERT INTO anhbch (TenAnhBCH, IDBCH) VALUES (?, ?)",
-                ["logo.jpg", IDDoanVien]
-              );
-
-              console.log("them thanh cong");
             }
-          } catch (error) {
-            console.error(error);
-            res.status(500).json({ message: "Có lỗi xảy ra" });
-            return;
-          }
-        }
 
-        res.status(200).json({ message: "Thêm nhiều đoàn viên thành công!" });
-      } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Có lỗi xảy ra" });
+            // const [existedDanhGiaNamHoc, existingDanhGiaNamHocFields1] =
+            //   await pool.execute(
+            //     "SELECT * FROM danhgiadoanvien WHERE danhgiadoanvien.IDDoanVien = ? and danhgiadoanvien.IDNamHoc = ?",
+            //     [existingRows1[0].IDDoanVien, idnamhoc]
+            //   );
+
+            // if (existedDanhGiaNamHoc.length > 0) {
+            //   console.log("Nam Hoc va MSSV da ton tai");
+            //   res.status(500).json({ message: "Nam Hoc va MSSV da ton tai" });
+            //   // return;
+            //   continue;
+            // } else {
+            //   await pool.execute(
+            //     "INSERT INTO danhgiadoanvien (IDDoanVien, IDNamHoc) VALUES (?, ?)",
+            //     [existingRows1[0].IDDoanVien, idnamhoc]
+            //   );
+            // }
+          } else {
+            const password = trimmedMSSV;
+            const saltRounds = 10;
+            const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+            const [resultDoanVien] = await pool.execute(
+              "INSERT INTO bchtruong (IDTruong, MaBCH, TenBCH, EmailBCH, PassBCH, SoDTBCH, GioiTinhBCH, QueQuanBCH, IDDanToc, IDTonGiao, NgaySinhBCH, NgayVaoDoanBCH) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+              [
+                IDTruong,
+                trimmedMSSV,
+                trimmedHoTen,
+                trimmedEmail,
+                hashedPassword,
+                trimmedSoDienThoai,
+                GioiTinh,
+                trimmedQueQuan,
+                dantoc[0].IDDanToc,
+                tongiao[0].IDTonGiao,
+                parsedNgaySinh,
+                parsedNgayVaoDoan,
+              ]
+            );
+
+            let IDDoanVien = resultDoanVien.insertId;
+
+            await pool.execute(
+              "INSERT INTO chitietbch (IDBCH, IDChucVu, IDNamHoc) VALUES (?, ?, ?)",
+              [IDDoanVien, chucvu[0].IDChucVu, idnamhoc]
+            );
+
+            // await pool.execute(
+            //   "INSERT INTO danhgiadoanvien (IDDoanVien, IDNamHoc, hk1, hk2, rl1, rl2, PhanLoai) VALUES (?, ?, 0, 0, 0, 0, 0)",
+            //   [IDDoanVien, idnamhoc]
+            // );
+
+            await pool.execute(
+              "INSERT INTO anhbch (TenAnhBCH, IDBCH) VALUES (?, ?)",
+              ["logo.jpg", IDDoanVien]
+            );
+
+            console.log("them thanh cong");
+          }
+        } catch (error) {
+          console.error(error);
+          res.status(500).json({ message: "Có lỗi xảy ra" });
+          return;
+        }
       }
+
+      res.status(200).json({ message: "Thêm nhiều đoàn viên thành công!" });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Có lỗi xảy ra" });
     }
-  );
+  });
 
   router.post("/XoaBCHTruong/:IDBCH", APIController.XoaBCHTruong);
-  router.post("/XoaChiTietBCHTruong/:IDChiTietBCH", APIController.XoaChiTietBCH);
   router.post(
-    "/CapNhatThongTinDHCT",
-    APIController.CapNhatThongTinDHCT
+    "/XoaChiTietBCHTruong/:IDChiTietBCH",
+    APIController.XoaChiTietBCH
   );
-  router.post(
-    "/doimatkhaudaihocct/:IDDHCT",
-    APIController.DoiMatKhauDHCT
+  router.post("/CapNhatThongTinDHCT", APIController.CapNhatThongTinDHCT);
+  router.post("/doimatkhaudaihocct/:IDDHCT", APIController.DoiMatKhauDHCT);
+  router.get(
+    "/laytenBCHTruong/:IDBCH/:IDTruong",
+    APIController.laytenBCHTruong
   );
+  router.post("/doimatkhaubchtruong/:IDBCH", APIController.doimatkhaubch);
+
+  // let getIDDV = (req, res, next) => {
+  //   console.log("id doan vien ", req.body);
+  //   next()
+  // }
+  
+ 
+  const storageMulter = multer.diskStorage({
+    destination: async (req, file, cb) => {
+      const IDDoanVien = req.params.IDDoanVien;
+      
+      let [rows, fields] = await pool.execute(
+        "select MSSV from doanvien where IDDoanVien = ?",
+        [IDDoanVien]
+      );
+
+      const MSSV = rows[0].MSSV;
+      const dest = `./src/public/DiemDanh/${MSSV}`;
+      fs.mkdirSync(dest, { recursive: true });
+      cb(null, dest);
+    },
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      const extension = path.extname(file.originalname);
+      cb(null, file.fieldname + "-" + uniqueSuffix + extension);
+    },
+  });
+
+  const upload3 = multer({ storage: storageMulter });
+
+  router.post("/AnhDiemDanh/:IDDoanVien", upload3.array("file"), async (req, res) => {
+    try {
+      const files = req.files;
+      const IDDoanVien = req.params.IDDoanVien;
+      console.log("ID doan vien", IDDoanVien)
+      await Promise.all(
+        files.map((file) => {
+          const filename = file.filename;
+          return pool.execute(
+            "INSERT INTO anhdiemdanh (DDTenAnh, IDDoanVien) VALUES (?, ?)",
+            [filename, IDDoanVien]
+          );
+        })
+      );
+
+      res.status(200).json({ success: "Thêm ảnh thành công!" });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Có lỗi xảy ra" });
+    }
+  });
+
   return app.use("/api", router);
 };
 

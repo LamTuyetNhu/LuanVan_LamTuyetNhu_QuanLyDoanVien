@@ -2377,7 +2377,7 @@ let DiemCuaMotDoanVien = async (req, res) => {
     (hk1 + hk2) / 2 < 1.5 ||
     hk1 < 1.0 ||
     hk2 < 1.0 ||
-    ((rl1 < 50 || rl2 < 50) && (rl1 + rl2) / 2 < 50)
+    ((rl1 < 50 || rl2 < 50) || (rl1 + rl2) / 2 < 50)
   ) {
     PhanLoai = 4;
   }
@@ -3753,7 +3753,112 @@ let DoiMatKhauDHCT = async (req, res) => {
   }
 };
 
+let laytenBCHTruong = async (req, res) => {
+  const IDBCH = req.params.IDBCH;
+  const IDTruong = req.params.IDTruong;
+  try {
+    const [rows, fields1] = await pool.execute(
+      "SELECT * FROM bchtruong, anhbch, dantoc, tongiao, admin where bchtruong.IDBCH = anhbch.IDBCH and bchtruong.IDDanToc = dantoc.IDDanToc and bchtruong.IDTonGiao = tongiao.IDTonGiao and admin.IDTruong = bchtruong.IDTruong and bchtruong.IDBCH = ? and bchtruong.IDTruong = ?",
+      [IDBCH, IDTruong]
+    );
+
+    console.log(rows)
+
+    if (rows && rows.length > 0) {
+      // Định dạng lại ngày trong rows[0].NgayHetHan
+      if (rows[0].NgaySinh) {
+        const formattedDate = format(new Date(rows[0].NgaySinh), "dd/MM/yyyy");
+        rows[0].NgaySinhBCH = formattedDate;
+      }
+
+      if (rows[0].NgayVaoDoan) {
+        const formattedDate1 = format(new Date(rows[0].NgayVaoDoan), "dd/MM/yyyy");
+        rows[0].NgayVaoDoanBCH = formattedDate1;
+      }
+
+      return res.status(200).json({
+        dataDV: rows[0],
+      });
+    } else {
+      console.log("Không tìm thấy kết quả");
+      return res.status(200).json({
+        dataDV: [],
+      });
+    }
+  } catch (error) {
+    console.error("Lỗi khi truy vấn cơ sở dữ liệu: ", error);
+  }
+};
+
+let doimatkhaubch = async (req, res) => {
+  try {
+    const IDBCH = req.params.IDBCH;
+    const { oldPassword, newPassword } = req.body;
+    console.log(IDBCH);
+    const [result, fields] = await pool.execute(
+      "SELECT PassBCH FROM bchtruong WHERE bchtruong.IDBCH = ?",
+      [IDBCH]
+    );
+
+    if (result && result.length > 0) {
+      const hashedPassword = result[0].PassBCH;
+
+      if (hashedPassword) {
+        // So sánh mật khẩu cũ
+        const match = await bcrypt.compare(oldPassword, hashedPassword);
+
+        if (match) {
+          // Băm mật khẩu mới
+          const saltRounds = 10;
+          const newHashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+          // Cập nhật mật khẩu mới vào cơ sở dữ liệu
+          const [updateResult, fieldUpdate] = await pool.execute(
+            "UPDATE bchtruong SET PassBCH = ? WHERE IDBCH = ?",
+            [newHashedPassword, IDBCH]
+          );
+          console.log(updateResult);
+          if (updateResult && updateResult.affectedRows > 0) {
+            console.log("Đổi mật khẩu thành công!");
+            return res.status(200).json({
+              success: true,
+              message: "Đổi mật khẩu thành công!",
+            });
+          } else {
+            console.log("Không thể cập nhật mật khẩu mới!");
+            return res.status(500).json({
+              error: "Không thể cập nhật mật khẩu mới!",
+            });
+          }
+        } else {
+          console.log("Mật khẩu cũ không đúng!");
+          return res.status(500).json({
+            error: "Mật khẩu cũ không đúng!",
+          });
+        }
+      } else {
+        console.log("Không tìm thấy mật khẩu trong cơ sở dữ liệu!");
+        return res.status(500).json({
+          error: "Không tìm thấy mật khẩu trong cơ sở dữ liệu!",
+        });
+      }
+    } else {
+      console.log("Không tìm thấy người dùng!");
+      return res.status(200).json({
+        dataDV: [],
+      });
+    }
+  } catch (error) {
+    console.error("Lỗi khi truy vấn cơ sở dữ liệu: ", error);
+    return res.status(500).json({
+      error: "Lỗi khi truy vấn cơ sở dữ liệu",
+    });
+  }
+};
+
 module.exports = {
+  doimatkhaubch,
+  laytenBCHTruong,
   DoiMatKhauDHCT,
   CapNhatThongTinDHCT,
   XoaChiTietDoanVien,

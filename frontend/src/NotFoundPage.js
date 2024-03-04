@@ -6,7 +6,7 @@ import notfound from "./assets/notfound.webp"
 const DHCT = () => {
   return (
     <div className="app-container notfound">
-      <img src={notfound} />
+      <img className="notfound" src={notfound} />
     </div>
   );
 };

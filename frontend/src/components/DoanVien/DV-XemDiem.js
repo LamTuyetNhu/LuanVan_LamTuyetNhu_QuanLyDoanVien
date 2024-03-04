@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState, useRef } from "react";
 import { format } from "date-fns";
-import { NavLink, useNavigate  } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import Form from "react-bootstrap/Form";
 import { faSave, faEdit, faBackward } from "@fortawesome/free-solid-svg-icons";
 import { namhoc, LayDiemCuaMotDoanVien } from "../../services/apiService";
@@ -48,7 +48,7 @@ const SinhVienNamTot = (props) => {
       let res = await LayDiemCuaMotDoanVien(IDDoanVien, idnamhoc);
       if (res.status === 200) {
         const DanhGiadata = res.data.dataDG;
-
+        console.log(DanhGiadata);
         setDSKetQua(DanhGiadata);
         seteditedDoanVien({
           hk1: DanhGiadata.hk1.toFixed(2),
@@ -56,7 +56,6 @@ const SinhVienNamTot = (props) => {
           rl1: DanhGiadata.rl1,
           rl2: DanhGiadata.rl2,
         });
-
       } else {
         console.error("Lỗi khi gọi API:", res.statusText);
       }
@@ -274,10 +273,7 @@ const SinhVienNamTot = (props) => {
           <div className="update row">
             <div className="btns">
               <button className="allcus-button" type="submit">
-                <NavLink
-                  to={`/DoanVien`}
-                  className="navlink"
-                >
+                <NavLink to={`/DoanVien/DanhGiaDoanVien`} className="navlink">
                   <FontAwesomeIcon icon={faBackward} />
                 </NavLink>
               </button>

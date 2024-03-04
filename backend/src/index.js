@@ -8,6 +8,7 @@ const jwt = require("jsonwebtoken");
 const Sequelize = require('sequelize');
 const XLSX = require('xlsx');
 const multer = require('multer');
+const fs = require('fs');
 require("dotenv").config();
 var morgan = require("morgan");
 const path = require("path");

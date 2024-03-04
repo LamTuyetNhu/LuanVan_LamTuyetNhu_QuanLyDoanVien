@@ -25,12 +25,12 @@ const searchChiDoanXepLoai = (formData) => {
 };
 
 const searchManyInfo = (formData) => {
-  console.log(formData)
+  console.log(formData);
   return axios.post("api/searchManyChiDoan", formData);
 };
 
 const searchManyInfoHD = (formData) => {
-  console.log(formData)
+  console.log(formData);
   return axios.post("api/searchManyHoatDong", formData);
 };
 
@@ -51,7 +51,7 @@ const searchDGDoanVien = (formData) => {
 };
 
 const searchManyDoanVien = (formData) => {
-  console.log(formData)
+  console.log(formData);
   return axios.post("api/searchManyDoanVien", formData);
 };
 
@@ -121,14 +121,14 @@ const searchBCH = (formData) => {
 };
 
 const searchManyDoanVienBCH = (formData) => {
-  console.log(formData)
+  console.log(formData);
   return axios.post("api/searchManyDoanVienBCH", formData);
-}
+};
 
 const searchManyDoanPhiCuaDoanVien = (formData) => {
-  console.log(formData)
+  console.log(formData);
   return axios.post("api/searchManyDoanPhiCuaDoanVien", formData);
-}
+};
 
 const XoaBanChapHanh = (select) => {
   return axios.post(`api/XoaBanChapHanh/${select}`);
@@ -147,12 +147,12 @@ const namhoccuaxeploai = () => {
 };
 
 const namhoccuachidoan = (IDLop) => {
-  console.log(IDLop)
+  console.log(IDLop);
   return axios.get(`api/namhoccuamotchidoan/${IDLop}`);
 };
 
 const namhoccuakhoa = (Khoa) => {
-  console.log(Khoa)
+  console.log(Khoa);
   return axios.get(`api/namhoccuakhoa/${Khoa}`);
 };
 
@@ -223,9 +223,10 @@ const laydshoatdongcualop = (IDLop, idnamhoc) => {
   return axios.get(`api/layDSHoatDongCuaLop/${IDLop}/${idnamhoc}`);
 };
 
-
 const LayDSDiemDanhCuaLop = (IDLop, IDHoatDong, IDNamHoc) => {
-  return axios.get(`api/LayDSDiemDanhCuaLop/${IDLop}/${IDHoatDong}/${IDNamHoc}`);
+  return axios.get(
+    `api/LayDSDiemDanhCuaLop/${IDLop}/${IDHoatDong}/${IDNamHoc}`
+  );
 };
 
 const SaveCheckboxStatesDiemDanhCuaLop = (IDHoatDong, checkboxStates) => {
@@ -240,21 +241,15 @@ const laytendoanvien = (IDDoanVien) => {
 };
 
 const DVLayMotDoanVien = (IDDoanVien, IDNamHoc) => {
-  return axios.get(
-    `api/DVlaymotdoanvien/${IDDoanVien}/${IDNamHoc}`
-  );
+  return axios.get(`api/DVlaymotdoanvien/${IDDoanVien}/${IDNamHoc}`);
 };
 
 const layDSChucVuDoanVien = (IDDoanVien) => {
-  return axios.get(
-    `api/layDSChucVuDoanVien/${IDDoanVien}}`
-  );
+  return axios.get(`api/layDSChucVuDoanVien/${IDDoanVien}}`);
 };
 
 const layDSDanhGiaDoanVien = (IDDoanVien) => {
-  return axios.get(
-    `api/layDSDanhGiaDoanVien/${IDDoanVien}}`
-  );
+  return axios.get(`api/layDSDanhGiaDoanVien/${IDDoanVien}}`);
 };
 
 const laydshoatdongcuadoanvien = (IDDoanVien, idnamhoc) => {
@@ -282,13 +277,13 @@ const mauUngTuyen = () => {
 };
 
 const CapNhatTrangThai = (IDUngTuyen, TTUngTuyen) => {
-  console.log(IDUngTuyen)
-  console.log(TTUngTuyen)
+  console.log(IDUngTuyen);
+  console.log(TTUngTuyen);
   return axios.post(`api/CapNhatUngTuyenCuaDV/${IDUngTuyen}/${TTUngTuyen}`);
 };
 
 const searchManySVNT = (formData) => {
-  console.log(formData)
+  console.log(formData);
   return axios.post("api/searchManySVNT", formData);
 };
 
@@ -301,7 +296,9 @@ const laydsdoanphicuadoanvien = (IDDoanVien, idnamhoc) => {
 };
 
 const DSDanhGiaDoanVienCuaLop = (IDLop, page, idnamhoc) => {
-  return axios.get(`api/DanhSachDanhGiaDoanVienCuaLop/${page}/${IDLop}/${idnamhoc}`);
+  return axios.get(
+    `api/DanhSachDanhGiaDoanVienCuaLop/${page}/${IDLop}/${idnamhoc}`
+  );
 };
 
 const DanhGiaTungChiDoan = (IDLop, idnamhoc) => {
@@ -360,7 +357,7 @@ const themtruong = (formData) => {
 };
 
 const searchManyTenTruong = (formData) => {
-  console.log(formData)
+  console.log(formData);
   return axios.post("api/searchManyTenTruong", formData);
 };
 
@@ -377,8 +374,7 @@ const CapNhatTruong = (IDTruong, formData) => {
 };
 
 const getAllChiDoanCT = (IDTruong, page, khoa) => {
-  return axios.get(`api/dschidoan/${IDTruong}/${page}/${khoa}`, {
-  });
+  return axios.get(`api/dschidoan/${IDTruong}/${page}/${khoa}`, {});
 };
 
 const themChiDoanCT = (IDTruong, formData) => {
@@ -398,9 +394,7 @@ const laytenBCH = (IDBCH) => {
 };
 
 const layDSChucVuBCH = (IDBCH) => {
-  return axios.get(
-    `api/layDSChucVuBCH/${IDBCH}}`
-  );
+  return axios.get(`api/layDSChucVuBCH/${IDBCH}}`);
 };
 
 const searchBCHTruong = (formData) => {
@@ -409,7 +403,7 @@ const searchBCHTruong = (formData) => {
 
 const searchManyBCH = (formData) => {
   return axios.post("api/searchManyBCH", formData);
-}
+};
 
 const XoaBCHTruong = (IDBCH) => {
   return axios.post(`api/XoaBCHTruong/${IDBCH}`);
@@ -423,7 +417,12 @@ const CapNhatThongTinDHCT = (formData) => {
   return axios.post("api/CapNhatThongTinDHCT", formData);
 };
 
+const laytenBCHTruong = (IDBCH, IDTruong) => {
+  return axios.get(`api/laytenBCHTruong/${IDBCH}/${IDTruong}`);
+};
+
 export {
+  laytenBCHTruong,
   CapNhatThongTinDHCT,
   XoaChiTietDoanVien,
   XoaChiTietBCHTruong,
@@ -442,7 +441,6 @@ export {
   searchManyTenTruong,
   XoaTruong,
   getAllChiDoanCT,
-
   searchChiDoan,
   searchChiDoanXepLoai,
   searchManyInfo,
@@ -516,11 +514,10 @@ export {
   CapNhatThongTinLop,
   searchManyDoanPhiCuaDoanVien,
   DanhGiaTungChiDoan,
-
   layTieuChi,
   layTieuChiChiDoan,
   layTieuChiDoanVien,
   laytentruongdh,
   laymottruong,
-  CapNhatTruong
+  CapNhatTruong,
 };

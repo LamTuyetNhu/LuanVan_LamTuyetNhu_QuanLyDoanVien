@@ -68,7 +68,7 @@ function Header() {
             <div className="header__cart-list">
               <ul className="header__cart-list-item">
               <li className="header__cart-item">
-                  <NavLink to="" className="header__cart-item-info" onClick={handleLogout}>
+                  <NavLink to="/DoanVien/AnhDiemDanh" className="header__cart-item-info">
                     Ảnh điểm danh
                   </NavLink>
                 </li>

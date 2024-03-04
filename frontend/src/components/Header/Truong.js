@@ -82,7 +82,7 @@ function Truong() {
                     to="/DaiHocCanTho/ThongTinCaNhan"
                     className="header__cart-item-info"
                   >
-                    Trang cá nhân
+                    Thông tin trường
                   </NavLink>
                 </li>
                 <li className="header__cart-item">

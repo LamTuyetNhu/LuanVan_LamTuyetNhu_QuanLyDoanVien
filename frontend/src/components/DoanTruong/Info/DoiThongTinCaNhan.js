@@ -93,13 +93,13 @@ const ChiTietHoatDong = (props) => {
       try {
         await CapNhatThongTin(editedThongTin);
         ThongTinCaNhan();
-  
+
         setThongTin(editedThongTin);
         setShowModalUpdate(true);
         setIsEditing(false);
       } catch (error) {
         console.error("Lỗi khi thêm mới hoạt động:", error);
-      } 
+      }
     } else {
       return;
     }
@@ -177,15 +177,29 @@ const ChiTietHoatDong = (props) => {
 
             {isEditing ? (
               <>
-                <button className="allcus-button bgcapnhat" onClick={handleSaveChanges}>
+                <button
+                  className="allcus-button bgcapnhat"
+                  onClick={handleSaveChanges}
+                >
                   <FontAwesomeIcon icon={faSave} /> Lưu
                 </button>
               </>
             ) : (
-              <button className="allcus-button bgcapnhat" onClick={handleToggleEdit}>
+              <button
+                className="allcus-button bgcapnhat"
+                onClick={handleToggleEdit}
+              >
                 <FontAwesomeIcon icon={faEdit} /> Cập nhật
               </button>
             )}
+            {/* <button className="allcus-button button-error" type="submit">
+              <NavLink
+                to={`/BCH-DoanTruong/DoiMatKhau`}
+                className="navlink"
+              >
+                Đổi mật khẩu
+              </NavLink>
+            </button> */}
           </div>
         </form>
       </div>
