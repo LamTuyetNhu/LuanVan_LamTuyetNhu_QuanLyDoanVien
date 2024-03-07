@@ -1355,12 +1355,6 @@ const initAPIRoute = (app) => {
   );
   router.post("/doimatkhaubchtruong/:IDBCH", APIController.doimatkhaubch);
 
-  // let getIDDV = (req, res, next) => {
-  //   console.log("id doan vien ", req.body);
-  //   next()
-  // }
-  
- 
   const storageMulter = multer.diskStorage({
     destination: async (req, file, cb) => {
       const IDDoanVien = req.params.IDDoanVien;
