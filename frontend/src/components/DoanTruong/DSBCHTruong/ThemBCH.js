@@ -676,7 +676,7 @@ const DoanVien = (props) => {
                 <div className="btns">
                   <button className="allcus-button" type="submit">
                     <NavLink
-                      to={`/DaiHocCanTho/DanhSachBCHTruong`}
+                      to={`/BCH-DoanTruong/DanhSachBCHTruong`}
                       className="navlink"
                     >
                       <FontAwesomeIcon icon={faBackward} />

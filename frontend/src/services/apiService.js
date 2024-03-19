@@ -421,7 +421,68 @@ const laytenBCHTruong = (IDBCH, IDTruong) => {
   return axios.get(`api/laytenBCHTruong/${IDBCH}/${IDTruong}`);
 };
 
+const layMSSVdoanvien = (MSSV) => {
+  return axios.get(`api/TimBangMSSV/${MSSV}`);
+};
+
+const laydshoatdongdhct = (page, idnamhoc) => {
+  console.log("Page, IDNamHoc: ", page, idnamhoc)
+  return axios.get(`api/layDSHoatDongDHCT/${page}/${idnamhoc}`);
+};
+
+const searchHoatDongdhct = (formData) => {
+  return axios.post("api/searchHoatDongDHCT", formData);
+};
+
+const searchManyInfoHDdhct = (formData) => {
+  return axios.post("api/searchManyInfoHDdhct", formData);
+};
+
+const themHoatDongdhct = (formData) => {
+  return axios.post("api/TaoHoatDongDHCT", formData);
+};
+
+const LayMotHoatDongdhct = (IDHoatDongDHCT) => {
+  console.log(IDHoatDongDHCT)
+  return axios.get(`api/layMotHoatDongDHCT/${IDHoatDongDHCT}`);
+};
+
+const CapNhatHoatDongdhct = (formData) => {
+  return axios.post("api/CapNhatHoatDongDHCT", formData);
+};
+
+const XoaHoatDongdhct = (IDHoatDong) => {
+  return axios.post(`api/XoaHoatDongDHCT/${IDHoatDong}`);
+};
+
+const LayDSDiemDanhdhct = (IDHoatDongDHCT, IDNamHoc, IDTruong) => {
+  return axios.get(`api/LayDSDiemDanhDHCT/${IDHoatDongDHCT}/${IDNamHoc}/${IDTruong}`);
+};
+
+const SaveCheckboxStatesDiemDanhdhct = (IDHoatDongDHCT, checkboxStates) => {
+  return axios.post("api/saveCheckboxStatesDiemDanhDHCT", {
+    IDHoatDongDHCT,
+    checkboxStates,
+  });
+};
+
+const layMaBCH = (MaBCH) => {
+  return axios.get(`api/layMaBCH/${MaBCH}`);
+};
+
 export {
+  layMaBCH,
+  laydshoatdongdhct,
+  searchHoatDongdhct,
+  themHoatDongdhct,
+  LayMotHoatDongdhct,
+  CapNhatHoatDongdhct,
+  XoaHoatDongdhct,
+  LayDSDiemDanhdhct,
+  SaveCheckboxStatesDiemDanhdhct,
+  searchManyInfoHDdhct,
+
+  layMSSVdoanvien,
   laytenBCHTruong,
   CapNhatThongTinDHCT,
   XoaChiTietDoanVien,

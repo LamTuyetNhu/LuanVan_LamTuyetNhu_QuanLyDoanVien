@@ -14,11 +14,10 @@ import {
   faChevronLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import {
-  laytatcatruong,
   namhoc,
-  laydshoatdong,
-  searchHoatDong,
-  searchManyInfoHD,
+  laydshoatdongdhct,
+  searchHoatDongdhct,
+  searchManyInfoHDdhct,
 } from "../../../services/apiService";
 
 const DanhSachHoatDong = (props) => {
@@ -28,9 +27,6 @@ const DanhSachHoatDong = (props) => {
   const [totalPages, setTotalPages] = useState(1);
   const [pageSize, setPageSize] = useState(5);
 
-  const [IDTruong, setTruong] = useState(4);
-  const [DSTruong, setDSTruong] = useState([]);
-
   const [idnamhoc, setIDNamHoc] = useState(1);
   const [NamHoc, setNamHoc] = useState([]);
 
@@ -39,7 +35,6 @@ const DanhSachHoatDong = (props) => {
     if (!token) {
       return false;
     }
-    // Thêm logic kiểm tra hạn của token nếu cần
     return true;
   };
   useEffect(() => {
@@ -49,27 +44,11 @@ const DanhSachHoatDong = (props) => {
     fetchDSHoatDong();
     fetchAllData();
     fetchDSNamHoc();
-    fetchDSTruong();
-  }, [currentPage, idnamhoc, IDTruong]);
-
-  const fetchDSTruong = async () => {
-    try {
-      let res = await laytatcatruong();
-
-      if (res.status === 200) {
-        setDSTruong(res.data.dataCD);
-      } else {
-        // Xử lý trường hợp lỗi
-        console.error("Lỗi khi gọi API:", res.statusText);
-      }
-    } catch (error) {
-      console.error("Lỗi khi gọi API:", error.message);
-    }
-  };
+  }, [currentPage, idnamhoc]);
 
   const fetchDSHoatDong = async () => {
     try {
-      let res = await laydshoatdong(currentPage, idnamhoc, IDTruong);
+      let res = await laydshoatdongdhct(currentPage, idnamhoc);
 
       if (res.status === 200) {
         setDSHoatDong(res.data.dataHD);
@@ -97,7 +76,6 @@ const DanhSachHoatDong = (props) => {
     try {
       let res = await namhoc();
       if (res.status === 200) {
-        // setListKhoa(res.data.dataNH); // Cập nhật state với danh sách khóa học
         const NamHocdata = res.data.dataNH;
 
         // Kiểm tra nếu khoaData là mảng trước khi cập nhật state
@@ -118,11 +96,10 @@ const DanhSachHoatDong = (props) => {
     try {
       const trimmedTenHoatDong = searchData.TenHoatDong.trim();
 
-      let res = await searchHoatDong({
+      let res = await searchHoatDongdhct({
         ...searchData,
         TenHoatDong: trimmedTenHoatDong,
         IDNamHoc: idnamhoc,
-        IDTruong: IDTruong,
       }); // Assuming you have implemented the search API
 
       console.log(res);
@@ -139,8 +116,11 @@ const DanhSachHoatDong = (props) => {
   const handleManySearch = async () => {
     try {
       const trimmedInfo = searchMany.info.trim().toLowerCase();
-      let res = await searchManyInfoHD({ trimmedInfo, 
-        IDNamHoc: idnamhoc, IDTruong: IDTruong }); // Assuming you have implemented the search API
+      let res = await searchManyInfoHDdhct({
+        trimmedInfo,
+        IDNamHoc: idnamhoc,
+        // IDTruong: IDTruong,
+      }); // Assuming you have implemented the search API
       console.log(res);
       if (res.status === 200) {
         setDSHoatDong(res.data.dataHD);
@@ -175,7 +155,7 @@ const DanhSachHoatDong = (props) => {
 
       // Lặp qua tất cả các trang
       for (let page = 1; page <= totalPages; page++) {
-        let res = await laydshoatdong(page, idnamhoc);
+        let res = await laydshoatdongdhct(page, idnamhoc);
 
         if (res.status === 200) {
           // Tích hợp dữ liệu từ trang hiện tại vào mảng
@@ -197,17 +177,17 @@ const DanhSachHoatDong = (props) => {
     // Tạo một mảng chứa dữ liệu bạn muốn xuất
     const dataToExport = allData.map((item) => {
       return {
-        TenHoatDong: item.TenHoatDong,
-        NgayBanHanh: format(new Date(item.NgayTao), "dd/MM/yyyy"),
+        "Tên hoạt động": item.TenHoatDongDHCT,
+        "Ngày ban hành": format(new Date(item.NgayTaoDHCT), "dd/MM/yyyy"),
 
-        NgayBatDau: format(new Date(item.NgayBanHanh), "dd/MM/yyyy"),
-        NgayHetHan: format(new Date(item.NgayHetHan), "dd/MM/yyyy"),
+        "Ngày bắt đầu": format(new Date(item.NgayBatDauDHCT), "dd/MM/yyyy"),
+        "Ngày hết hạn": format(new Date(item.NgayHetHanDHCT), "dd/MM/yyyy"),
         "Trạng thái":
-          item.ttHD === 0
+          item.ttHDDHCT === 0
             ? "Chưa ban hành"
-            : item.ttHD === 1
+            : item.ttHDDHCT === 1
             ? "Đã ban hành"
-            : item.ttHD === 2
+            : item.ttHDDHCT === 2
             ? "Hoàn thành"
             : "Đã xóa",
       };
@@ -235,11 +215,6 @@ const DanhSachHoatDong = (props) => {
     return (pageIndex - 1) * pageSize + itemIndex + 1;
   };
 
-  const handleTruongChange = (e) => {
-    const selectedIDNamHoc = e.target.value;
-    setTruong(selectedIDNamHoc);
-  };
-
   return (
     <>
       <div className="container-fluid app__content">
@@ -247,24 +222,7 @@ const DanhSachHoatDong = (props) => {
           <h2 className="text-center">Danh Sách Hoạt Động</h2>
 
           <div className="searchDV-input">
-            Tên trường/khoa:
-            <select
-              type="text"
-              className="search_name"
-              value={IDTruong}
-              onChange={handleTruongChange}
-            >
-              {DSTruong.map((item, index) => {
-                return (
-                  <option key={index} value={item.IDTruong}>
-                    {item.TenTruong}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-
-          <div className="searchDV-input">Năm học:
+            Năm học:
             <select
               type="text"
               className="search_name"
@@ -348,6 +306,12 @@ const DanhSachHoatDong = (props) => {
             </div>
             <div className="buttonSearch">
               {" "}
+              <NavLink to="/DaiHocCanTho/ThemMoiHoatDong">
+                <button className="formatButton">
+                  {" "}
+                  <FontAwesomeIcon icon={faPlus} />
+                </button>
+              </NavLink>
               <div>
                 <button className="formatButton" onClick={exportToExcel}>
                   {" "}
@@ -358,7 +322,13 @@ const DanhSachHoatDong = (props) => {
           </div>
 
           <div className="searchDV tablet-mobile">
-          <div className="searchDV-Right">
+            <div className="searchDV-Right">
+              <NavLink to="/DaiHocCanTho/ThemMoiHoatDong">
+                <button className="formatButton">
+                  {" "}
+                  <FontAwesomeIcon icon={faPlus} />
+                </button>
+              </NavLink>
               <div>
                 <button className="formatButton" onClick={exportToExcel}>
                   {" "}
@@ -374,9 +344,9 @@ const DanhSachHoatDong = (props) => {
                   className="search_name"
                   placeholder="Tìm tên hoạt động"
                   value={searchMany.info}
-                onChange={(e) => {
-                  setsearchMany({ info: e.target.value });
-                }}
+                  onChange={(e) => {
+                    setsearchMany({ info: e.target.value });
+                  }}
                 />
               </div>
               <button className="formatButton" onClick={handleManySearch}>
@@ -384,7 +354,6 @@ const DanhSachHoatDong = (props) => {
                 <FontAwesomeIcon icon={faMagnifyingGlass} />
               </button>
             </div>
-
           </div>
         </div>
 
@@ -413,40 +382,42 @@ const DanhSachHoatDong = (props) => {
                     return (
                       <tr key={`table-hoatdong-${index}`} className="tableRow">
                         <td className="col-center">{stt}</td>
-                        <td className="mb-tableItem mb-tableItem1">{item.TenHoatDong}</td>
-                        <td className="col-center">
-                          {format(new Date(item.NgayTao), "dd/MM/yyyy")}
+                        <td className="mb-tableItem mb-tableItem1">
+                          {item.TenHoatDongDHCT}
                         </td>
                         <td className="col-center">
-                          {format(new Date(item.NgayBanHanh), "dd/MM/yyyy")}
+                          {format(new Date(item.NgayTaoDHCT), "dd/MM/yyyy")}
                         </td>
                         <td className="col-center">
-                          {format(new Date(item.NgayHetHan), "dd/MM/yyyy")}
+                          {format(new Date(item.NgayBatDauDHCT), "dd/MM/yyyy")}
+                        </td>
+                        <td className="col-center">
+                          {format(new Date(item.NgayHetHanDHCT), "dd/MM/yyyy")}
                         </td>
 
                         <td
                           className={` ${
-                            item.ttHD === 0
+                            item.ttHDDHCT === 0
                               ? ""
-                              : item.ttHD === 1
+                              : item.ttHDDHCT === 1
                               ? "daTotNghiep"
-                              : item.ttHD === 2
+                              : item.ttHDDHCT === 2
                               ? "chuaTotNghiep"
                               : "hoanthanh"
                           }`}
                         >
-                          {item.ttHD === 0
+                          {item.ttHDDHCT === 0
                             ? "Chưa ban hành"
-                            : item.ttHD === 1
+                            : item.ttHDDHCT === 1
                             ? "Đang diễn ra"
-                            : item.ttHD === 2
+                            : item.ttHDDHCT === 2
                             ? "Hoàn thành"
                             : "Đã xóa"}
                         </td>
 
                         <td className="btnOnTable1">
                           <NavLink
-                            to={`/DaiHocCanTho/ChiTietHoatDong/DiemDanhChiDoan/${item.IDHoatDong}/${item.IDNamHoc}`}
+                            to={`/DaiHocCanTho/ChiTietHoatDong/DiemDanhBCHTruong/${item.IDHoatDongDHCT}/${item.IDNamHoc}`}
                           >
                             <button className="btnOnTable ">
                               <FontAwesomeIcon icon={faEye} />
@@ -456,7 +427,7 @@ const DanhSachHoatDong = (props) => {
 
                         <td className="btnOnTable1 thButton">
                           <NavLink
-                            to={`/DaiHocCanTho/ChiTietHoatDong/${item.IDHoatDong}`}
+                            to={`/DaiHocCanTho/ChiTietHoatDong/${item.IDHoatDongDHCT}`}
                           >
                             <button className="btnOnTable">
                               <FontAwesomeIcon icon={faPenToSquare} />
@@ -477,73 +448,72 @@ const DanhSachHoatDong = (props) => {
         </div>
 
         {DSHoatDong && DSHoatDong.length > 0 && (
-        <div className="pagination pagination1">
-          <button
-            className="btn-footer"
-            onClick={handlePrevPage}
-            disabled={currentPage <= 1}
-          >
-            <FontAwesomeIcon icon={faChevronLeft} />
-          </button>
+          <div className="pagination pagination1">
+            <button
+              className="btn-footer"
+              onClick={handlePrevPage}
+              disabled={currentPage <= 1}
+            >
+              <FontAwesomeIcon icon={faChevronLeft} />
+            </button>
 
-          {totalPages > 4 && currentPage > 3 && (
-            <div className="footer">
-              <span className="ellipsis"></span>
-            </div>
-          )}
+            {totalPages > 4 && currentPage > 3 && (
+              <div className="footer">
+                <span className="ellipsis"></span>
+              </div>
+            )}
 
-          {Array.from(
-            { length: totalPages > 4 ? 3 : totalPages },
-            (_, index) => {
-              let pageToShow;
-              if (totalPages <= 4) {
-                pageToShow = index + 1;
-              } else if (currentPage <= 3) {
-                pageToShow = index + 1;
-              } else if (currentPage >= totalPages - 2) {
-                pageToShow = totalPages - 2 + index;
-              } else {
-                pageToShow = currentPage - 1 + index;
+            {Array.from(
+              { length: totalPages > 4 ? 3 : totalPages },
+              (_, index) => {
+                let pageToShow;
+                if (totalPages <= 4) {
+                  pageToShow = index + 1;
+                } else if (currentPage <= 3) {
+                  pageToShow = index + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageToShow = totalPages - 2 + index;
+                } else {
+                  pageToShow = currentPage - 1 + index;
+                }
+
+                return (
+                  <div className="footer" key={index}>
+                    <button
+                      className={`btn-footer ${
+                        currentPage === pageToShow ? "active" : ""
+                      }`}
+                      onClick={() => changePage(pageToShow)}
+                      disabled={currentPage === pageToShow}
+                    >
+                      {pageToShow}
+                    </button>
+                  </div>
+                );
               }
+            )}
 
-              return (
-                <div className="footer" key={index}>
-                  <button
-                    className={`btn-footer ${
-                      currentPage === pageToShow ? "active" : ""
-                    }`}
-                    onClick={() => changePage(pageToShow)}
-                    disabled={currentPage === pageToShow}
-                  >
-                    {pageToShow}
-                  </button>
-                </div>
-              );
-            }
-          )}
+            {totalPages > 4 && currentPage < totalPages - 2 && (
+              <div className="footer">
+                <span className="ellipsis"></span>
+              </div>
+            )}
 
-          {totalPages > 4 && currentPage < totalPages - 2 && (
-            <div className="footer">
-              <span className="ellipsis"></span>
-            </div>
-          )}
+            <button
+              className="btn-footer"
+              onClick={handleNextPage}
+              disabled={currentPage >= totalPages}
+            >
+              <FontAwesomeIcon icon={faChevronRight} />
+            </button>
+          </div>
+        )}
 
-          <button
-            className="btn-footer"
-            onClick={handleNextPage}
-            disabled={currentPage >= totalPages}
-          >
-            <FontAwesomeIcon icon={faChevronRight} />
-          </button>
-        </div>
-      )}
-
-      {DSHoatDong && DSHoatDong.length <= 5 && (
-        <div className="pagination pagination1">
-          {/* You can add some message or content indicating that pagination is not shown */}
-        </div>
-      )}
-
+        {DSHoatDong && DSHoatDong.length <= 5 && (
+          <div className="pagination pagination1">
+            {/* You can add some message or content indicating that pagination is not shown */}
+          </div>
+        )}
       </div>
     </>
   );

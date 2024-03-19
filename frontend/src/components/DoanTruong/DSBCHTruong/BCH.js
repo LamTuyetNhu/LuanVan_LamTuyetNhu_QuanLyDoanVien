@@ -12,7 +12,7 @@ import {
   faEdit,
   faCamera,
   faTrash,
-  faX
+  faX,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   chucvu,
@@ -21,7 +21,7 @@ import {
   layDSChucVuBCH,
   laytenBCH,
   XoaBCHTruong,
-  XoaChiTietBCHTruong
+  XoaChiTietBCHTruong,
 } from "../../../services/apiService";
 
 const DoanVien = (props) => {
@@ -371,7 +371,9 @@ const DoanVien = (props) => {
   const handleDisplayButtonClick = async (itemID) => {
     try {
       await XoaChiTietBCHTruong(itemID);
-      setCVDoanVien(prevCVDoanVien => prevCVDoanVien.filter(item => item.IDChiTietNamHoc !== itemID));
+      setCVDoanVien((prevCVDoanVien) =>
+        prevCVDoanVien.filter((item) => item.IDChiTietNamHoc !== itemID)
+      );
 
       setShowModal2(true);
     } catch (error) {
@@ -406,6 +408,14 @@ const DoanVien = (props) => {
                   onChange={(e) => handleUpLoadImage(e)}
                 />
               </label>
+            </div>
+            <div className="namhoc-center">
+            <NavLink to={`/BCH-DoanTruong/DanhSachBCHTruong/BCHTruong/AnhDiemDanh`} className="navlink">
+              
+            <button className="allcus-button">
+              <FontAwesomeIcon icon={faSave} /> Ảnh điểm danh
+            </button>
+            </NavLink>
             </div>
           </div>
           <div className="col-12 col-md-9 col-lg-10 margin-top1">
@@ -795,7 +805,6 @@ const DoanVien = (props) => {
       </NavLink>
 
       <DeleteSuccess show={showModal2} onHide={() => setShowModal2(false)} />
-
     </>
   );
 };

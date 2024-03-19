@@ -15,6 +15,7 @@ import {
   chucvu,
   LayTonGiao,
   LayDanToc,
+  layDSDanhGiaDoanVien,
   layDSChucVuDoanVien,
   laytendoanvien,
 } from "../../services/apiService";
@@ -25,6 +26,8 @@ const DoanVien = (props) => {
 
   const [DoanVien, setDoanVien] = useState([]);
   const [CVDoanVien, setCVDoanVien] = useState([]);
+  const [DGDoanVien, setDGDoanVien] = useState([]);
+  const [listIDDanhGia, setListIDDanhGia] = useState([]);
 
   const [DanToc, setDanToc] = useState([]);
   const [TonGiao, setTonGiao] = useState([]);
@@ -56,6 +59,7 @@ const DoanVien = (props) => {
     fetchTonGiao();
     fetchDanToc();
     DSChucVuDoanVien();
+    DSDanhGiaDoanVien();
   }, [IDDoanVien]);
 
   const layMotDoanVien = async () => {
@@ -86,6 +90,22 @@ const DoanVien = (props) => {
         // Assuming dataDV contains roles (ChucVu)
         setCVDoanVien(dataDV);
         setListIDChucVu(dataDV.map((item) => item.IDChucVu));
+      } else {
+        console.error("Lỗi khi gọi API:", res.statusText);
+      }
+    } catch (error) {
+      console.error("Lỗi khi gọi API:", error.message);
+    }
+  };
+
+  const DSDanhGiaDoanVien = async () => {
+    try {
+      let res = await layDSDanhGiaDoanVien(IDDoanVien);
+      if (res.status === 200) {
+        const { dataDV } = res.data;
+        // Assuming dataDV contains roles (ChucVu)
+        setDGDoanVien(dataDV);
+        setListIDDanhGia(dataDV.map((item) => item.IDDanhGia));
       } else {
         console.error("Lỗi khi gọi API:", res.statusText);
       }
@@ -679,6 +699,7 @@ const handleChangeChucVu = (e, index) => {
                         <th className="table-item">STT</th>
                         <th className="table-item">Tên năm học</th>
                         <th>Chức vụ</th>
+                        <th>Phân loại</th>
                       </tr>
                     </thead>
                     <tbody id="myTable">
@@ -710,9 +731,21 @@ const handleChangeChucVu = (e, index) => {
                                     ))}
                                   </Form.Select>
                                 ) : (
-                                  // Display the current Chức Vụ
                                   item.TenCV
                                 )}
+                              </td>
+                              <td>
+                                {DGDoanVien[index]
+                                  ? DGDoanVien[index].PhanLoai === 1
+                                    ? "Xuất sắc"
+                                    : DGDoanVien[index].PhanLoai === 2
+                                    ? "Khá"
+                                    : DGDoanVien[index].PhanLoai === 3
+                                    ? "Trung bình"
+                                    : DGDoanVien[index].PhanLoai === 4
+                                    ? "Yếu kém"
+                                    : "Chưa phân loại"
+                                  : "Chưa có đánh giá"}
                               </td>
                             </tr>
                           );

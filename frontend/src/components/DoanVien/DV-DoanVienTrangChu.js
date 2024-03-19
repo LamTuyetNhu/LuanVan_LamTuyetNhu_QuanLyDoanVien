@@ -10,7 +10,7 @@ import hoatdong from "../../assets/hoatdong.png";
 import svnamtot from "../../assets/sv5tot.jpg";
 import diem from "../../assets/diem.jpg";
 import tienquy from "../../assets/tienquy.png";
-import matkhau from "../../assets/matkhau.png";
+import matkhau from "../../assets/khoa1.jpg";
 
 import { laytendoanvien } from "../../services/apiService";
 

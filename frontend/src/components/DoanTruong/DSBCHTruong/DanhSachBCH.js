@@ -279,7 +279,7 @@ const DanhSachBCH = (props) => {
 
   const handleAddButtonClick = (itemID) => {
     localStorage.setItem("IDTruong", IDTruong);
-    navigate(`/DaiHocCanTho/ThemMoiBanChapHanh`);
+    navigate(`/BCH-DoanTruong/ThemBCH`);
   };
 
   const fileInputRef = useRef(null);

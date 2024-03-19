@@ -1,8 +1,8 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, NavLink } from "react-router-dom";
 import Modal from "../../Modal/Modal";
-import { faSave, faCloudArrowDown } from "@fortawesome/free-solid-svg-icons";
+import { faSave, faCloudArrowDown, faCamera } from "@fortawesome/free-solid-svg-icons";
 import {
   LayDSDiemDanhCuaLop,
   SaveCheckboxStatesDiemDanhCuaLop,
@@ -25,7 +25,6 @@ const DiemDanh = (props) => {
     if (!token) {
       return false;
     }
-    // Thêm logic kiểm tra hạn của token nếu cần
     return true;
   };
 
@@ -142,6 +141,16 @@ const DiemDanh = (props) => {
       <div className="container-fluid app__content">
         <h5 className="text-center">{TenHoatDong}</h5>
         <h6 className="text-center">{TenNamHoc}</h6>
+
+        <div className="searchDV-Right">
+              <NavLink to={`/ChiDoan/DiemDanhGuongMat/${IDHoatDong}`}>
+                <button className="formatButton">
+                  <FontAwesomeIcon icon={faCamera} /> Điểm danh bằng gương mặt
+                </button>
+              </NavLink>
+            </div>
+
+
         <div className="table-container">
           <table className="table table-striped">
             <thead>

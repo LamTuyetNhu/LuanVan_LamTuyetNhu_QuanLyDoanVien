@@ -7,7 +7,8 @@ const fs = require("fs");
 import pool from "../configs/connectDB";
 const { parse, format } = require("date-fns");
 const path = require("path");
-
+const util = require("util");
+const readdir = util.promisify(fs.readdir);
 var appRoot = require("app-root-path");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
@@ -894,7 +895,6 @@ const initAPIRoute = (app) => {
   router.get("/LayTieuChi", APIController.LayTieuChi);
   router.get("/LayMotTieuChi/:IDTieuChi", APIController.LayMotTieuChi);
   router.post("/CapNhatMotTieuChi/:IDTieuChi", APIController.CapNhatMotTieuChi);
-
   router.get("/LayTieuChiChiDoan", APIController.LayTieuChiChiDoan);
   router.post("/LayMotTieuChiDGCD/:IDDGCD", APIController.CapNhatMotTieuChiCD);
   router.get("/LayTieuChiDoanVien", APIController.LayTieuChiDoanVien);
@@ -943,7 +943,6 @@ const initAPIRoute = (app) => {
     APIController.getBCHTruong
   );
   router.get("/namhoccuabch", APIController.namhoccuabch);
-
   router.post("/ThemMoiBCH", upload.single("file"), async (req, res) => {
     let {
       IDTruong,
@@ -1159,19 +1158,15 @@ const initAPIRoute = (app) => {
       }
     }
   );
-
   router.post("/searchBCHTruong", APIController.searchBCHTruong);
   router.post("/searchManyBCH", APIController.searchManyBCH);
-
   router.post("/ThemBCHExcel", upload1.single("file"), async (req, res) => {
     let { IDTruong, idnamhoc } = req.body;
     console.log(req.body);
 
-    // Parse IDLop to an integer
     IDTruong = parseInt(IDTruong, 10); // Assuming base 10
     idnamhoc = parseInt(idnamhoc, 10); // Assuming base 10
 
-    // Ensure that IDLop is a valid integer
     if (isNaN(IDTruong)) {
       console.error("Invalid IDTruong:", req.body.IDTruong);
       res.status(400).json({ message: "Invalid IDTruong" });
@@ -1268,24 +1263,6 @@ const initAPIRoute = (app) => {
                 [existingRows1[0].IDBCH, chucvu[0].IDChucVu, idnamhoc]
               );
             }
-
-            // const [existedDanhGiaNamHoc, existingDanhGiaNamHocFields1] =
-            //   await pool.execute(
-            //     "SELECT * FROM danhgiadoanvien WHERE danhgiadoanvien.IDDoanVien = ? and danhgiadoanvien.IDNamHoc = ?",
-            //     [existingRows1[0].IDDoanVien, idnamhoc]
-            //   );
-
-            // if (existedDanhGiaNamHoc.length > 0) {
-            //   console.log("Nam Hoc va MSSV da ton tai");
-            //   res.status(500).json({ message: "Nam Hoc va MSSV da ton tai" });
-            //   // return;
-            //   continue;
-            // } else {
-            //   await pool.execute(
-            //     "INSERT INTO danhgiadoanvien (IDDoanVien, IDNamHoc) VALUES (?, ?)",
-            //     [existingRows1[0].IDDoanVien, idnamhoc]
-            //   );
-            // }
           } else {
             const password = trimmedMSSV;
             const saltRounds = 10;
@@ -1316,11 +1293,6 @@ const initAPIRoute = (app) => {
               [IDDoanVien, chucvu[0].IDChucVu, idnamhoc]
             );
 
-            // await pool.execute(
-            //   "INSERT INTO danhgiadoanvien (IDDoanVien, IDNamHoc, hk1, hk2, rl1, rl2, PhanLoai) VALUES (?, ?, 0, 0, 0, 0, 0)",
-            //   [IDDoanVien, idnamhoc]
-            // );
-
             await pool.execute(
               "INSERT INTO anhbch (TenAnhBCH, IDBCH) VALUES (?, ?)",
               ["logo.jpg", IDDoanVien]
@@ -1341,7 +1313,6 @@ const initAPIRoute = (app) => {
       res.status(500).json({ message: "Có lỗi xảy ra" });
     }
   });
-
   router.post("/XoaBCHTruong/:IDBCH", APIController.XoaBCHTruong);
   router.post(
     "/XoaChiTietBCHTruong/:IDChiTietBCH",
@@ -1354,18 +1325,19 @@ const initAPIRoute = (app) => {
     APIController.laytenBCHTruong
   );
   router.post("/doimatkhaubchtruong/:IDBCH", APIController.doimatkhaubch);
-
   const storageMulter = multer.diskStorage({
     destination: async (req, file, cb) => {
       const IDDoanVien = req.params.IDDoanVien;
-      
+
       let [rows, fields] = await pool.execute(
-        "select MSSV from doanvien where IDDoanVien = ?",
+        "select MSSV, MaLop from doanvien, lop where doanvien.IDDoanVien = ? and doanvien.IDLop = lop.IDLop",
         [IDDoanVien]
       );
 
       const MSSV = rows[0].MSSV;
-      const dest = `./src/public/DiemDanh/${MSSV}`;
+      const MaLop = rows[0].MaLop;
+
+      const dest = `./src/public/DiemDanh/${MaLop}/${MSSV}`;
       fs.mkdirSync(dest, { recursive: true });
       cb(null, dest);
     },
@@ -1375,31 +1347,148 @@ const initAPIRoute = (app) => {
       cb(null, file.fieldname + "-" + uniqueSuffix + extension);
     },
   });
-
   const upload3 = multer({ storage: storageMulter });
+  router.post(
+    "/AnhDiemDanh/:IDDoanVien",
+    upload3.array("file"),
+    async (req, res) => {
+      try {
+        const files = req.files;
+        const IDDoanVien = req.params.IDDoanVien;
+        console.log("ID doan vien", IDDoanVien);
+        await Promise.all(
+          files.map((file) => {
+            const filename = file.filename;
+            return pool.execute(
+              "INSERT INTO anhdiemdanh (DDTenAnh, IDDoanVien) VALUES (?, ?)",
+              [filename, IDDoanVien]
+            );
+          })
+        );
 
-  router.post("/AnhDiemDanh/:IDDoanVien", upload3.array("file"), async (req, res) => {
-    try {
-      const files = req.files;
-      const IDDoanVien = req.params.IDDoanVien;
-      console.log("ID doan vien", IDDoanVien)
-      await Promise.all(
-        files.map((file) => {
-          const filename = file.filename;
-          return pool.execute(
-            "INSERT INTO anhdiemdanh (DDTenAnh, IDDoanVien) VALUES (?, ?)",
-            [filename, IDDoanVien]
-          );
-        })
+        res.status(200).json({ success: "Thêm ảnh thành công!" });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Có lỗi xảy ra" });
+      }
+    }
+  );
+  router.get("/LayAnhDiemDanh/:IDDoanVien", APIController.LayAnhDiemDanh);
+  // router.post("/uploadthumuc", async (req, res) => {
+  //   try {
+  //     // Đường dẫn đến thư mục lớn
+  //     const mainDirectory =
+  //       "D:/QuanLyDoanVien/backend/src/public/DiemDanh/DI20Z6A3"; // Điền đường dẫn của bạn
+  //     const subDirectories = await readdir(mainDirectory);
+  //     // Đọc danh sách thư mục con
+  //     // Duyệt qua từng thư mục con
+  //     for (const tenThuMuc of subDirectories) {
+  //       const subDirectoryPath = path.join(mainDirectory, tenThuMuc);
+
+  //       // Đọc danh sách ảnh trong thư mục con
+  //       const images = await readdir(subDirectoryPath);
+
+  //       // Duyệt qua từng ảnh và thêm vào cơ sở dữ liệu
+  //       const [rows, fields1] = await pool.execute(
+  //         "SELECT IDDoanVien from doanvien where doanvien.MSSV = ?",
+  //         [tenThuMuc]
+  //       );
+
+  //       if (rows.length > 0) {
+  //         let iddoanvien = rows[0].IDDoanVien;
+  //         console.log(iddoanvien);
+  //         // Duyệt qua từng ảnh và thêm vào cơ sở dữ liệu
+  //         for (const tenAnh of images) {
+  //           // Thêm vào cơ sở dữ liệu
+  //           const [DiemDanh, fields1] = await pool.execute(
+  //             "INSERT INTO AnhDiemDanh (IDDoanVien, DDTenAnh) VALUES (?, ?)",
+  //             [iddoanvien, tenAnh]
+  //           );
+  //           console.log(`Đã thêm thành công: ${tenThuMuc}/${tenAnh}`);
+  //         }
+  //       }
+  //     }
+  //     res.status(200).json({ message: "Thành công" });
+  //   } catch (error) {
+  //     console.error(error);
+  //     res.status(500).json({ error: "Có lỗi xảy ra" });
+  //   }
+  // });
+ 
+  router.get("/TimBangMSSV/:MSSV", APIController.timbangmssv);
+  router.post("/SaveIDDoanVienDiemDanhCuaLop", APIController.SaveIDDoanVienDiemDanhCuaLop);
+
+  
+  router.get(
+    "/layDSHoatDongDHCT/:page/:idnamhoc",
+    APIController.layDSHoatDongDHCT
+  );
+  router.post("/searchHoatDongDHCT", APIController.searchHoatDongDHCT);
+  router.post("/searchManyInfoHDdhct", APIController.searchManyInfoHDdhct);
+
+  router.post("/TaoHoatDongDHCT", APIController.TaoHoatDongDHCT);
+  router.get("/layMotHoatDongDHCT/:IDHoatDongDHCT", APIController.layMotHoatDongDHCT);
+  router.post("/CapNhatHoatDongDHCT", APIController.capNhatHoatDongDHCT);
+  router.post("/XoaHoatDongDHCT/:IDHoatDongDHCT", APIController.deleteHoatDongDHCT);
+  router.get(
+    "/LayDSDiemDanhDHCT/:IDHoatDongDHCT/:IDNamHoc/:IDTruong",
+    APIController.LayDSDiemDanhDHCT
+  );
+  router.post(
+    "/saveCheckboxStatesDiemDanhDHCT",
+    APIController.SaveCheckboxStatesDiemDanhDHCT
+  );
+
+  router.get("/layMaBCH/:MaBCH", APIController.layMaBCH);
+  router.post("/SaveIDBCH", APIController.SaveIDBCH);
+  
+  const storageMulter1 = multer.diskStorage({
+    destination: async (req, file, cb) => {
+      const IDBCH = req.params.IDBCH;
+
+      let [rows, fields] = await pool.execute(
+        "select MaBCH from bchtruong where bchtruong.IDBCH = ?",
+        [IDBCH]
       );
 
-      res.status(200).json({ success: "Thêm ảnh thành công!" });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Có lỗi xảy ra" });
-    }
-  });
+      const MaBCH = rows[0].MaBCH;
 
+      const dest = `./src/public/DiemDanh/GiangVien/${MaBCH}`;
+      fs.mkdirSync(dest, { recursive: true });
+      cb(null, dest);
+    },
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      const extension = path.extname(file.originalname);
+      cb(null, file.fieldname + "-" + uniqueSuffix + extension);
+    },
+  });
+  const upload4 = multer({ storage: storageMulter1 });
+  router.post(
+    "/AnhDiemDanhBCH/:IDBCH",
+    upload4.array("file"),
+    async (req, res) => {
+      try {
+        const files = req.files;
+        const IDBCH = req.params.IDBCH;
+        console.log("ID doan vien", IDBCH);
+        await Promise.all(
+          files.map((file) => {
+            const filename = file.filename;
+            return pool.execute(
+              "INSERT INTO anhdiemdanhbch (DDTenAnhBCH, IDBCH) VALUES (?, ?)",
+              [filename, IDBCH]
+            );
+          })
+        );
+
+        res.status(200).json({ success: "Thêm ảnh thành công!" });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Có lỗi xảy ra" });
+      }
+    }
+  );
   return app.use("/api", router);
 };
 

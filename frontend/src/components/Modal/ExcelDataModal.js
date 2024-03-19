@@ -52,7 +52,7 @@ const ExcelDataModal = ({ excelData, onClose, onConfirm, selectedFile  }) => {
   const renderTableBody = () => {
     return (
       <tbody>
-        {excelData.slice(0, 10).map((data, index) => (
+        {excelData.slice(0, 7).map((data, index) => (
           <tr key={index}>
             <td className="mb-tableItem mb-tableItem1">{data.MaBCH}</td>
             <td>{data.TenBCH}</td>

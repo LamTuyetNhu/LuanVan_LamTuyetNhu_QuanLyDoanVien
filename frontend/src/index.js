@@ -33,8 +33,9 @@ import CTThemMoiDoanVien from "./components/DaiHocCanTho/DSDoanVien/ThemMoiDoanV
 
 import CTDanhSachHoatDong from "./components/DaiHocCanTho/HoatDong/DanhSachHD";
 import CTChiTietHoatDong from "./components/DaiHocCanTho/HoatDong/ChiTietHoatDong";
-import CTDiemDanhChiDoan from "./components/DaiHocCanTho/HoatDong/DSDiemDanh";
-import CTDiemDanhDoanVien from "./components/DaiHocCanTho/HoatDong/DSDiemDanhDV"
+import CTDiemDanhNDGM from "./components/DaiHocCanTho/HoatDong/DiemDanhNDGM";
+import CTDiemDanhBCHTruong from "./components/DaiHocCanTho/HoatDong/DSDiemDanhDV"
+import CTThemMoiHoatDong from "./components/DaiHocCanTho/HoatDong/ThemMoiHD"
 
 import CTSinhVienNamTot from "./components/DaiHocCanTho/SinhVienNamTot/DSUTCuaTruong";
 import CTTieuChi from "./components/DaiHocCanTho/SinhVienNamTot/TieuChi";
@@ -62,9 +63,9 @@ import DoanVien from "./components/DoanTruong/DSDoanVien/DoanVien";
 import ThemMoiDoanVien from "./components/DoanTruong/DSDoanVien/ThemMoiDoanVien";
 import DanhSachHoatDong from "./components/DoanTruong/HoatDong/DanhSachHD";
 import ThemMoiHoatDong from "./components/DoanTruong/HoatDong/ThemMoiHD";
-import ChiTietHoatDong from "./components/DoanTruong/HoatDong/ChiTietHoatDong";
+import ChiTietHoatDong from "./components/DaiHocCanTho/HoatDong/ChiTietHoatDong";
 import DiemDanhChiDoan from "./components/DoanTruong/HoatDong/DSDiemDanh";
-import DiemDanhDoanVienChiDoan from "./components/ChiDoan/HoatDong/CD-DSDiemDanh";
+import DiemDanhDoanVienChiDoan from "./components/DoanTruong/HoatDong/DSDiemDanhCD";
 import SinhVienNamTot from "./components/DoanTruong/SinhVienNamTot/DanhSachDoanVien";
 import TieuChi from "./components/DoanTruong/SinhVienNamTot/TieuChi";
 import CapNhatTieuChi from "./components/DoanTruong/SinhVienNamTot/CapNhatTieuChi";
@@ -78,6 +79,7 @@ import ThongTinCaNhan from "./components/DoanTruong/Info/DoiThongTinCaNhan";
 import DoiMatKhau from "./components/DoanTruong/Info/DoiMatKhau";
 import TruongDSBCH from "./components/DoanTruong/DSBCHTruong/DanhSachBCH"
 import TruongBCH from "./components/DoanTruong/DSBCHTruong/BCH"
+import TruongAnhDiemDanhBCH from "./components/DoanTruong/DSBCHTruong/AnhDiemDanh"
 import TruongThemBCH from "./components/DoanTruong/DSBCHTruong/ThemBCH"
 import ThongTinCuaBan from "./components/DoanTruong/Info/BCH"
 import DoiMatKhauCuaBan from "./components/DoanTruong/Info/DoiMatKhauBCH"
@@ -100,6 +102,7 @@ import CDCNDanhGiaDoanVien from "./components/ChiDoan/XepLoaiChiDoan/CD-CapNhatD
 import ThongTinCaNhanLop from "./components/ChiDoan/Info/DoiThongTinCaNhan";
 import DoiMatKhauLop from "./components/ChiDoan/Info/DoiMatKhau";
 import TieuChiDanhGiaCD from "./components/ChiDoan/XepLoaiChiDoan/CD-TieuChiDanhGia";
+import CDDiemDanhGuongMat from "./components/ChiDoan/HoatDong/CD-DiemDanhNDGM"
 
 /* Doàn viên */
 import DVDoanVienTrangChu from "./components/DoanVien/DV-DoanVienTrangChu";
@@ -143,6 +146,7 @@ root.render(
             path="DanhSachBCHTruong/BanChapHanh"
             element={<CTBanChapHanh />}
           />
+
           <Route path="ThemMoiBanChapHanh" element={<ThemMoiBCH />} />
 
           <Route path="DoanPhi" element={<CTDoanPhi />} />
@@ -152,17 +156,15 @@ root.render(
           />
           <Route path="HoatDong" element={<CTDanhSachHoatDong />} />
           <Route
-            path="ChiTietHoatDong/:IDHoatDong"
+            path="ChiTietHoatDong/:IDHoatDongDHCT"
             element={<CTChiTietHoatDong />}
           />
           <Route
-            path="ChiTietHoatDong/DiemDanhChiDoan/:IDHoatDong/:IDNamHoc"
-            element={<CTDiemDanhChiDoan />}
+            path="ChiTietHoatDong/DiemDanhBCHTruong/:IDHoatDongDHCT/:IDNamHoc"
+            element={<CTDiemDanhBCHTruong />}
           />
-          <Route
-            path="ChiTietHoatDong/DiemDanhChiDoan/:IDHoatDong/:IDNamHoc/DanhSachDiemDanhCuaChiDoan"
-            element={<CTDiemDanhDoanVien />}
-          />
+          <Route path="DiemDanhGuongMat/:IDHoatDongDHCT/:IDNamHoc" element={<CTDiemDanhNDGM />} />
+          <Route path="ThemMoiHoatDong" element={<CTThemMoiHoatDong />} />
 
           <Route path="SinhVienNamTot" element={<CTSinhVienNamTot />} />
           <Route path="TieuChi" element={<CTTieuChi />} />
@@ -258,7 +260,9 @@ root.render(
 
           <Route path="DanhSachBCHTruong" element={<TruongDSBCH />} />
           <Route path="DanhSachBCHTruong/BCHTruong" element={<TruongBCH />} />
-          <Route path="DanhSachThemBCH" element={<TruongThemBCH />} />
+          <Route path="DanhSachBCHTruong/BCHTruong/AnhDiemDanh" element={<TruongAnhDiemDanhBCH />} />
+
+          <Route path="ThemBCH" element={<TruongThemBCH />} />
         </Route>
 
         <Route path="/ChiDoan" element={<BCH />}>
@@ -297,6 +301,8 @@ root.render(
           <Route path="DoiMatKhau" element={<DoiMatKhauLop />} />
           <Route path="ThongTinCaNhan" element={<ThongTinCaNhanLop />} />
           <Route path="TieuChiDanhGia" element={<TieuChiDanhGiaCD />} />
+          <Route path="DiemDanhGuongMat/:IDHoatDong" element={<CDDiemDanhGuongMat />} />
+
         </Route>
 
         <Route path="/DoanVien" element={<DVDoanVien />}>
