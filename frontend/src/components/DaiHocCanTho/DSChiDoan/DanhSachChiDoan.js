@@ -116,10 +116,15 @@ const DanhSachChiDoan = (props) => {
     }
   };
 
+  
+  const [searchMany, setsearchMany] = useState({
+    info: "",
+  });
+
   const handleManySearch = async () => {
     try {
       const trimmedInfo = searchMany.info.trim().toLowerCase();
-      let res = await searchManyInfo({ trimmedInfo }); // Assuming you have implemented the search API
+      let res = await searchManyInfo({ trimmedInfo, IDTruong }); // Assuming you have implemented the search API
       console.log(res);
       if (res.status === 200) {
         setListChiDoan(res.data.dataCD);
@@ -183,11 +188,6 @@ const DanhSachChiDoan = (props) => {
     TenLop: "",
     Khoa: khoa,
     ttLop: "",
-  });
-
-  const [searchMany, setsearchMany] = useState({
-    IDTruong: IDTruong,
-    info: "",
   });
 
   const exportToExcel = () => {

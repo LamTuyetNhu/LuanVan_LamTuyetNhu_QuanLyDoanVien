@@ -70,7 +70,7 @@ let getSearchChiDoan = async (req, res) => {
   try {
     if (MaLop !== undefined && TenLop === "" && ttLop === "") {
       const [rowsMaLop, fields] = await pool.execute(
-        "SELECT * FROM lop where Khoa = ? and MaLop LIKE ? and IDTruong = ?",
+        "SELECT * FROM lop where Khoa = ? and MaLop LIKE ? and IDTruong = ? and ttLop != 2",
         [Khoa, "%" + MaLop + "%", IDTruong]
       );
 
@@ -79,7 +79,7 @@ let getSearchChiDoan = async (req, res) => {
       });
     } else if (MaLop === "" && TenLop !== undefined && ttLop === "") {
       const [rowsTenLop, fields] = await pool.execute(
-        "SELECT * FROM lop where Khoa = ? and TenLop LIKE ? and IDTruong = ?",
+        "SELECT * FROM lop where Khoa = ? and TenLop LIKE ? and IDTruong = ? and ttLop != 2",
         [Khoa, "%" + TenLop + "%", IDTruong]
       );
 
@@ -88,7 +88,7 @@ let getSearchChiDoan = async (req, res) => {
       });
     } else if (MaLop === "" && TenLop === "" && ttLop !== undefined) {
       const [rowsTrangThai, fields] = await pool.execute(
-        "SELECT * FROM lop where Khoa = ? and ttLop = ? and IDTruong = ?",
+        "SELECT * FROM lop where Khoa = ? and ttLop = ? and IDTruong = ? and ttLop != 2",
         [Khoa, ttLop, IDTruong]
       );
 
@@ -97,7 +97,7 @@ let getSearchChiDoan = async (req, res) => {
       });
     } else if (MaLop !== undefined && TenLop !== undefined && ttLop === "") {
       const [rows, fields] = await pool.execute(
-        "SELECT * FROM lop where Khoa = ? and (TenLop LIKE ? and MaLop LIKE ?) and IDTruong = ?",
+        "SELECT * FROM lop where Khoa = ? and (TenLop LIKE ? and MaLop LIKE ?) and IDTruong = ? and ttLop != 2",
         [Khoa, "%" + TenLop + "%", "%" + MaLop + "%", IDTruong]
       );
 
@@ -106,7 +106,7 @@ let getSearchChiDoan = async (req, res) => {
       });
     } else if (MaLop !== undefined && TenLop === "" && ttLop !== undefined) {
       const [rows, fields] = await pool.execute(
-        "SELECT * FROM lop where Khoa = ? and (ttLop = ? and MaLop LIKE ?) and IDTruong = ?",
+        "SELECT * FROM lop where Khoa = ? and (ttLop = ?  and ttLop != 2 and MaLop LIKE ?) and IDTruong = ?",
         [Khoa, ttLop, "%" + MaLop + "%", IDTruong]
       );
 
@@ -115,7 +115,7 @@ let getSearchChiDoan = async (req, res) => {
       });
     } else if (MaLop === "" && TenLop !== undefined && ttLop !== undefined) {
       const [rows, fields] = await pool.execute(
-        "SELECT * FROM lop where Khoa = ? and (ttLop = ? and TenLop LIKE ?) and IDTruong = ?",
+        "SELECT * FROM lop where Khoa = ? and (ttLop = ? and TenLop LIKE ?) and IDTruong = ?  and ttLop != 2",
         [Khoa, ttLop, "%" + TenLop + "%", IDTruong]
       );
 
@@ -128,7 +128,7 @@ let getSearchChiDoan = async (req, res) => {
       ttLop !== undefined
     ) {
       const [rows, fields] = await pool.execute(
-        "SELECT * FROM lop where Khoa = ? and (ttLop = ? and TenLop LIKE ? and MaLop LIKE ?) and IDTruong = ?",
+        "SELECT * FROM lop where Khoa = ? and (ttLop = ? and TenLop LIKE ? and MaLop LIKE ?) and IDTruong = ? and ttLop != 2",
         [Khoa, ttLop, "%" + TenLop + "%", "%" + MaLop + "%", IDTruong]
       );
 
@@ -151,11 +151,11 @@ let getSearchChiDoan = async (req, res) => {
 
 let getSearchManyChiDoan = async (req, res) => {
   let { trimmedInfo, IDTruong } = req.body;
-  console.log(IDTruong);
+  console.log(req.body);
   try {
     if (trimmedInfo !== undefined) {
       const [rowsMaLop, fields] = await pool.execute(
-        "SELECT * FROM lop where (MaLop LIKE ? or TenLop LIKE ? or Khoa = ?) and IDTruong = ?",
+        "SELECT * FROM lop where (MaLop LIKE ? or TenLop LIKE ? or Khoa = ?) and IDTruong = ? and ttLop != 2",
         [
           "%" + trimmedInfo + "%",
           "%" + trimmedInfo + "%",
@@ -667,7 +667,7 @@ let getSearchDoanVien = async (req, res) => {
   try {
     if (MSSV !== undefined && HoTen === "" && IDChucVu === "") {
       const [rowsMaLop, fields] = await pool.execute(
-        "SELECT * FROM lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where doanvien.IDLop = ? and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and chitietnamhoc.IDNamHoc = ? and doanvien.MSSV LIKE ?",
+        "SELECT * FROM lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where doanvien.IDLop = ? and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and chitietnamhoc.IDNamHoc = ? and doanvien.MSSV LIKE ? and doanvien.ttDoanVien = 1",
         [IDLop, IDNamHoc, "%" + MSSV + "%"]
       );
 
@@ -678,7 +678,7 @@ let getSearchDoanVien = async (req, res) => {
       });
     } else if (MSSV === "" && HoTen !== undefined && IDChucVu === "") {
       const [rowsTenLop, fields] = await pool.execute(
-        "SELECT * FROM lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where doanvien.IDLop = ? and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and chitietnamhoc.IDNamHoc = ? and doanvien.HoTen LIKE ?",
+        "SELECT * FROM lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where doanvien.IDLop = ? and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and chitietnamhoc.IDNamHoc = ? and doanvien.HoTen LIKE ? and doanvien.ttDoanVien = 1",
 
         [IDLop, IDNamHoc, "%" + HoTen + "%"]
       );
@@ -690,7 +690,7 @@ let getSearchDoanVien = async (req, res) => {
       });
     } else if (MSSV === "" && HoTen === "" && IDChucVu !== undefined) {
       const [rowsKhoa, fields] = await pool.execute(
-        "SELECT * FROM lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where doanvien.IDLop = ? and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and chitietnamhoc.IDNamHoc = ? and chucvu.IDChucVu LIKE ?",
+        "SELECT * FROM lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where doanvien.IDLop = ? and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and chitietnamhoc.IDNamHoc = ? and chucvu.IDChucVu LIKE ? and doanvien.ttDoanVien = 1",
 
         [IDLop, IDNamHoc, "%" + IDChucVu + "%"]
       );
@@ -702,7 +702,7 @@ let getSearchDoanVien = async (req, res) => {
       });
     } else if (MSSV !== undefined && HoTen !== undefined && IDChucVu === "") {
       const [rows, fields] = await pool.execute(
-        "SELECT * FROM lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where doanvien.IDLop = ? and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.MSSV LIKE ? and doanvien.HoTen LIKE ? and chitietnamhoc.IDNamHoc = ?",
+        "SELECT * FROM lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where doanvien.IDLop = ? and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.MSSV LIKE ? and doanvien.HoTen LIKE ? and chitietnamhoc.IDNamHoc = ? and doanvien.ttDoanVien = 1",
 
         [IDLop, "%" + MSSV + "%", "%" + HoTen + "%", IDNamHoc]
       );
@@ -714,7 +714,7 @@ let getSearchDoanVien = async (req, res) => {
       });
     } else if (MSSV !== undefined && HoTen === "" && IDChucVu !== undefined) {
       const [rows, fields] = await pool.execute(
-        "SELECT * FROM lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where doanvien.IDLop = ? and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.MSSV LIKE ? and chucvu.IDChucVu LIKE ? and chitietnamhoc.IDNamHoc = ?",
+        "SELECT * FROM lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where doanvien.IDLop = ? and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.MSSV LIKE ? and chucvu.IDChucVu LIKE ? and chitietnamhoc.IDNamHoc = ? and doanvien.ttDoanVien = 1",
 
         [IDLop, "%" + MSSV + "%", "%" + IDChucVu + "%", IDNamHoc]
       );
@@ -726,7 +726,7 @@ let getSearchDoanVien = async (req, res) => {
       });
     } else if (MSSV === "" && HoTen !== undefined && IDChucVu !== undefined) {
       const [rows, fields] = await pool.execute(
-        "SELECT * FROM lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where doanvien.IDLop = ? and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.HoTen LIKE ? and chucvu.IDChucVu = ? and chitietnamhoc.IDNamHoc = ?",
+        "SELECT * FROM lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where doanvien.IDLop = ? and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.HoTen LIKE ? and chucvu.IDChucVu = ? and chitietnamhoc.IDNamHoc = ? and doanvien.ttDoanVien = 1",
 
         [IDLop, "%" + HoTen + "%", IDChucVu, IDNamHoc]
       );
@@ -742,7 +742,7 @@ let getSearchDoanVien = async (req, res) => {
       IDChucVu !== undefined
     ) {
       const [rows, fields] = await pool.execute(
-        "SELECT * FROM lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where doanvien.IDLop = ? and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.MSSV LIKE ? and doanvien.HoTen LIKE ? and chucvu.IDChucVu = ? and chitietnamhoc.IDNamHoc = ?",
+        "SELECT * FROM lop, doanvien, chitietnamhoc, chucvu, namhoc, tongiao, dantoc where doanvien.IDLop = ? and lop.IDLop = doanvien.IDLop and chitietnamhoc.IDDoanVien = doanvien.IDDoanVien and chitietnamhoc.IDChucVu = chucvu.IDChucVu and chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and doanvien.IDDanToc = dantoc.IDDanToc and doanvien.IDTonGiao = tongiao.IDTonGiao and doanvien.MSSV LIKE ? and doanvien.HoTen LIKE ? and chucvu.IDChucVu = ? and chitietnamhoc.IDNamHoc = ? and doanvien.ttDoanVien = 1",
 
         [IDLop, "%" + MSSV + "%", "%" + HoTen + "%", IDChucVu, IDNamHoc]
       );

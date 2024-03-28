@@ -264,7 +264,7 @@ const SinhVienNamTot = (props) => {
             Ứng tuyển
           </div>
           <div className="tab-pane active">
-            <h2>Ứng tuyển</h2>
+            {/* <h2>Ứng tuyển</h2> */}
             <div className="margin-top">
               <div className="table-container">
                 <table className="table table-striped table-svnt">

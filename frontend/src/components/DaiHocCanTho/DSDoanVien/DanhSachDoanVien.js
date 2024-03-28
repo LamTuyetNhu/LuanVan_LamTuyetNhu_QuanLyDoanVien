@@ -226,12 +226,12 @@ const DanhSachDoanVien = (props) => {
 
       const dataToExport = allData.map((item) => {
         return {
-          "Mã Chi Đoàn": item.MaLop,
-          "Tên Chi Đoàn": item.TenLop,
-          Khóa: item.Khoa,
-          MSSV: item.MSSV,
+          // "Mã Chi Đoàn": item.MaLop,
+          // "Tên Chi Đoàn": item.TenLop,
+          // Khóa: item.Khoa,
+          "MSSV": item.MSSV,
           "Họ tên": item.HoTen,
-          Email: item.Email,
+          "Email": item.Email,
           "Số điện thoại": item.SoDT,
           "Giới tính":
             item.GioiTinh === 0 ? "Nữ" : item.GioiTinh === 1 ? "Nam" : "Khác",

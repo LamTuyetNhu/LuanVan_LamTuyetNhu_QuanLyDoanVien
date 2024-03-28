@@ -73,7 +73,6 @@ const DanhSachDoanVien = (props) => {
     try {
       let res = await DanhSachUngTuyenCT(idnamhoc, IDTruong, currentPage);
       console.log(res);
-
       if (res.status === 200) {
         console.log("Data from API:", res.data.dataUT);
         setListDoanVien(res.data.dataUT);
@@ -337,7 +336,6 @@ const DanhSachDoanVien = (props) => {
             <thead>
               <tr>
                 <th>STT</th>
-                <th>Tên trường/khoa</th>
                 <th>Mã lớp</th>
                 <th className="mb-tableItem">MSSV</th>
                 <th>Họ tên</th>
@@ -354,7 +352,6 @@ const DanhSachDoanVien = (props) => {
                   return (
                     <tr key={`table-doanvien-${index}`} className="tableRow">
                       <td className="col-center">{index + 1}</td>
-                      <td className="">{item.TenTruong}</td>
                       <td className="">{item.MaLop}</td>
                       <td className="mb-tableItem mb-tableItem1">
                         {item.MSSV}
