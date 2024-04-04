@@ -1,20 +1,15 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState, useRef, } from "react";
-import { format } from "date-fns";
 import { useNavigate, NavLink, useParams } from "react-router-dom";
-import Form from "react-bootstrap/Form";
-import { faSave, faEdit, faBackward } from "@fortawesome/free-solid-svg-icons";
-import { laytenlop, layMaBCH } from "../../../services/apiService";
+import { faSave, faEdit } from "@fortawesome/free-solid-svg-icons";
+import { layMaBCH } from "../../../services/apiService";
 import axios from "axios";
-import ModalAddSuccess from "../../Modal/ModalAddSuccess";
 import Modal1 from "../../Modal/Modal";
 const SinhVienNamTot = (props) => {
   const [doanVienDetails, setDoanVienDetails] = useState([]);
   const [diemDanhData, setDiemDanhData] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false); // Trạng thái để kiểm soát nút Điểm danh/Lưu
   const { IDHoatDong } = useParams();
-  // const IDLop = localStorage.getItem("IDLop");
-  // const [MaLop, setMaLop] = useState([])
   const { IDHoatDongDHCT, IDNamHoc } = useParams();
 
   const navigate = useNavigate();
@@ -27,7 +22,6 @@ const SinhVienNamTot = (props) => {
   };
 
   useEffect(() => {
-    // fetchTenLop()
     if (!isAuthenticated()) {
       navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
     }
@@ -60,23 +54,6 @@ const SinhVienNamTot = (props) => {
       fetchDoanVienDetails();
     }
   }, [IDHoatDongDHCT, diemDanhData]);
-
-  
-  // const fetchTenLop = async () => {
-  //   try {
-  //     let res = await laytenlop(IDLop);
-  //     console.log(res);
-
-  //     if (res.status === 200) {
-  //       setMaLop(res.data.dataCD.MaLop)
-
-  //     } else {
-  //       console.error("Lỗi khi gọi API:", res.statusText);
-  //     }
-  //   } catch (error) {
-  //     console.error("Lỗi khi gọi API:", error.message);
-  //   }
-  // };
 
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [selectedImageUrls, setSelectedImageUrls] = useState([]);
@@ -186,7 +163,7 @@ const SinhVienNamTot = (props) => {
           <tr key={`${index}-${subIndex}`}>
             <td className="col-center">{index * doanVienDetails[0].length + subIndex + 1}</td>
             <td>{item.MaBCH}</td>
-            <td>{item.TenBCH}</td>
+            <td>{item.TenBCH ? item.TenBCH : "Người lạ"}</td> {/* Kiểm tra nếu Tên cán bộ rỗng, hiển thị "Người lạ" */}
           </tr>
         ))
       )}

@@ -1489,6 +1489,9 @@ const initAPIRoute = (app) => {
       }
     }
   );
+  router.post("/ThemNamHoc", APIController.ThemNamHoc);
+  router.post("/XoaNamHoc/:IDNamHoc", APIController.XoaNamHoc);
+
   return app.use("/api", router);
 };
 

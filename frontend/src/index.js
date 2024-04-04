@@ -47,6 +47,7 @@ import CTCapNhatTieuChiDanhGiaChiDoan from "./components/DaiHocCanTho/XepLoaiChi
 import CTChiTietDanhGia from "./components/DaiHocCanTho/XepLoaiChiDoan/ChiTietDanhGia";
 import CTCapNhatTieuChiDanhGiaDoanVien from "./components/DaiHocCanTho/XepLoaiChiDoan/CapNhatTieuChiDV";
 
+import CTThemMoiNamHoc from "./components/DaiHocCanTho/Info/ThemNamHoc"
 /* Mot truowng / khoa */
 import DanhSachChiDoan from "./components/DoanTruong/DSChiDoan/DanhSachChiDoan";
 import CapNhatChiDoan from "./components/DoanTruong/DSChiDoan/CapNhatChiDoan";
@@ -131,6 +132,7 @@ root.render(
           <Route path="ThemMoiTruong/Khoa" element={<ThemMoiTruong />} />
           <Route path="CapNhatTruongKhoa" element={<CapNhatTruongKhoa />} />
           <Route path="DoanTruong" element={<CTDSChiDoan />} />
+          <Route path="ThemMoiNamHoc" element={<CTThemMoiNamHoc />} />
 
           <Route path="ThemMoi-ChiDoan" element={<CTThemMoiChiDoan />} />
           <Route path="ChiTiet" element={<CTCapNhatChiDoan />} />

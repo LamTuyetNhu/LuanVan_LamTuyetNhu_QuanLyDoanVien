@@ -87,6 +87,14 @@ function Truong() {
                 </li>
                 <li className="header__cart-item">
                   <NavLink
+                    to="/DaiHocCanTho/ThemMoiNamHoc"
+                    className="header__cart-item-info"
+                  >
+                    Thêm năm học
+                  </NavLink>
+                </li>
+                <li className="header__cart-item">
+                  <NavLink
                     to="/DaiHocCanTho/DoiMatKhau"
                     className="header__cart-item-info"
                   >

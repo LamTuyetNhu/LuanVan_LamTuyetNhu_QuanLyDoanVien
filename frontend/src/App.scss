@@ -1404,3 +1404,58 @@ header {
 #upload-box .upload-icon {
  font-size: 1.5em;
 }
+
+
+.category {
+  padding: 32px;
+  max-height: 450px;
+  border-radius: 3px;
+  overflow-y: auto; 
+  background-color: rgb(29, 161, 242, 0.1);;
+}
+
+.category__heading {
+  text-transform: uppercase;
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--black);
+  margin-top: 0;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.category-list {
+  padding: 0 0 8px 0;
+  list-style: none;
+  margin-left: 9px;
+}
+
+.category-item {
+  position: relative;
+  padding: 6px 8px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.category-item:first-child::before {
+  display: none;
+}
+
+.category-item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 8px;
+  right: 8px;
+  border-top: 1px solid #a19e9e;
+}
+
+.category-item-delete {
+  border: none;
+    background: none;
+    color: red;
+}
+
+.category-item-delete:hover {
+  color: var(--blue);
+}

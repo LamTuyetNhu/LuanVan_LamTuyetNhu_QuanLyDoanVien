@@ -470,7 +470,17 @@ const layMaBCH = (MaBCH) => {
   return axios.get(`api/layMaBCH/${MaBCH}`);
 };
 
+const ThemNamHoc = (formData) => {
+  return axios.post(`api/ThemNamHoc`, formData);
+};
+
+const XoaNamHoc = (IDNamHoc) => {
+  return axios.post(`api/XoaNamHoc/${IDNamHoc}`);
+};
+
 export {
+  XoaNamHoc,
+  ThemNamHoc,
   layMaBCH,
   laydshoatdongdhct,
   searchHoatDongdhct,

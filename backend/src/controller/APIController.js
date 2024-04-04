@@ -1350,7 +1350,7 @@ let SaveCheckboxStatesDiemDanh = async (req, res) => {
 let namhoc = async (req, res) => {
   try {
     const [result, fields1] = await Promise.all([
-      pool.execute("SELECT * FROM namhoc"),
+      pool.execute("SELECT * FROM namhoc where ttNamHoc = 1"),
     ]);
 
     if (result[0] && result[0].length > 0) {
@@ -4345,10 +4345,18 @@ let layMaBCH = async (req, res) => {
   const MaBCH = req.params.MaBCH;
   console.log(MaBCH);
   try {
-    const [rows, fields1] = await pool.execute(
-      "SELECT IDBCH, MaBCH, TenBCH FROM bchtruong where bchtruong.MaBCH = ?",
-      [MaBCH]
-    );
+    let rows;
+
+    if (MaBCH === "Người lạ") {
+      // Nếu MaBCH là "Người lạ", gán TenBCH là "Người lạ"
+      rows = [{ IDBCH: null, MaBCH: "Người lạ", TenBCH: "Người lạ" }];
+    } else {
+      // Nếu MaBCH không phải là "Người lạ", truy vấn cơ sở dữ liệu bình thường
+      [rows] = await pool.execute(
+        "SELECT IDBCH, MaBCH, TenBCH FROM bchtruong where bchtruong.MaBCH = ?",
+        [MaBCH]
+      );
+    }
 
     console.log(rows);
     return res.status(200).json({
@@ -4392,7 +4400,59 @@ let SaveIDBCH = async (req, res) => {
   }
 };
 
+let ThemNamHoc = async (req, res) => {
+  console.log("123", req.body);
+  let { TenNamHoc } = req.body;
+  const [rows, result2] = await pool.execute(
+    "SELECT TenNamHoc from namhoc where namhoc.TenNamHoc = ?",
+    [TenNamHoc]
+  );
+  try {
+    if(rows.length > 0) {
+      console.log("Nam hoc da ton tai")
+      return res.status(400).json({
+       message: "Nam hoc da ton tai"
+      });
+    } else {
+      let [rows, fields] = await pool.execute(
+        "insert into namhoc(TenNamHoc) values (?)",
+        [TenNamHoc]
+      );
+      console.log("ThanhCong")
+
+      return res.status(200).json({
+        message: "Thêm năm học thành công!"
+       });
+    }
+  } catch (error) {
+    console.error("Thêm năm học thất bại!: ", error);
+    return res.status(400).json({
+      message: "Thêm năm học thất bại!"
+     }); // Thay đổi ở đây
+  }
+};
+
+
+let XoaNamHoc = async (req, res) => {
+  let IDNamHoc = req.params.IDNamHoc;
+
+  try {
+    await pool.execute("Update namhoc set ttNamHoc = 0 where IDNamHoc = ?", [
+      IDNamHoc,
+    ]);
+
+    console.log("Xoa thanh cong");
+    return res.status(200).json({
+      message: "Xóa thành công!",
+    });
+  } catch (error) {
+    console.error("Lỗi khi truy vấn cơ sở dữ liệu: ", error);
+  }
+};
+
 module.exports = {
+  XoaNamHoc,
+  ThemNamHoc,
   SaveIDBCH,
   layMaBCH,
   SaveCheckboxStatesDiemDanhDHCT,
