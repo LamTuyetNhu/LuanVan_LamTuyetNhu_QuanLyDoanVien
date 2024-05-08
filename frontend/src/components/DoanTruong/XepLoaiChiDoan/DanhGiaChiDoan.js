@@ -225,7 +225,7 @@ const DanhSachChiDoan = (props) => {
     <>
       <div className="container-fluid app__content">
         <div className="namhoc-center">
-          <h5 className="text-center">Danh Sách Chi Đoàn</h5>
+          <h5 className="text-center">Danh Sách Đánh Giá Chi Đoàn</h5>
 
           <div className="searchDV-input">
             Năm học:{" "}
@@ -286,11 +286,6 @@ const DanhSachChiDoan = (props) => {
                 </NavLink>
               </div>
           <div>
-              <button className="formatButton" onClick={exportToExcel}>
-                <FontAwesomeIcon icon={faCloudArrowDown} />
-              </button>
-            </div>
-            <div>
               <button className="formatButton" onClick={exportToExcel}>
                 <FontAwesomeIcon icon={faCloudArrowDown} />
               </button>

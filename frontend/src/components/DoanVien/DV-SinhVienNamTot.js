@@ -223,7 +223,7 @@ const SinhVienNamTot = (props) => {
       <div className="container app__content">
         <div className="namhoc-center">
           <h2 className="text-center mg-bt">
-            Tiêu chuẩn xét chọn sinh viên năm tốt
+            Tiêu Chuẩn Xét Chọn Sinh Viên Năm Tốt
           </h2>
         </div>
         <div className="tabs">

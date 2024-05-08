@@ -1324,8 +1324,8 @@ header {
   margin: 0 auto;
   padding: 24px;
     display: flex;
-    width: 200px;
-    height: 200px;
+    width: 200px !important;
+    height: 200px !important;
 }
 
 .password-strength {
@@ -1458,4 +1458,9 @@ header {
 
 .category-item-delete:hover {
   color: var(--blue);
+}
+
+.img-fluid {
+  // height: 200px;
+  // text-align: center !important;
 }

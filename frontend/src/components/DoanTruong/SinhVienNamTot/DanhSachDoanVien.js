@@ -1,21 +1,23 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import ModalUpdateStatus from "../../Modal/UpdateStatus";
-import { NavLink, useNavigate  } from "react-router-dom";
-
+import { NavLink, useNavigate } from "react-router-dom";
+import ModalAddSuccess from "../../Modal/ModalInfo";
 import {
   faEdit,
   faFilePdf,
   faCloudArrowDown,
   faMagnifyingGlass,
   faChevronLeft,
-  faChevronRight
+  faChevronRight,
+  faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   searchManySVNT,
   namhoc,
   DanhSachUngTuyenCT,
+  deleteSVNT,
 } from "../../../services/apiService";
 
 const DanhSachDoanVien = (props) => {
@@ -28,6 +30,7 @@ const DanhSachDoanVien = (props) => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [selectedIDUngTuyen, setSelectedIDUngTuyen] = useState(null);
   const [showModalUpdate, setShowModalUpdate] = useState(false);
+  const [showModalSuccess, setShowModalSuccess] = useState(false);
 
   const handleIconClick = (IDUngTuyen) => {
     setSelectedIDUngTuyen(IDUngTuyen);
@@ -38,7 +41,10 @@ const DanhSachDoanVien = (props) => {
     setModalOpen(false);
   };
 
-  
+  const closeModalSuccess = () => {
+    setShowModalSuccess(false);
+  };
+
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [pageSize, setPageSize] = useState(5);
@@ -128,11 +134,11 @@ const DanhSachDoanVien = (props) => {
       for (let page = 1; page <= totalPages; page++) {
         let res = await DanhSachUngTuyenCT(idnamhoc, IDTruong, page);
         if (res.status === 200) {
-        allDataArray = [...allDataArray, ...res.data.dataUT];
-      } else {
-        console.error("Lỗi khi gọi API:", res.statusText);
+          allDataArray = [...allDataArray, ...res.data.dataUT];
+        } else {
+          console.error("Lỗi khi gọi API:", res.statusText);
+        }
       }
-    }
       setAllData(allDataArray);
     } catch (error) {
       console.error("Lỗi khi gọi API:", error.message);
@@ -174,7 +180,6 @@ const DanhSachDoanVien = (props) => {
     }
   };
 
-  
   const changePage = (newPage) => {
     setCurrentPage(newPage);
   };
@@ -191,10 +196,44 @@ const DanhSachDoanVien = (props) => {
     }
   };
 
-
   const handleNamHocChange = (e) => {
     const selectedIDNamHoc = e.target.value;
     setNamHoc(selectedIDNamHoc);
+  };
+
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [message, setMessage] = useState("");
+
+  // Checkbox handler
+  const handleCheckboxChange = (IDUngTuyen) => {
+    const selectedIndex = selectedItems.indexOf(IDUngTuyen);
+    let newSelected = [...selectedItems];
+    if (selectedIndex === -1) {
+      newSelected.push(IDUngTuyen);
+    } else {
+      newSelected.splice(selectedIndex, 1);
+    }
+    setSelectedItems(newSelected);
+  };
+
+  // Delete selected items handler
+  const handleDeleteSelected = async () => {
+    // Perform deletion logic with selectedItems
+    console.log("Deleting selected items:", selectedItems);
+    try {
+      let res = await deleteSVNT({
+        selectedItems,
+      });
+
+      let message = res.data.message;
+      if (res.status === 200) {
+        setShowModalSuccess(true);
+        setMessage(message);
+        fetchDSDoanVien();
+      }
+    } catch (error) {
+      console.error("Lỗi khi tìm kiếm:", error.message);
+    }
   };
 
   return (
@@ -254,7 +293,7 @@ const DanhSachDoanVien = (props) => {
           </div>
 
           <div className="searchDV tablet-mobile">
-          <div className="searchDV-Right">
+            <div className="searchDV-Right">
               <div>
                 <NavLink to="/BCH-DoanTruong/TieuChi" className="navlink">
                   <button className="formatButton">Tiêu chí</button>
@@ -266,7 +305,7 @@ const DanhSachDoanVien = (props) => {
                 </button>
               </div>
             </div>
-            
+
             <div className="">
               <div className="searchDV-input">
                 <input
@@ -284,7 +323,6 @@ const DanhSachDoanVien = (props) => {
                 <FontAwesomeIcon icon={faMagnifyingGlass} />
               </button>
             </div>
-
           </div>
         </div>
       </div>
@@ -302,6 +340,23 @@ const DanhSachDoanVien = (props) => {
                 <th>Hồ sơ</th>
                 <th>Trạng thái</th>
                 <th>Cập nhật</th>
+                <th>
+                  {/* Add checkbox column header */}
+                  {/* <input
+                  type="checkbox"
+                  onChange={() => {
+                    // Select all items if not all selected
+                    if (selectedItems.length !== DSDoanVien.length) {
+                      const allIDs = DSDoanVien.map((item) => item.IDUngTuyen);
+                      setSelectedItems(allIDs);
+                    } else {
+                      // Deselect all if all selected
+                      setSelectedItems([]);
+                    }
+                  }}
+                  checked={selectedItems.length === DSDoanVien.length}
+                /> */}
+                </th>
               </tr>
             </thead>
             <tbody id="myTable">
@@ -342,6 +397,14 @@ const DanhSachDoanVien = (props) => {
                       >
                         <FontAwesomeIcon icon={faEdit} className="clcapnhat" />
                       </td>
+                      <td>
+                        {/* Checkbox for each row */}
+                        <input
+                          type="checkbox"
+                          onChange={() => handleCheckboxChange(item.IDUngTuyen)}
+                          checked={selectedItems.includes(item.IDUngTuyen)}
+                        />
+                      </td>
                     </tr>
                   );
                 })}
@@ -352,6 +415,23 @@ const DanhSachDoanVien = (props) => {
               )}
             </tbody>
           </table>
+        </div>
+        <div>
+
+        <div className="searchDV-Right">
+          {/* <div className="btns allcus-button"> */}
+            <button className=" category-item-delete" onClick={handleDeleteSelected}>
+              <FontAwesomeIcon icon={faTrash} /> Xóa
+            </button>
+            {/* <button
+                  className="allcus-button button-error"
+                  type="button"
+                  onClick={handleDeleteSelected}
+                >
+                  <FontAwesomeIcon icon={faTrash} />
+                </button> */}
+          </div>
+        {/* </div> */}
         </div>
       </div>
 
@@ -429,6 +509,12 @@ const DanhSachDoanVien = (props) => {
           selectedIDUngTuyen={selectedIDUngTuyen}
         />
       )}
+
+      <ModalAddSuccess
+        show={showModalSuccess}
+        onHide={closeModalSuccess}
+        message={message}
+      />
     </>
   );
 };

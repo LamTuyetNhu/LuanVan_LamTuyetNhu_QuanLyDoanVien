@@ -139,7 +139,7 @@ const DanhSachDoanPhi = (props) => {
                       <div>
                         
                       </div>
-                      <img src={require(`../../assets/${doanphi.DaDong === 0 ? "ChuaDong" : "DaDong"}.jpg`)} className="img-fluid img-mandel1" />
+                      <img src={require(`../../assets/${doanphi.DaDong === 0 ? "ChuaDong1" : "DaDong1"}.jpg`)} className="img-fluid img-mandel1" />
                     </form>
                     <div className="inline">
                       <p

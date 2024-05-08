@@ -31,7 +31,6 @@ const ExcelDataModal = ({ excelData, idnamhoc, onClose, onConfirm, selectedFile,
             <td>{data.MSSV}</td>
             <td>{data.hk1}</td>
             <td>{data.hk2}</td>
-            
             <td>{data.rl1}</td>
             <td>{data.rl2}</td>
           </tr>
@@ -45,8 +44,6 @@ const ExcelDataModal = ({ excelData, idnamhoc, onClose, onConfirm, selectedFile,
     onConfirm(
       idnamhoc
     );
-
-    // Đóng modal
     onClose();
   };
 

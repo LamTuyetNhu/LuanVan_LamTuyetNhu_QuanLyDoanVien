@@ -138,7 +138,7 @@ const ThemMoiHoatDong = (props) => {
     };
 
     if (
-      new Date(themhoatdong.NgayHetHan) <= new Date(themhoatdong.NgayBatDau)
+      new Date(themhoatdong.NgayHetHan) < new Date(themhoatdong.NgayBatDau)
     ) {
       newErrors.NgayHetHan = "Ngày kết thúc phải sau ngày bắt đầu";
     }

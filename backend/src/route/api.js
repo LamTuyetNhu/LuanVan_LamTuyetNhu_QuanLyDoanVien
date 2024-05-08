@@ -216,68 +216,82 @@ const initAPIRoute = (app) => {
         "SELECT * FROM doanvien WHERE doanvien.MSSV = ?",
         [MSSV]
       );
+      
+      if (existingRows1.length > 0 ) {
+        if(Email !== existingRows1[0].Email) {
+          return res.status(200).json({ message: "Email không khớp với đoàn viên này!"});
+        } 
 
-      if (existingRows1.length > 0) {
         const [existedNamHoc, existingNamHocFields1] = await pool.execute(
-          "SELECT * FROM chitietnamhoc WHERE chitietnamhoc.IDDoanVien = ? and chitietnamhoc.idnamhoc = ?",
+          "SELECT * FROM chitietnamhoc, namhoc WHERE chitietnamhoc.IDNamHoc = namhoc.IDNamHoc and chitietnamhoc.IDDoanVien = ? and chitietnamhoc.idnamhoc = ?",
           [existingRows1[0].IDDoanVien, IDNamHoc]
         );
 
-        if (existedNamHoc.length > 0) {
-          console.log("MSSV đã tồn tại");
-          res.status(500).json({ message: "MSSV đã tồn tại" });
-          return;
+        if(existedNamHoc.length > 0) {
+          console.log("MSSV đã tồn tại trong năm học này!");
+          return res.status(200).json({ message: "MSSV đã tồn tại trong năm học\n" + existedNamHoc[0].TenNamHoc});
         } else {
           await pool.execute(
             "INSERT INTO chitietnamhoc (IDDoanVien, IDChucVu, IDNamHoc) VALUES (?, ?, ?)",
             [existingRows1[0].IDDoanVien, IDChucVu, IDNamHoc]
           );
+          return res.status(200).json({ message: "Thêm đoàn viên thành công!" });
+        };
+      }  else {
+        const [existingEmail, existingEmailField] = await pool.execute(
+          "SELECT * FROM doanvien WHERE doanvien.Email = ?",
+          [Email]
+        );
+
+        if(existingEmail.length === 0) {
+          let [resultDoanVien] = await pool.execute(
+            "INSERT INTO doanvien (IDLop, MSSV, HoTen, Email, Password, SoDT, GioiTinh, QueQuan, IDDanToc, IDTonGiao, NgaySinh, NgayVaoDoan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [
+              IDLop,
+              MSSV,
+              HoTen,
+              Email,
+              hashedPassword,
+              SoDT,
+              GioiTinh,
+              QueQuan,
+              IDDanToc,
+              IDTonGiao,
+              NgaySinh,
+              NgayVaoDoan,
+            ]
+          );
+  
+          let IDDoanVien = resultDoanVien.insertId;
+  
+          if (filename === undefined || filename === "" || filename === null) {
+            filename = "logo.jpg";
+          }
+  
+          await pool.execute(
+            "INSERT INTO anh (TenAnh, IDDoanVien) VALUES (?, ?)",
+            [filename, IDDoanVien]
+          );
+  
+          await pool.execute(
+            "INSERT INTO danhgiadoanvien (IDDoanVien, IDNamHoc) VALUES (?, ?)",
+            [IDDoanVien, IDNamHoc]
+          );
+  
+          await pool.execute(
+            "INSERT INTO chitietnamhoc (IDDoanVien, IDChucVu, IDNamHoc) VALUES (?, ?, ?)",
+            [IDDoanVien, IDChucVu, IDNamHoc]
+          );
+  
+          return res.status(200).json({ message: "Thêm đoàn viên thành công!" });
+        } else {
+          return res.status(200).json({ message: "Eamil đã tồn tại!" });
         }
-      } else {
-        let [resultDoanVien] = await pool.execute(
-          "INSERT INTO doanvien (IDLop, MSSV, HoTen, Email, Password, SoDT, GioiTinh, QueQuan, IDDanToc, IDTonGiao, NgaySinh, NgayVaoDoan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-          [
-            IDLop,
-            MSSV,
-            HoTen,
-            Email,
-            hashedPassword,
-            SoDT,
-            GioiTinh,
-            QueQuan,
-            IDDanToc,
-            IDTonGiao,
-            NgaySinh,
-            NgayVaoDoan,
-          ]
-        );
-
-        let IDDoanVien = resultDoanVien.insertId;
-
-        if (filename === undefined || filename === "" || filename === null) {
-          filename = "logo.jpg";
-        }
-
-        await pool.execute(
-          "INSERT INTO anh (TenAnh, IDDoanVien) VALUES (?, ?)",
-          [filename, IDDoanVien]
-        );
-
-        await pool.execute(
-          "INSERT INTO danhgiadoanvien (IDDoanVien, IDNamHoc) VALUES (?, ?)",
-          [IDDoanVien, IDNamHoc]
-        );
-
-        await pool.execute(
-          "INSERT INTO chitietnamhoc (IDDoanVien, IDChucVu, IDNamHoc) VALUES (?, ?, ?)",
-          [IDDoanVien, IDChucVu, IDNamHoc]
-        );
-
-        res.status(200).json({ message: "Thêm đoàn viên thành công!" });
+   
       }
     } catch (error) {
       console.error(error);
-      res.status(500).json({ message: "Có lỗi xảy ra" });
+      return res.status(500).json({ message: "Có lỗi xảy ra" });
     }
   });
 
@@ -414,7 +428,7 @@ const initAPIRoute = (app) => {
   router.post("/searchHoatDong", APIController.searchHoatDong);
   router.post("/TaoHoatDong", APIController.TaoHoatDong);
   router.get("/layMotHoatDong/:IDHoatDong", APIController.layMotHoatDong);
-  router.post("/CapNhatHoatDong", APIController.capNhatHoatDong);
+  router.post("/CapNhatHoatDong/:IDHoatDong", APIController.capNhatHoatDong);
   router.post("/XoaHoatDong/:IDHoatDong", APIController.deleteHoatDong);
   router.get(
     "/LayDSDiemDanh/:IDHoatDong/:IDNamHoc",
@@ -435,11 +449,9 @@ const initAPIRoute = (app) => {
       let { IDLop, idnamhoc } = req.body;
       console.log(req.body);
 
-      // Parse IDLop to an integer
       IDLop = parseInt(IDLop, 10); // Assuming base 10
       idnamhoc = parseInt(idnamhoc, 10); // Assuming base 10
 
-      // Ensure that IDLop is a valid integer
       if (isNaN(IDLop)) {
         console.error("Invalid IDLop:", req.body.IDLop);
         res.status(400).json({ message: "Invalid IDLop" });
@@ -529,7 +541,6 @@ const initAPIRoute = (app) => {
               if (existedNamHoc.length > 0) {
                 console.log("Nam Hoc va MSSV da ton tai");
                 res.status(500).json({ message: "Nam Hoc va MSSV da ton tai" });
-                // return;
                 continue;
               } else {
                 await pool.execute(
@@ -547,7 +558,6 @@ const initAPIRoute = (app) => {
               if (existedDanhGiaNamHoc.length > 0) {
                 console.log("Nam Hoc va MSSV da ton tai");
                 res.status(500).json({ message: "Nam Hoc va MSSV da ton tai" });
-                // return;
                 continue;
               } else {
                 await pool.execute(
@@ -984,13 +994,13 @@ const initAPIRoute = (app) => {
 
         if (existedNamHoc.length > 0) {
           console.log("MaBCH đã tồn tại");
-          res.status(500).json({ message: "Mã cán bộ đã tồn tại" });
-          return;
+          return res.status(200).json({ message: "Mã cán bộ đã tồn tại" });
         } else {
           await pool.execute(
             "INSERT INTO chitietbch (IDBCH, IDChucVu, IDNamHoc) VALUES (?, ?, ?)",
             [existingRows1[0].IDBCH, IDChucVu, IDNamHoc]
           );
+          return res.status(200).json({ message: "Thêm cán bộ thành công!" });
         }
       } else {
         let [resultDoanVien] = await pool.execute(
@@ -1027,7 +1037,7 @@ const initAPIRoute = (app) => {
           [IDDoanVien, IDChucVu, IDNamHoc]
         );
 
-        res.status(200).json({ message: "Thêm đoàn viên thành công!" });
+        return res.status(200).json({ message: "Thêm cán bộ thành công!" });
       }
     } catch (error) {
       console.error(error);
@@ -1374,46 +1384,6 @@ const initAPIRoute = (app) => {
     }
   );
   router.get("/LayAnhDiemDanh/:IDDoanVien", APIController.LayAnhDiemDanh);
-  // router.post("/uploadthumuc", async (req, res) => {
-  //   try {
-  //     // Đường dẫn đến thư mục lớn
-  //     const mainDirectory =
-  //       "D:/QuanLyDoanVien/backend/src/public/DiemDanh/DI20Z6A3"; // Điền đường dẫn của bạn
-  //     const subDirectories = await readdir(mainDirectory);
-  //     // Đọc danh sách thư mục con
-  //     // Duyệt qua từng thư mục con
-  //     for (const tenThuMuc of subDirectories) {
-  //       const subDirectoryPath = path.join(mainDirectory, tenThuMuc);
-
-  //       // Đọc danh sách ảnh trong thư mục con
-  //       const images = await readdir(subDirectoryPath);
-
-  //       // Duyệt qua từng ảnh và thêm vào cơ sở dữ liệu
-  //       const [rows, fields1] = await pool.execute(
-  //         "SELECT IDDoanVien from doanvien where doanvien.MSSV = ?",
-  //         [tenThuMuc]
-  //       );
-
-  //       if (rows.length > 0) {
-  //         let iddoanvien = rows[0].IDDoanVien;
-  //         console.log(iddoanvien);
-  //         // Duyệt qua từng ảnh và thêm vào cơ sở dữ liệu
-  //         for (const tenAnh of images) {
-  //           // Thêm vào cơ sở dữ liệu
-  //           const [DiemDanh, fields1] = await pool.execute(
-  //             "INSERT INTO AnhDiemDanh (IDDoanVien, DDTenAnh) VALUES (?, ?)",
-  //             [iddoanvien, tenAnh]
-  //           );
-  //           console.log(`Đã thêm thành công: ${tenThuMuc}/${tenAnh}`);
-  //         }
-  //       }
-  //     }
-  //     res.status(200).json({ message: "Thành công" });
-  //   } catch (error) {
-  //     console.error(error);
-  //     res.status(500).json({ error: "Có lỗi xảy ra" });
-  //   }
-  // });
  
   router.get("/TimBangMSSV/:MSSV", APIController.timbangmssv);
   router.post("/SaveIDDoanVienDiemDanhCuaLop", APIController.SaveIDDoanVienDiemDanhCuaLop);
@@ -1491,6 +1461,7 @@ const initAPIRoute = (app) => {
   );
   router.post("/ThemNamHoc", APIController.ThemNamHoc);
   router.post("/XoaNamHoc/:IDNamHoc", APIController.XoaNamHoc);
+  router.post("/deleteSVNT", APIController.deleteSVNT);
 
   return app.use("/api", router);
 };

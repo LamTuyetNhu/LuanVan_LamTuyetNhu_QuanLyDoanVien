@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useState, useRef, } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, NavLink, useParams } from "react-router-dom";
 import { faSave, faEdit } from "@fortawesome/free-solid-svg-icons";
 import { layMaBCH } from "../../../services/apiService";
@@ -31,12 +31,15 @@ const SinhVienNamTot = (props) => {
         const response = await layMaBCH(MaBCH);
         console.log(response.data);
         // Thêm đối tượng vào mảng doanVienDetails
-        setDoanVienDetails((prevDetails) => [...prevDetails, response.data.dataDV]); // Giả sử response.data.dataDV là đối tượng bạn muốn thêm
+        setDoanVienDetails((prevDetails) => [
+          ...prevDetails,
+          response.data.dataDV,
+        ]); // Giả sử response.data.dataDV là đối tượng bạn muốn thêm
       } catch (error) {
         console.error("Lỗi khi gọi API cho MaBCH", MaBCH, error);
       }
     };
-  
+
     const fetchDoanVienDetails = async () => {
       // Duyệt qua mỗi phần tử trong mảng diemDanhData và gọi API cho từng MSSV
       try {
@@ -49,7 +52,7 @@ const SinhVienNamTot = (props) => {
         console.error("Lỗi khi gọi API cho mảng MaBCH", error);
       }
     };
-  
+
     if (diemDanhData.length > 0) {
       fetchDoanVienDetails();
     }
@@ -60,6 +63,8 @@ const SinhVienNamTot = (props) => {
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [modalIsError, setModalIsError] = useState(false);
+  const [ImageDiemDanhData, setImageDiemDanhData] = useState([]);
+  const [none, setNone] = useState("");
 
   const handleUpload = (event) => {
     const files = Array.from(event.target.files);
@@ -87,7 +92,11 @@ const SinhVienNamTot = (props) => {
         );
 
         console.log(response.data);
-        setDiemDanhData(response.data); // Lưu dữ liệu vào state
+        if (response.data[0] == "Người lạ") {
+          setNone("Người lạ");
+        }
+        setDiemDanhData(response.data[0]); // Lưu dữ liệu vào state
+        setImageDiemDanhData(response.data[1]);
         setIsSubmitting(true); // Để thay đổi trạng thái của nút
       } catch (error) {
         setModalMessage("Điểm danh thất bại: " + error.message);
@@ -102,15 +111,20 @@ const SinhVienNamTot = (props) => {
     }
   };
 
-  const idDoanVienList = doanVienDetails.flatMap(detail => detail.map(dv => dv.IDBCH));
+  const idDoanVienList = doanVienDetails.flatMap((detail) =>
+    detail.map((dv) => dv.IDBCH)
+  );
   const payload = {
     IDHoatDongDHCT: IDHoatDongDHCT,
-    IDBCHList: idDoanVienList
+    IDBCHList: idDoanVienList,
   };
 
   const handleSave = async () => {
     try {
-      const response = await axios.post("http://localhost:8080/api/SaveIDBCH", payload);
+      const response = await axios.post(
+        "http://localhost:8080/api/SaveIDBCH",
+        payload
+      );
       // Xử lý sau khi lưu thành công
       setModalMessage("Điểm danh thành công!");
       setModalIsError(false);
@@ -147,29 +161,56 @@ const SinhVienNamTot = (props) => {
             />
           </label>
         </div>
+        {ImageDiemDanhData.length > 0 && (
+          <div id="upload-box" className="upload-box">
+            <div id="image-gallery" className="image-gallery">
+              {ImageDiemDanhData.map((image, index) => (
+                <img key={index} src={`http://localhost:8080/image/${image}`} />
+              ))}
+            </div>
+
+            {none !== "Người lạ" ? (
+              <label htmlFor="image-upload" className="upload-icon">
+                Ảnh nhận diện
+                <input
+                  type="file"
+                  id="image-upload"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                />
+              </label>
+            ) : (
+              <h3>{none}</h3>
+            )}
+          </div>
+        )}
+
         <div className="text-center error-message error-message1"></div>
         {doanVienDetails.length > 0 && (
-  <table className="table table-striped">
-    <thead>
-      <tr className="table-item">
-        <th>STT</th>
-        <th>Mã cán bộ</th>
-        <th>Tên cán bộ</th>
-      </tr>
-    </thead>
-    <tbody>
-      {doanVienDetails.flatMap((detail, index) =>
-        detail.map((item, subIndex) => (
-          <tr key={`${index}-${subIndex}`}>
-            <td className="col-center">{index * doanVienDetails[0].length + subIndex + 1}</td>
-            <td>{item.MaBCH}</td>
-            <td>{item.TenBCH ? item.TenBCH : "Người lạ"}</td> {/* Kiểm tra nếu Tên cán bộ rỗng, hiển thị "Người lạ" */}
-          </tr>
-        ))
-      )}
-    </tbody>
-  </table>
-)}
+          <table className="table table-striped">
+            <thead>
+              <tr className="table-item">
+                <th>STT</th>
+                <th>Mã cán bộ</th>
+                <th>Tên cán bộ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {doanVienDetails.flatMap((detail, index) =>
+                detail.map((item, subIndex) => (
+                  <tr key={`${index}-${subIndex}`}>
+                    <td className="col-center">
+                      {index * doanVienDetails[0].length + subIndex + 1}
+                    </td>
+                    <td>{item.MaBCH ? item.MaBCH : ""}</td>
+                    <td>{item.TenBCH ? item.TenBCH : "Người lạ"}</td>{" "}
+                    {/* Kiểm tra nếu Tên cán bộ rỗng, hiển thị "Người lạ" */}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        )}
         <div className="update row">
           <div className="btns">
             <button
@@ -181,10 +222,13 @@ const SinhVienNamTot = (props) => {
             </button>
 
             <button className="allcus-button button-error" type="submit">
-                <NavLink to={`/DaiHocCanTho/ChiTietHoatDong/DiemDanhBCHTruong/${IDHoatDongDHCT}/${IDNamHoc}`} className="navlink">
-                  Hủy
-                </NavLink>
-              </button>
+              <NavLink
+                to={`/DaiHocCanTho/ChiTietHoatDong/DiemDanhBCHTruong/${IDHoatDongDHCT}/${IDNamHoc}`}
+                className="navlink"
+              >
+                Hủy
+              </NavLink>
+            </button>
           </div>
         </div>
       </div>

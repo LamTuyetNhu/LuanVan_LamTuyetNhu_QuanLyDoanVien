@@ -181,7 +181,7 @@ const PasswordStrengthMeter = () => {
   return (
     <>
       <div className="container app__content">
-        <h2 className="text-center">Đổi mật khẩu</h2>
+        <h2 className="text-center">Đổi Mật Khẩu</h2>
 
         <form id="customerForm" className="formAdd">
           <div className="">

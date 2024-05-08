@@ -75,8 +75,12 @@ const LayMotHoatDong = (IDHoatDong) => {
   return axios.get(`api/layMotHoatDong/${IDHoatDong}`);
 };
 
-const CapNhatHoatDong = (formData) => {
-  return axios.post("api/CapNhatHoatDong", formData);
+// const CapNhatHoatDong = (formData) => {
+//   return axios.post("api/CapNhatHoatDong", formData);
+// };
+
+const CapNhatHoatDong = (IDHoatDong, formData) => {
+  return axios.post(`api/CapNhatHoatDong/${IDHoatDong}`, formData);
 };
 
 const XoaHoatDong = (IDHoatDong) => {
@@ -478,7 +482,12 @@ const XoaNamHoc = (IDNamHoc) => {
   return axios.post(`api/XoaNamHoc/${IDNamHoc}`);
 };
 
+const deleteSVNT = (selectItems) => {
+  return axios.post("api/deleteSVNT", selectItems);
+}
+
 export {
+  deleteSVNT,
   XoaNamHoc,
   ThemNamHoc,
   layMaBCH,

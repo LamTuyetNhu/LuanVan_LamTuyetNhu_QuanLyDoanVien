@@ -26,7 +26,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.static("./src/public"));
-
+app.use(express.static("./src/face_recognition_streamlit"));
 app.use(express.urlencoded({ extended: true })); 
 app.use(express.json()); 
 

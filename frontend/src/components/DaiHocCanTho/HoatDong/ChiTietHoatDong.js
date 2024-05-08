@@ -131,7 +131,7 @@ const ChiTietHoatDong = (props) => {
     };
 
     if (
-      new Date(editedDoanPhi.NgayHetHanDHCT) <= new Date(editedDoanPhi.NgayBatDauDHCT)
+      new Date(editedDoanPhi.NgayHetHanDHCT) < new Date(editedDoanPhi.NgayBatDauDHCT)
     ) {
       newErrors.NgayHetHanDHCT = "Ngày kết thúc phải sau ngày bắt đầu";
     }

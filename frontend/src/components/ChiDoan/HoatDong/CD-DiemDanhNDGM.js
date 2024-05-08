@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useState, useRef, } from "react";
+import { useEffect, useState, useRef } from "react";
 import { format } from "date-fns";
 import { useNavigate, NavLink, useParams } from "react-router-dom";
 import Form from "react-bootstrap/Form";
@@ -14,7 +14,7 @@ const SinhVienNamTot = (props) => {
   const [isSubmitting, setIsSubmitting] = useState(false); // Trạng thái để kiểm soát nút Điểm danh/Lưu
   const { IDHoatDong } = useParams();
   const IDLop = localStorage.getItem("IDLop");
-  const [MaLop, setMaLop] = useState([])
+  const [MaLop, setMaLop] = useState([]);
 
   const navigate = useNavigate();
   const isAuthenticated = () => {
@@ -26,7 +26,7 @@ const SinhVienNamTot = (props) => {
   };
 
   useEffect(() => {
-    fetchTenLop()
+    fetchTenLop();
     if (!isAuthenticated()) {
       navigate("/"); // Điều hướng người dùng về trang đăng nhập nếu chưa đăng nhập
     }
@@ -36,12 +36,15 @@ const SinhVienNamTot = (props) => {
         const response = await layMSSVdoanvien(MSSV);
         console.log(response.data);
         // Thêm đối tượng vào mảng doanVienDetails
-        setDoanVienDetails((prevDetails) => [...prevDetails, response.data.dataDV]); // Giả sử response.data.dataDV là đối tượng bạn muốn thêm
+        setDoanVienDetails((prevDetails) => [
+          ...prevDetails,
+          response.data.dataDV,
+        ]); // Giả sử response.data.dataDV là đối tượng bạn muốn thêm
       } catch (error) {
         console.error("Lỗi khi gọi API cho MSSV", MSSV, error);
       }
     };
-  
+
     const fetchDoanVienDetails = async () => {
       // Duyệt qua mỗi phần tử trong mảng diemDanhData và gọi API cho từng MSSV
       try {
@@ -54,21 +57,19 @@ const SinhVienNamTot = (props) => {
         console.error("Lỗi khi gọi API cho mảng MSSV", error);
       }
     };
-  
+
     if (diemDanhData.length > 0) {
       fetchDoanVienDetails();
     }
   }, [IDHoatDong, diemDanhData, IDLop]);
 
-  
   const fetchTenLop = async () => {
     try {
       let res = await laytenlop(IDLop);
       console.log(res);
 
       if (res.status === 200) {
-        setMaLop(res.data.dataCD.MaLop)
-
+        setMaLop(res.data.dataCD.MaLop);
       } else {
         console.error("Lỗi khi gọi API:", res.statusText);
       }
@@ -82,6 +83,8 @@ const SinhVienNamTot = (props) => {
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [modalIsError, setModalIsError] = useState(false);
+  const [ImageDiemDanhData, setImageDiemDanhData] = useState([]);
+  const [none, setNone] = useState("");
 
   const handleUpload = (event) => {
     const files = Array.from(event.target.files);
@@ -109,7 +112,12 @@ const SinhVienNamTot = (props) => {
         );
 
         console.log(response.data);
-        setDiemDanhData(response.data); // Lưu dữ liệu vào state
+        if (response.data[0] == "Người lạ") {
+          setNone("Người lạ");
+        }
+
+        setDiemDanhData(response.data[0]); 
+        setImageDiemDanhData(response.data[1]); // Lưu dữ liệu vào state
         setIsSubmitting(true); // Để thay đổi trạng thái của nút
       } catch (error) {
         setModalMessage("Điểm danh thất bại: " + error.message);
@@ -124,15 +132,20 @@ const SinhVienNamTot = (props) => {
     }
   };
 
-  const idDoanVienList = doanVienDetails.flatMap(detail => detail.map(dv => dv.IDDoanVien));
+  const idDoanVienList = doanVienDetails.flatMap((detail) =>
+    detail.map((dv) => dv.IDDoanVien)
+  );
   const payload = {
     IDHoatDong: IDHoatDong,
-    IDDoanVienList: idDoanVienList
+    IDDoanVienList: idDoanVienList,
   };
 
   const handleSave = async () => {
     try {
-      const response = await axios.post("http://localhost:8080/api/SaveIDDoanVienDiemDanhCuaLop", payload);
+      const response = await axios.post(
+        "http://localhost:8080/api/SaveIDDoanVienDiemDanhCuaLop",
+        payload
+      );
       // Xử lý sau khi lưu thành công
       setModalMessage("Điểm danh thành công!");
       setModalIsError(false);
@@ -169,29 +182,57 @@ const SinhVienNamTot = (props) => {
             />
           </label>
         </div>
+        {ImageDiemDanhData.length > 0 && (
+        <div id="upload-box" className="upload-box">
+          <div id="image-gallery" className="image-gallery">
+          {ImageDiemDanhData.map((image, index) => (
+              <img src={`http://localhost:8080/image/${image}`} />
+            ))}
+          </div>
+
+          {none !== "Người lạ" ? (
+          <label htmlFor="image-upload" className="upload-icon">
+            Ảnh nhận diện
+            <input
+              type="file"
+              id="image-upload"
+              // multiple
+              accept="image/*"
+              // onChange={handleUpload}
+              style={{ display: "none" }}
+            />
+          </label>
+          ) : (
+            <h3>{none}</h3>
+          )}
+        </div>
+)}
         <div className="text-center error-message error-message1"></div>
         {doanVienDetails.length > 0 && (
-  <table className="table table-striped">
-    <thead>
-      <tr className="table-item">
-        <th>STT</th>
-        <th>MSSV</th>
-        <th>Họ Tên</th>
-      </tr>
-    </thead>
-    <tbody>
-      {doanVienDetails.flatMap((detail, index) =>
-        detail.map((item, subIndex) => (
-          <tr key={`${index}-${subIndex}`}>
-            <td className="col-center">{index * doanVienDetails[0].length + subIndex + 1}</td>
-            <td>{item.MSSV}</td>
-            <td>{item.HoTen}</td>
-          </tr>
-        ))
-      )}
-    </tbody>
-  </table>
-)}
+          <table className="table table-striped">
+            <thead>
+              <tr className="table-item">
+                <th>STT</th>
+                <th>MSSV</th>
+                <th>Họ Tên</th>
+              </tr>
+            </thead>
+            <tbody>
+              {doanVienDetails.flatMap((detail, index) =>
+                detail.map((item, subIndex) => (
+                  <tr key={`${index}-${subIndex}`}>
+                    <td className="col-center">
+                      {/* {index * doanVienDetails[0].length + subIndex + 1} */}
+                      {index + 1}
+                    </td>
+                    <td>{item.MSSV}</td>
+                    <td>{item.HoTen}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        )}
         <div className="update row">
           <div className="btns">
             <button
@@ -203,10 +244,10 @@ const SinhVienNamTot = (props) => {
             </button>
 
             <button className="allcus-button button-error" type="submit">
-                <NavLink to="/ChiDoan" className="navlink">
-                  Hủy
-                </NavLink>
-              </button>
+              <NavLink to="/ChiDoan/HoatDong" className="navlink">
+                Hủy
+              </NavLink>
+            </button>
           </div>
         </div>
       </div>

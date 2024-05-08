@@ -177,12 +177,16 @@ const SinhVienNamTot = (props) => {
 
   const handleConfirmExcelData = async () => {
     try {
+      setShowExcelModal(false);
+      
       const formData = new FormData();
       formData.append("file", selectedFile);
+      
       let res = await axios.post(
         "http://localhost:8080/api/CapNhatMauUngTuyen",
         formData
       );
+
 
       if (res.status === 200) {
         // Thêm thành công
@@ -318,6 +322,7 @@ const SinhVienNamTot = (props) => {
           <Modal
             show={showModalUpdate}
             onHide={() => {
+              setShowExcelModal(false)
               setShowModalUpdate(false);
               setSuccessMessage("");
             }}
@@ -330,6 +335,7 @@ const SinhVienNamTot = (props) => {
           <Modal
             show={showModalUpdate}
             onHide={() => {
+              setShowExcelModal(false)
               setShowModalUpdate(false);
               setErrorMessage("");
             }}

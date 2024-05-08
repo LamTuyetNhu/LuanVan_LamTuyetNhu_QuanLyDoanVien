@@ -9,6 +9,7 @@ import {
   faMagnifyingGlass,
   faChevronRight,
   faChevronLeft,
+  faCloudArrowUp,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   searchDGDoanVien,
@@ -17,7 +18,8 @@ import {
   namhoccuaxeploai,
   DSDanhGiaDoanVienCuaLop,
 } from "../../../services/apiService";
-
+import axios from "axios";
+import ExcelDataModal from "../../Modal/FileDanhGia";
 const DanhSachDoanVien = (props) => {
   const IDLop = localStorage.getItem("IDLop");
 
@@ -281,6 +283,42 @@ const DanhSachDoanVien = (props) => {
     }
   };
 
+  const handleConfirmExcelData = async () => {
+    console.log("Updated Excel Data:", excelData);
+    console.log("Selected Nam Hoc:", idnamhoc);
+
+    // Gọi API hoặc thực hiện các bước cần thiết
+    try {
+      const formData = new FormData();
+      formData.append("IDLop", IDLop);
+      formData.append("idnamhoc", idnamhoc);
+      formData.append("file", selectedFile);
+
+      let res = await axios.post(
+        "http://localhost:8080/api/DanhGiaDoanVienExcel",
+        formData
+      );
+
+      if (res.status === 200) {
+        // Thêm thành công
+        setSuccessMessage("Thêm thành công!");
+        setShowModalUpdate(true);
+        fetchDSDoanVien();
+      } else {
+        // Xử lý trường hợp lỗi
+        setErrorMessage("Thêm không thành công!")
+        setShowModalUpdate(true);
+      }
+    } catch (error) {
+      // Xử lý lỗi nếu có
+      console.error("Lỗi khi tải file:", error.message);
+      // setErrorMessage("Lỗi khi tải file!");
+      setErrorMessage();
+
+      setShowModalUpdate(true);
+    }
+  };
+
   const calculateIndex = (pageIndex, pageSize, itemIndex) => {
     return (pageIndex - 1) * pageSize + itemIndex + 1;
   };
@@ -376,9 +414,19 @@ const DanhSachDoanVien = (props) => {
                   <button className="formatButton">Tiêu chí</button>
                 </NavLink>
               </div>
+
               <div>
-
-
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  style={{ display: "none" }}
+                  onChange={handleFileChange}
+                />
+                <button className="formatButton" onClick={handleButtonClick}>
+                  <FontAwesomeIcon icon={faCloudArrowUp} />
+                </button>
+              </div>
+              <div>
                 <button className="formatButton" onClick={exportToExcel}>
                   <FontAwesomeIcon icon={faCloudArrowDown} />
                 </button>
@@ -392,6 +440,11 @@ const DanhSachDoanVien = (props) => {
                 <NavLink to="/ChiDoan/TieuChiDanhGia" className="navlink">
                   <button className="formatButton">Tiêu chí</button>
                 </NavLink>
+              </div>
+              <div>
+                <button className="formatButton" onClick={handleFileChange}>
+                  <FontAwesomeIcon icon={faCloudArrowUp} />
+                </button>
               </div>
               <div>
                 <button className="formatButton" onClick={exportToExcel}>
@@ -584,6 +637,18 @@ const DanhSachDoanVien = (props) => {
           />
         )}
       </div>
+
+      {showExcelModal && (
+        <ExcelDataModal
+          excelData={excelData}
+          idnamhoc={idnamhoc}
+          onClose={() => setShowExcelModal(false)}
+          onConfirm={handleConfirmExcelData}
+          selectedFile={selectedFile}
+          DSNamHoc={DSNamHoc}
+        />
+      )}
+
       <div className="tablet-mobile">
         <div className="searchDV-Right">
           Xuất sắc: {DSPhanLoai[1] || 0} <br /> Khá: {DSPhanLoai[2] || 0} <br />{" "}

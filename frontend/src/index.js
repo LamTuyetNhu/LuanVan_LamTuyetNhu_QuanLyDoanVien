@@ -64,9 +64,10 @@ import DoanVien from "./components/DoanTruong/DSDoanVien/DoanVien";
 import ThemMoiDoanVien from "./components/DoanTruong/DSDoanVien/ThemMoiDoanVien";
 import DanhSachHoatDong from "./components/DoanTruong/HoatDong/DanhSachHD";
 import ThemMoiHoatDong from "./components/DoanTruong/HoatDong/ThemMoiHD";
-import ChiTietHoatDong from "./components/DaiHocCanTho/HoatDong/ChiTietHoatDong";
+import ChiTietHoatDong from "./components/DoanTruong/HoatDong/ChiTietHoatDong";
 import DiemDanhChiDoan from "./components/DoanTruong/HoatDong/DSDiemDanh";
 import DiemDanhDoanVienChiDoan from "./components/DoanTruong/HoatDong/DSDiemDanhCD";
+// import DiemDanhDoancVienNDGM from "./components/DoanTruong/HoatDong/CD-DiemDanhNDGM";
 import SinhVienNamTot from "./components/DoanTruong/SinhVienNamTot/DanhSachDoanVien";
 import TieuChi from "./components/DoanTruong/SinhVienNamTot/TieuChi";
 import CapNhatTieuChi from "./components/DoanTruong/SinhVienNamTot/CapNhatTieuChi";
@@ -228,6 +229,10 @@ root.render(
             path="ChiTietHoatDong/DiemDanhChiDoan/:IDHoatDong/:IDNamHoc/DanhSachDiemDanhCuaChiDoan"
             element={<DiemDanhDoanVienChiDoan />}
           />
+          {/* <Route
+            path="ChiTietHoatDong/DiemDanhChiDoan/DiemDanhDoancVienNDGM"
+            element={<DiemDanhDoancVienNDGM />}
+          /> */}
           <Route path="SinhVienNamTot" element={<SinhVienNamTot />} />
           <Route path="TieuChi" element={<TieuChi />} />
           <Route path="CapNhatTieuChi" element={<CapNhatTieuChi />} />

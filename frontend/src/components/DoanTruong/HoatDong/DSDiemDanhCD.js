@@ -141,7 +141,13 @@ const DiemDanh = (props) => {
       <div className="container-fluid app__content">
         <h5 className="text-center">{TenHoatDong}</h5>
         <h6 className="text-center">{TenNamHoc}</h6>
-
+        {/* <div className="searchDV-Right">
+              <NavLink to={`/BCH-DoanTruong/DiemDanhGuongMat/${IDHoatDong}`}>
+                <button className="formatButton">
+                  <FontAwesomeIcon icon={faCamera} /> Điểm danh bằng gương mặt
+                </button>
+              </NavLink>
+            </div> */}
         <div className="table-container">
           <table className="table table-striped">
             <thead>

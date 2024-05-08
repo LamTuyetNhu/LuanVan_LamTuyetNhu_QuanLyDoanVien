@@ -8,7 +8,7 @@ import Form from "react-bootstrap/Form";
 import loadVietnamBoundary from "./DiaGioiVN";
 
 import Modal1 from "../../Modal/Modal";
-import ModalAddSuccess from "../../Modal/ModalAddSuccess";
+import ModalAddSuccess from "../../Modal/ModalInfo";
 import axios from "axios";
 import {
   faBackward,
@@ -61,7 +61,7 @@ const DoanVien = (props) => {
   const [IDTonGiao, setIDTonGiao] = useState("");
   const [IDChucVu, setIDChucVu] = useState("");
   const [IDNamHoc, setIDNamHoc] = useState("");
-
+  const [backendMessage, setBackendMessage] = useState("");
   const isAuthenticated = () => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -362,7 +362,16 @@ const DoanVien = (props) => {
         formData
       );
       // setApiMessage(res.data.message);
-      setShowModal(true);
+      // alert(res.data.message)
+      if (res.status === 200) {
+        setBackendMessage(res.data.message); // Cập nhật thông điệp từ backend
+        setShowModal(true);
+      } else if (res.status === 500) {
+        alert(res.data.message)
+
+        setBackendMessage(res.data.message); // Cập nhật thông điệp từ backend
+        setShowModal(true);
+      }
       // setIsEditing(false);
     } catch (error) {
       // setApiMessage(res.data.message);
@@ -719,8 +728,12 @@ const DoanVien = (props) => {
           </div>
         </div>
       </div>
-
-      <ModalAddSuccess show={showModal} onHide={() => setShowModal(false)} />
+      <ModalAddSuccess
+  show={showModal}
+  onHide={() => setShowModal(false)}
+  message={backendMessage} // Truyền thông điệp từ backend vào ModalAddSuccess
+/>
+      {/* <ModalAddSuccess show={showModal} onHide={() => setShowModal(false)} /> */}
     </>
   );
 };

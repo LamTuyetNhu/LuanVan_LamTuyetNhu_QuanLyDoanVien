@@ -232,7 +232,7 @@ const SinhVienNamTot = (props) => {
   return (
     <>
       <div className="container app__content">
-        <h2 className="text-center mg-bt">Đánh giá đoàn viên</h2>
+        <h2 className="text-center mg-bt">Đánh Giá Đoàn Viên</h2>
 
         <div className="tabs">
           <div className="tab-item active">

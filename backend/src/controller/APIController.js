@@ -994,8 +994,11 @@ let layMotHoatDong = async (req, res) => {
 };
 
 let capNhatHoatDong = async (req, res) => {
+  console.log(req.body)
+  console.log(req.params.IDHoatDong)
+ const IDHoatDong = req.params.IDHoatDong;
   try {
-    const { IDHoatDong, TenHoatDong, NgayBanHanh, NgayHetHan, ChiTietHD } =
+    const { ChiTietHD, NgayBanHanh, NgayHetHan ,TenHoatDong } =
       req.body;
 
     if (!TenHoatDong || !NgayBanHanh || !NgayHetHan || !ChiTietHD) {
@@ -1990,6 +1993,9 @@ let SaveIDDoanVienDiemDanhCuaLop = async (req, res) => {
   try {
     // Assuming checkboxStates is an array of objects with IDChiTietDoanPhi and isChecked
     for (let IDDoanVien of IDDoanVienList) {
+      if(IDDoanVien === null) {
+        continue;
+      }
       const [rows] = await pool.execute(
         "SELECT COUNT(*) AS count FROM doanvien WHERE IDDoanVien = ?",
         [IDDoanVien]
@@ -2054,13 +2060,23 @@ let laytendoanvien = async (req, res) => {
 let timbangmssv = async (req, res) => {
   const MSSV = req.params.MSSV;
   console.log(MSSV);
+
   try {
-    const [rows, fields1] = await pool.execute(
-      "SELECT IDDoanVien, MSSV, HoTen FROM doanvien where doanvien.MSSV = ?",
-      [MSSV]
-    );
+    let rows;
+
+    if (MSSV === "Người lạ") {
+      rows = [{ IDDoanVien: null, MSSV: "Người lạ", HoTen: "Người lạ" }];
+    } else if (MSSV === "Đã tồn tại") {
+      rows = [{ IDDoanVien: null, MSSV: "Đã tồn tại", HoTen: "Đã tồn tại" }];
+    } else{
+      [rows] = await pool.execute(
+        "SELECT IDDoanVien, MSSV, HoTen FROM doanvien where doanvien.MSSV = ?",
+        [MSSV]
+      );
+    }
 
     console.log(rows);
+
     return res.status(200).json({
       dataDV: rows,
     });
@@ -4348,10 +4364,10 @@ let layMaBCH = async (req, res) => {
     let rows;
 
     if (MaBCH === "Người lạ") {
-      // Nếu MaBCH là "Người lạ", gán TenBCH là "Người lạ"
       rows = [{ IDBCH: null, MaBCH: "Người lạ", TenBCH: "Người lạ" }];
-    } else {
-      // Nếu MaBCH không phải là "Người lạ", truy vấn cơ sở dữ liệu bình thường
+    } else if (MaBCH === "Đã tồn tại") {
+      rows = [{ IDBCH: null, MaBCH: "Đã tồn tại", TenBCH: "Đã tồn tại" }];
+    } else{
       [rows] = await pool.execute(
         "SELECT IDBCH, MaBCH, TenBCH FROM bchtruong where bchtruong.MaBCH = ?",
         [MaBCH]
@@ -4374,6 +4390,9 @@ let SaveIDBCH = async (req, res) => {
   try {
     // Assuming checkboxStates is an array of objects with IDChiTietDoanPhi and isChecked
     for (let IDBCH of IDBCHList) {
+      if (IDBCH === null) {
+        continue;
+      }
       const [rows] = await pool.execute(
         "SELECT COUNT(*) AS count FROM bchtruong WHERE IDBCH = ?",
         [IDBCH]
@@ -4450,7 +4469,26 @@ let XoaNamHoc = async (req, res) => {
   }
 };
 
+let deleteSVNT = async (req, res) => {
+  let ungtuyen = req.body.selectedItems; // Lấy mảng selectedItems từ req.body
+  console.log(req.body);
+  try {
+    for (let ut of ungtuyen) {
+      await pool.execute("DELETE FROM `ungtuyen` WHERE IDUngTuyen = ?", [
+        ut,
+      ]);
+    }
+    console.log("Xoa thanh cong");
+    return res.status(200).json({
+      message: "Xóa thành công!",
+    });
+  } catch (error) {
+    console.error("Lỗi khi truy vấn cơ sở dữ liệu: ", error);
+  }
+};
+
 module.exports = {
+  deleteSVNT,
   XoaNamHoc,
   ThemNamHoc,
   SaveIDBCH,
